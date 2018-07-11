@@ -1,8 +1,33 @@
+/**
+ * Mattrax: An Open Source Device Management System
+ * File Descripton: This is The Apple MDM Stricts. These Are The Go Structs For Database Communication and Plist Generation.
+ * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
+ * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
+ */
+
 package appleMDM
 
-import (
-	_ "encoding/hex"
-)
+// Devices Database Table
+type Device struct {
+  TableName struct{} `sql:"devices"`
+  UDID          string `sql:"udid,pk"`
+  ProductName   string `sql:"ProductName"`
+  OSVersion     string `sql:"OSVersion"`
+  Topic         string `sql:"Topic"`
+  SerialNumber  string `sql:"SerialNumber"`
+  Token         []byte `sql:"Token"`
+  PushMagic     string `sql:"PushMagic"`
+  UnlockToken   []byte `sql:"UnlockToken"`
+}
+
+
+
+
+
+
+
+
+
 
 // CheckinRequest represents an MDM checkin command struct.
 type CheckinCommand struct {
@@ -42,14 +67,4 @@ type userTokenUpdate struct { //TODO: Do I Need These/What Devices Send It
 	UserLongName  string `plist:",omitempty"`
 	UserShortName string `plist:",omitempty"`
 	NotOnConsole  bool   `plist:",omitempty"`
-}
-
-// data decodes to []byte,
-// we can then attach a string method to the type
-// Tokens are encoded as Hex Strings
-//type hexData []byte
-
-type ServerCommand struct { //TODO: Is This Used
-	UDID   string
-	Status string
 }
