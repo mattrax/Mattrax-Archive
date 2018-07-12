@@ -11,13 +11,21 @@ package appleMDM
 type Device struct {
   TableName struct{} `sql:"devices"`
   UDID          string `sql:"udid,pk"`
-  ProductName   string `sql:"ProductName"`
-  OSVersion     string `sql:"OSVersion"`
-  Topic         string `sql:"Topic"`
-  SerialNumber  string `sql:"SerialNumber"`
+  // Device Details
+  OSVersion    string `sql:"OSVersion"`
+	BuildVersion string `sql:"BuildVersion"`
+	ProductName  string `sql:"ProductName"`
+	SerialNumber string `sql:"SerialNumber"`
+	IMEI         string `sql:"IMEI"`
+	MEID         string `sql:"MEID"`
+  // APNS
   Token         []byte `sql:"Token"`
   PushMagic     string `sql:"PushMagic"`
   UnlockToken   []byte `sql:"UnlockToken"`
+  //Status
+  Deployed      bool `sql:"Deployed,notnull"`
+
+  //Registered Time (To Detect Deployed Errors)
 }
 
 
@@ -67,4 +75,13 @@ type userTokenUpdate struct { //TODO: Do I Need These/What Devices Send It
 	UserLongName  string `plist:",omitempty"`
 	UserShortName string `plist:",omitempty"`
 	NotOnConsole  bool   `plist:",omitempty"`
+}
+
+
+
+
+
+type ServerCommand struct { //TODO: Is This Used
+	UDID   string
+	//Status string
 }

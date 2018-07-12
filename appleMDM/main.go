@@ -9,7 +9,7 @@ package appleMDM
 
 import (
 	"fmt" //// TODO: Eliminate This (Only Used Once)
-  "io/ioutil"
+  //"io/ioutil"
   "net/http"
   "os"
 
@@ -34,7 +34,8 @@ var (
 // TODO:
 //  Setup Logger For These Sub Packages
 //  Capitialise UDID in Database And Find Out What is Causing That Not To Work
-
+//	Alert Admin And Prune Device That Are Do Not Deployed After Set Amount Of Time
+//  Better, More Informative Error Messages
 
 //  Add Logging To File Or Something For Any Errors Occurred (Debugging For The Me)
 //  See What Checkin Does If None Of The Core Values (4 Of Them) Are Not Given By The Client Does It Plist Parsing Error?
@@ -53,10 +54,11 @@ func Mount(r *mux.Router) {
 	r.HandleFunc("/", genericResponse).Methods("GET")
 
   r.HandleFunc("/ping-apns", pingApnsHandler).Methods("GET")
+	r.HandleFunc("/testing", testingHandler).Methods("GET")
 
 	r.HandleFunc("/enroll", enrollHandler).Methods("GET")
 	r.HandleFunc("/checkin", checkinHandler).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")
-	//r.HandleFunc("/server", serverHandler).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm")
+	r.HandleFunc("/server", serverHandler).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm")
 	//r.HandleFunc("/scep", scepHandler).Methods("GET")
 }
 
@@ -85,49 +87,44 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) {
     w.WriteHeader(http.StatusBadRequest)
     return
   }
+	device := getDevice(cmd.UDID)
 
   if cmd.MessageType == "Authenticate" {
     if cmd.auth.OSVersion != "" && cmd.auth.BuildVersion != "" && cmd.auth.ProductName != "" && cmd.auth.SerialNumber != "" && cmd.auth.IMEI != "" && cmd.auth.MEID != "" {
-      log.Info("New Device Trying To Join The MDM")
+			if device == nil {
+				device = newDevice(cmd)
 
-      device := Device{
-        SerialNumber: cmd.auth.SerialNumber,
-        ProductName: cmd.auth.ProductName,
-        OSVersion: cmd.auth.OSVersion,
-        Topic: cmd.Topic,
-        UDID: cmd.UDID,
-        Token: []byte{},
-        PushMagic: "",
-        UnlockToken: []byte{},
-      }
-      err := pgdb.Insert(&device) //.OnConflict("DO NOTHING") //TODO: Check The Do Nothing Works Then make It Error
-      if err != nil {
-        log.Fatal(err)
-        w.WriteHeader(http.StatusUnauthorized) //TODO: Check This Kills The Client Joining
-      } else {
-        w.WriteHeader(http.StatusOK)
-      }
+				if status := editDevice(device, false); status == false {
+	        log.Debug("Failure To Add New Device To The Database")
+	        w.WriteHeader(http.StatusUnauthorized) //TODO: Check This Kills The Client Joining
+	      } else {
+	        w.WriteHeader(http.StatusOK)
+	      }
+			} else {
+				log.Warning("An Existing Device Has Requested To Enroll. -> 403 (Unauthorized)")
+				w.WriteHeader(http.StatusUnauthorized)
+			}
     }
-  } else if cmd.MessageType == "TokenUpdate" {
+  } else if cmd.MessageType == "TokenUpdate" && device != nil {
     if cmd.update.Token != nil && cmd.update.PushMagic != "string" && cmd.update.UnlockToken != nil && (cmd.update.AwaitingConfiguration == true || cmd.update.AwaitingConfiguration == false) {
-      if cmd.update.AwaitingConfiguration == true {
-        //Do DEP Prestage Enrollment By Pushing The Profiles Now Then Run The Fully Setup Thing
-        //TODO: Debug Event (Until Feature is Built)
-        fmt.Println("Unsupported DEP Features")
-        //TODO: Future Feature: If set to true, the device is awaiting a DeviceConfigured MDM command before proceeding through Setup Assistant.
+			if device.Deployed == false {
+				device.Deployed = true
+
+				if status := editDevice(device, true); status == false {
+	        log.Debug("Failure To Update The Devices Deployment Status")
+	        w.WriteHeader(http.StatusUnauthorized)
+					return
+	      } else {
+					log.Info("A New Device Joined The MDM: " + device.UDID)
+	      }
+			}
+
+			if cmd.update.AwaitingConfiguration == true {
+        // TODO: Do DEP Prestage Enrollment By Pushing The Profiles Now Then Run The Fully Setup Thing Then Push The Finished Command
+        log.Error("Unsupported DEP Features")
+				w.WriteHeader(http.StatusUnauthorized)
+				return
       }
-
-      log.Info(cmd.UDID)
-
-      var device Device
-      err := pgdb.Model(&device).Where("udid = ?", cmd.UDID).Select()
-      if err != nil {
-        log.Fatal(err)
-        return
-      }
-      // TODO If Not Found Handle That Separatly To Other Errors
-
-      fmt.Println(device)
 
       device.Token = cmd.update.Token
       device.PushMagic = cmd.update.PushMagic
@@ -135,21 +132,43 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) {
         device.UnlockToken = cmd.update.UnlockToken
       }
 
-      err2 := pgdb.Update(&device)
-      if err2 != nil {
-        log.Fatal(err2)
-        w.WriteHeader(http.StatusUnauthorized)
-      } else {
-        w.WriteHeader(http.StatusOK)
-        fmt.Println("Device Updated Its Tokens")
-      }
+			if status := editDevice(device, true); status == false {
+				log.Debug("Failure To Update The Devices APNS Tokens")
+				w.WriteHeader(http.StatusUnauthorized)
+				return
+			} else {
+				log.Debug("Device Updated Its APNS Keys: " + device.UDID)
+				w.WriteHeader(http.StatusOK)
+			}
     } else {
       log.Warning("A Device Requested To Join With An Invalid Setup (Pre IOS 9 or Doesn't Have Perms)")
       w.WriteHeader(http.StatusUnauthorized)
     }
+	} else if cmd.MessageType == "CheckOut" && device != nil {
+		log.Debug("A Device Has Checked Out: " + cmd.UDID)
+
+		var device Device
+		err := pgdb.Model(&device).Where("udid = ?", cmd.UDID).Select()
+		if err != nil {
+			log.Fatal(err)
+			return
+		}
+
+		err1 := pgdb.Delete(&device)
+	  if err1 != nil {
+	      log.Fatal(err1)
+				w.WriteHeader(http.StatusBadRequest)
+				return
+	  }
+
+		w.WriteHeader(http.StatusOK)
   } else {
-    log.Warning("Unkown Checkin MessageType of: " + cmd.MessageType)
-    w.WriteHeader(http.StatusBadRequest)
+		if device != nil {
+			log.Warning("Unkown Checkin MessageType of: " + cmd.MessageType)
+		} else {
+			log.Warning("A Device Not In The Database Attempted An Action: " + cmd.MessageType)
+		}
+		w.WriteHeader(http.StatusBadRequest)
   }
 }
 
@@ -218,7 +237,10 @@ func pingApnsHandler(w http.ResponseWriter, r *http.Request) {
 
 
 
+func testingHandler(w http.ResponseWriter, r *http.Request) {
 
+	fmt.Fprintf(w, "Testing Route!")
+}
 
 
 
@@ -238,9 +260,26 @@ func pingApnsHandler(w http.ResponseWriter, r *http.Request) {
 var lockedDevice = false //TEMP
 
 func serverHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Println("MDM Server Request")
+	var cmd ServerCommand
+  if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
+    fmt.Println("Failed To Parse Checkin Request")
+    fmt.Println(err)
 
-	buf, err := ioutil.ReadAll(r.Body)
+    // TODO: Debug Event To Error Logs
+    w.WriteHeader(http.StatusBadRequest)
+    return
+	}
+	device := getDevice(cmd.UDID)
+
+	if device != nil && device.Deployed {
+		log.Debug("A Device Has Requested The Server: " + device.UDID)
+	} else {
+		log.Warning("A Device Attempted To Get Actions From Server Without Having Send APNS Tokens Yet")
+	}
+
+
+
+	/*buf, err := ioutil.ReadAll(r.Body)
 	r.Body.Close()
 	if err != nil {
 		//Do something
@@ -249,7 +288,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 
 	fmt.Println(string(buf))
 	w.WriteHeader(http.StatusOK)
-	return
+	return*/
 
 	/*var cmd ServerCommand
 	  if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
