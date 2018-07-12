@@ -25,28 +25,30 @@ var (
   pgdb *pg.DB
 )
 
-//TODO:
-//	Auto Generate Profiles From Config Details Parsed In (Cache Sirectory)
+
+// Try To:
+//	 Simplier Logging Library. Less Configuration and More Opionated. -> Subfile Logging (Separated) Support
+//	 Better/Neater Error Handling
+// 				-  Handle PG Errors From (Maybe Add More In PR If Needed To Add More): https://github.com/go-pg/pg/blob/master/error.go
+//   Func Based (struct, err) Error Handling Insead Of *struct (Remove All Of *struct)
+//	 Neater Error Messages/Logging Output (Decide What Each Log Level Is For)
+
+// Features:
+//	 Auto Generate Profiles From Config Details Parsed In (Cache In Subdirectory)
+//	 After Enrolling Do Inventory -> Get All The Devices Profiles, Apps, Details, Configuration, etc
+//	 Detect Via APNS (And Logging) If Device Was Removed Without CheckOut Working -> Alert Admin
+//	 Auto Prune Devices That Did Not Complete Enrollment -> Alert Admin
+//	 Postgres Handle Database Lossing Connection and Stress Testing -> Handle Errors
+//	 Clean APNS. Combine Multiple APNS Into One Request (For Bulk Without DOSing Apple)
+//	 Prevent Forging Enrollment Certificates
+//	 Prestage Enrollment (Template For Devices) -> DEP Support
+
+// Future Features:
+//   Build Tests -> For All Function And Routes (Fake Device Requests/Response Verifying)
+//	 Optimisng Preformance
 
 
-// TODO:
-//  Func Based (struct, err) Error Handling
-//	Logging Log Line Number It Was Caled From
-//	Redo Logging Messages/Levels
-//	Custom Handling For Postgres Returned Constraints Issues
-
-// TODO:
-//  Setup Logger For These Sub Packages
-//  Capitialise UDID in Database And Find Out What is Causing That Not To Work
-//	Alert Admin And Prune Device That Are Do Not Deployed After Set Amount Of Time
-//  Better, More Informative Error Messages
-
-//  Add Logging To File Or Something For Any Errors Occurred (Debugging For The Me)
 //  See What Checkin Does If None Of The Core Values (4 Of Them) Are Not Given By The Client Does It Plist Parsing Error?
-//  Detect Device That Have Disconnected From Management
-//  Prevent APNS Module Form Causing "DDOS" To Apples Servers
-//  Use Verify Stuff To Stop People Forging The Enrollment Profile Even If They Know The URL's
-//  Switch The Order Of All Routers So HandleFunc is After Attributes
 
 func Init(_pgdb *pg.DB, _log *logging.Logger) {
   pgdb = _pgdb
@@ -74,8 +76,14 @@ func genericResponse(w http.ResponseWriter, r *http.Request) {
 func enrollHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-apple-aspen-config")
 	http.ServeFile(w, r, "enroll.mobileconfig")
+	//fmt.Fprintf(w, generateEnrollmentProfile())
 }
 
+func generateEnrollmentProfile() {
+	//Load Values From Config
+
+	//Generate Profile
+}
 
 
 
@@ -273,7 +281,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 
 		    return
 		  }
-			
+
 			AppPayload := ServerCommand{
 				CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
 				Command: ServerCommandBody{
