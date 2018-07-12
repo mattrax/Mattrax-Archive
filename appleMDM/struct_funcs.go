@@ -11,9 +11,27 @@ import (
   "github.com/go-pg/pg" // Database (Postgres)
 )
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 func getDevice(_UDID string) *Device {
   var device Device
-  err := pgdb.Model(&device).Where("udid = ?", _UDID).Select()
+  err := pgdb.Model(&device).Where("uuid = ?", _UDID).Select()
 
   /*if err == pg.ErrNoRows || err == pg.ErrMultiRows {
     log.Debug("getDevice(): Searching Empty Database");
@@ -24,10 +42,22 @@ func getDevice(_UDID string) *Device {
       log.Warning("Postgres Error: ", err);
        //TODO: Try Database Request Again Here
     }
+
     return nil
   }
   return &device
 }
+
+
+
+
+
+
+
+
+
+
+
 
 func getDevices() []Device {
   var devices []Device
@@ -42,6 +72,22 @@ func getDevices() []Device {
 func newDevice(cmd CheckinCommand) *Device {
   return &Device{
     UDID: cmd.UDID,
+    DeviceState: 0,
+    DeviceDetails: DeviceDetails{
+      OSVersion: cmd.auth.OSVersion,
+      BuildVersion: cmd.auth.BuildVersion,
+      ProductName: cmd.auth.ProductName,
+      SerialNumber: cmd.auth.SerialNumber,
+      IMEI: cmd.IMEI,
+      MEID: cmd.MEID,
+    },
+    DeviceTokens: DeviceTokens{
+      Token: []byte{},
+      PushMagic: "",
+      UnlockToken: []byte{},
+    },
+
+    /*UDID: cmd.UDID,
     // Device Details
     OSVersion: cmd.auth.OSVersion,
     BuildVersion: cmd.auth.BuildVersion,
@@ -54,7 +100,7 @@ func newDevice(cmd CheckinCommand) *Device {
     PushMagic: "",
     UnlockToken: []byte{},
     //Status
-    Deployed: false,
+    Deployed: false,*/
   }
 }
 
@@ -69,13 +115,13 @@ func editDevice(_device *Device, exists bool) bool {
   } else {
     //Create New
     _, err = pgdb.Model(_device).
-      Set("udid = ?", _device.UDID).
+      Set("uuid = ?", _device.UDID).
       Insert()
   }
 
   if err != nil {
     if err != pg.ErrNoRows && err != pg.ErrMultiRows {
-      log.Warning("Postgres Error: ", err);
+      log.Warning("Postgres Error (Exists: ", exists, "): ", err);
        //TODO: Try Database Request Again Here
     }
     return false
@@ -99,9 +145,9 @@ func deleteDevice(_device **Device) bool {
     Model(Device{
       UDID: _device.UDID,
     }).
-    //Where("udid = ?", _device.UDID).
+    //Where("uuid = ?", _device.UDID).
     //Select().
-    //Set("udid = ?", _device.UDID).
+    //Set("uuid = ?", _device.UDID).
     //Select().
     Delete() //*_device
 

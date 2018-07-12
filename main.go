@@ -78,7 +78,13 @@ func main() {
 
 
 func setupLogger() {
-  format := logging.MustStringFormatter(`%{time:15:04:05} %{color}[%{level}]%{color:reset} %{message}`)
+  var format logging.Formatter
+  if *verbose {
+    format = logging.MustStringFormatter(`%{time:15:04:05} %{color}[%{level}]%{color:reset} [%{shortfile}] %{message}`)
+  } else {
+    format = logging.MustStringFormatter(`%{time:15:04:05} %{color}[%{level}]%{color:reset} %{message}`)
+  }
+
   consoleBackend := logging.AddModuleLevel(logging.NewBackendFormatter(logging.NewLogBackend(os.Stderr, "", 0), format))
   var fileBackend logging.LeveledBackend
 

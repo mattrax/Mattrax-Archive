@@ -28,10 +28,12 @@ var (
 //TODO:
 //	Auto Generate Profiles From Config Details Parsed In (Cache Sirectory)
 
+
 // TODO:
 //  Func Based (struct, err) Error Handling
 //	Logging Log Line Number It Was Caled From
 //	Redo Logging Messages/Levels
+//	Custom Handling For Postgres Returned Constraints Issues
 
 // TODO:
 //  Setup Logger For These Sub Packages
@@ -97,8 +99,8 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) {
 				device = newDevice(cmd)
 
 				if status := editDevice(device, false); status == false {
-	        log.Debug("Failure To Add New Device To The Database")
-	        w.WriteHeader(http.StatusUnauthorized) //TODO: Check This Kills The Client Joining
+	        log.Warning("Database Error Enrolling Client -> 403 (Unauthorized)")
+	        w.WriteHeader(http.StatusUnauthorized)
 	      } else {
 	        w.WriteHeader(http.StatusOK)
 	      }
@@ -107,10 +109,10 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) {
 				w.WriteHeader(http.StatusUnauthorized)
 			}
     }
-  } else if cmd.MessageType == "TokenUpdate" && device != nil {
+	} else if cmd.MessageType == "TokenUpdate" && device != nil {
     if cmd.update.Token != nil && cmd.update.PushMagic != "string" && cmd.update.UnlockToken != nil && (cmd.update.AwaitingConfiguration == true || cmd.update.AwaitingConfiguration == false) {
-			if device.Deployed == false {
-				device.Deployed = true
+			if device.DeviceState < 3 { //TODO: Rework This Mechanic For DEP When It Is Built
+				device.DeviceState = 3
 
 				if status := editDevice(device, true); status == false {
 	        log.Debug("Failure To Update The Devices Deployment Status")
@@ -128,10 +130,10 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) {
 				return
       }
 
-      device.Token = cmd.update.Token
-      device.PushMagic = cmd.update.PushMagic
+      device.DeviceTokens.Token = cmd.update.Token
+      device.DeviceTokens.PushMagic = cmd.update.PushMagic
       if cmd.update.UnlockToken != nil {
-        device.UnlockToken = cmd.update.UnlockToken
+        device.DeviceTokens.UnlockToken = cmd.update.UnlockToken
       }
 
 			if status := editDevice(device, true); status == false {
@@ -237,7 +239,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	device := getDevice(cmd.UDID)
 
-	if device != nil && device.Deployed {
+	if device != nil && device.DeviceState == 3 {
 		if cmd.Status == "Idle" {
 			log.Debug("Idle Device: " + device.UDID)
 		} else if cmd.Status == "Acknowledged" { //TODO: Storing Feedback

@@ -7,9 +7,65 @@
 
 package appleMDM
 
+//TODO:
+//  Track Device Events (When They Enrolled, When They Checkin)
+
+///// Device Model /////
+type Device struct {
+  TableName struct{} `sql:"devices"`
+  UDID string `sql:"uuid,pk"`
+  DeviceState int `sql:"DeviceState,notnull"`
+  DeviceDetails DeviceDetails `sql:"DeviceDetails,notnull"`
+  DeviceTokens DeviceTokens `sql:"DeviceTokens,notnull"`
+}
+
+type DeviceDetails struct {
+  OSVersion string `sql:"OSVersion,notnull"`
+  BuildVersion string `sql:"BuildVersion,notnull"`
+  ProductName string `sql:"ProductName,notnull"`
+  SerialNumber string `sql:"SerialNumber,notnull"`
+  IMEI string `sql:"IMEI,notnull"`
+  MEID string `sql:"MEID,notnull"`
+}
+
+type DeviceTokens struct {
+  Token []byte `sql:"Token,notnull"`
+  PushMagic string `sql:"PushMagic,notnull"`
+  UnlockToken []byte `sql:"UnlockToken,notnull"`
+}
+
+/* End */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 //TODO: Only Capitialise Stuff That Needs External Access
 
 // Devices Database Table
+/*
 type Device struct {
   TableName struct{} `sql:"devices"`
   UDID          string `sql:"udid,pk"`
@@ -29,7 +85,7 @@ type Device struct {
 
   //Registered Time (To Detect Deployed Errors)
 }
-
+*/
 
 
 

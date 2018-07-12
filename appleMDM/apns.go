@@ -63,7 +63,7 @@ func deviceUpdate(_device Device) bool { //TODO: Clean This Up (Maybe Remove Cli
 
   // construct a payload to send to the device:
   p := payload.MDM{
-    Token: _device.PushMagic,
+    Token: _device.DeviceTokens.PushMagic,
   }
   b, err := json.Marshal(p)
   if err != nil {
@@ -72,7 +72,7 @@ func deviceUpdate(_device Device) bool { //TODO: Clean This Up (Maybe Remove Cli
   }
 
   // push the notification:
-  deviceToken := hex.EncodeToString(_device.Token)
+  deviceToken := hex.EncodeToString(_device.DeviceTokens.Token)
 
   if !push.IsDeviceTokenValid(deviceToken) {
     log.Warning("The Device Token Is Incorrect")
