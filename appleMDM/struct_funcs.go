@@ -29,19 +29,14 @@ func getDevice(_UDID string) *Device {
   return &device
 }
 
-func getDevices() {
-
-
-
-
-
-
-
-
-
-
-
-
+func getDevices() []Device {
+  var devices []Device
+  err := pgdb.Model(&devices).Select()
+  if err != nil {
+		log.Error(err)
+		return []Device{}
+	}
+  return devices
 }
 
 func newDevice(cmd CheckinCommand) *Device {
@@ -64,6 +59,10 @@ func newDevice(cmd CheckinCommand) *Device {
 }
 
 func editDevice(_device *Device, exists bool) bool {
+  if _device == nil  {
+    log.Debug("editDevice() Parsed A Nil Device")
+    return false
+  }
   var err error
   if exists {
     err = pgdb.Update(_device)
@@ -76,53 +75,88 @@ func editDevice(_device *Device, exists bool) bool {
 
   if err != nil {
     if err != pg.ErrNoRows && err != pg.ErrMultiRows {
-      log.Warning("2Postgres Error: ", err);
+      log.Warning("Postgres Error: ", err);
        //TODO: Try Database Request Again Here
     }
     return false
   }
   return true
-
-  /*_, err := pgdb.Model(_device).
-    //OnConflict("(udid) DO UPDATE").
-    Where("udid = ?", _device.UDID).
-    Update()*/
-
-  //log.Info(_device)
-
-  //.Where("udid = ?", _device.UDID).OnConflict("(udid) DO UPDATE").Insert() //. Returning("udid")
-
-  /*err := pgdb.Model(_device)OnConflict("(id) DO UPDATE").
-        Set("udid = ?", _device.UDID).
-        Create()
-  */
-        //.OnConflict("(udid) DO UPDATE").Create()
-  //.Model(_device).
-    //OnConflict("(udid) DO UPDATE").
-    //Set("udid = ?", _device.UDID).
+}
 
 
-    //Column("id").
+func deleteDevice(_device **Device) bool {
+
+  err := pgdb.Delete(&_device)
+
+  //Eror Handle nil _device
+
+  //err := pgdb.Delete(&_device)
+
+
+
+
+  /*out, err := pgdb.
+    Model(Device{
+      UDID: _device.UDID,
+    }).
     //Where("udid = ?", _device.UDID).
-    //OnConflict("DO NOTHING"). // OnConflict is optional
-    //Returning("id").
-    //SelectOrCreate()
-    /*OnConflict("(udid) DO UPDATE").
-    Set("udid = ?", _device.UDID).
-    Insert()*/
+    //Select().
+    //Set("udid = ?", _device.UDID).
+    //Select().
+    Delete() //*_device
+
+  log.Debug(out)*/
 
   if err != nil {
-    log.Warning("Postgres Error: ", err);
-    return false //TODO: Try Again Here
+    if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+      log.Warning("Postgres Error: ", err);
+       return false
+    } else {
+      return true
+    }
   }
-
-  //log.Info("After Update: ", getDevice(_device.UDID).Deployed)
   return true
 }
 
 
-func deleteDevice() {
 
-}
 
-//update/add device
+
+
+
+
+
+
+
+
+
+
+
+
+/*_, err := pgdb.Model(_device).
+  //OnConflict("(udid) DO UPDATE").
+  Where("udid = ?", _device.UDID).
+  Update()*/
+
+//log.Info(_device)
+
+//.Where("udid = ?", _device.UDID).OnConflict("(udid) DO UPDATE").Insert() //. Returning("udid")
+
+/*err := pgdb.Model(_device)OnConflict("(id) DO UPDATE").
+      Set("udid = ?", _device.UDID).
+      Create()
+*/
+      //.OnConflict("(udid) DO UPDATE").Create()
+//.Model(_device).
+  //OnConflict("(udid) DO UPDATE").
+  //Set("udid = ?", _device.UDID).
+
+
+  //Column("id").
+  //Where("udid = ?", _device.UDID).
+  //OnConflict("DO NOTHING"). // OnConflict is optional
+  //Returning("id").
+  //SelectOrCreate()
+  /*OnConflict("(udid) DO UPDATE").
+  Set("udid = ?", _device.UDID).
+  Insert()*/

@@ -17,19 +17,23 @@ import (
 	"github.com/gorilla/mux" // HTTP Router
   "github.com/go-pg/pg" // Database (Postgres)
 
-
 	"github.com/groob/plist"
-	"encoding/hex"
+	/*"encoding/hex"
 	"encoding/json"
 	"github.com/RobotsAndPencils/buford/certificate"
 	"github.com/RobotsAndPencils/buford/payload"
-	"github.com/RobotsAndPencils/buford/push"
+	"github.com/RobotsAndPencils/buford/push"*/
 )
 
 var (
   log *logging.Logger // TODO: This is A TEMP Sub Logging Solution
   pgdb *pg.DB
 )
+
+// TODO:
+//  Func Based (struct, err) Error Handling
+//	Logging Log Line Number It Was Caled From
+//	Redo Logging Messages/Levels
 
 // TODO:
 //  Setup Logger For These Sub Packages
@@ -82,8 +86,7 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 func checkinHandler(w http.ResponseWriter, r *http.Request) {
   var cmd CheckinCommand
   if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
-    log.Error("Failed To Parse Checkin Request")
-    log.Error(err)
+    log.Debug("Error Parsing Checkin Request: ", err)
     w.WriteHeader(http.StatusBadRequest)
     return
   }
@@ -145,22 +148,13 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) {
       w.WriteHeader(http.StatusUnauthorized)
     }
 	} else if cmd.MessageType == "CheckOut" && device != nil {
-		log.Debug("A Device Has Checked Out: " + cmd.UDID)
-
-		var device Device
-		err := pgdb.Model(&device).Where("udid = ?", cmd.UDID).Select()
-		if err != nil {
-			log.Fatal(err)
-			return
-		}
-
-		err1 := pgdb.Delete(&device)
-	  if err1 != nil {
-	      log.Fatal(err1)
+		err := pgdb.Delete(device)
+	  if err != nil {
+	      log.Fatal("Failure To CheckOut Device. The Device Will Not Try Again", err)
 				w.WriteHeader(http.StatusBadRequest)
 				return
 	  }
-
+		log.Debug("A Device Has Been Removed From The MDM: " + cmd.UDID)
 		w.WriteHeader(http.StatusOK)
   } else {
 		if device != nil {
@@ -177,68 +171,32 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) {
 
 
 func pingApnsHandler(w http.ResponseWriter, r *http.Request) {
-  var devices []Device
-  err := pgdb.Model(&devices).Select()
-  if err != nil {
-		log.Error(err)
+	devices := getDevices()
+
+	if devices == nil { //[]Device{} {
+		log.Debug("Error Getting Devices Or There Are None")
+		w.WriteHeader(http.StatusBadRequest)
+		fmt.Fprintf(w, "Error Getting Devices Or There Are None")
 		return
 	}
 
   for _, device := range devices {
     log.Debug("APNS Update Sent To Device " + device.UDID)
+		status := deviceUpdate(device)
 
-    cert, err := certificate.Load("PushCert.p12", "password")
-    if err != nil {
-      log.Error(err)
-      w.WriteHeader(http.StatusBadRequest)
-      return
-    }
-
-    client, err := push.NewClient(cert)
-    if err != nil {
-      log.Error(err)
-      w.WriteHeader(http.StatusBadRequest)
-      return
-    }
-
-    service := push.NewService(client, push.Production)
-
-    // construct a payload to send to the device:
-    p := payload.MDM{
-      Token: device.PushMagic,
-    }
-    b, err := json.Marshal(p)
-    if err != nil {
-      log.Error(err)
-      w.WriteHeader(http.StatusBadRequest)
-      return
-    }
-
-    // push the notification:
-    deviceToken := hex.EncodeToString(device.Token)
-
-    if !push.IsDeviceTokenValid(deviceToken) {
-      fmt.Println("The Device Token Is Incorrect")
-      return
-    }
-
-    id, err := service.Push(deviceToken, nil, b)
-    if err != nil {
-      log.Error(err)
-      w.WriteHeader(http.StatusBadRequest)
-      return
-    }
-
-    log.Debug("APNS ID: " + id)
+		if !status {
+	    w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "Error Sending APNS Update To The Device: " + device.UDID)
+	    return
+	  }
   }
 
-  fmt.Fprintf(w, "Sent APNS Update For All Devices")
+  fmt.Fprintf(w, "All Devices Have Been Told To Update")
 }
 
 
 
 func testingHandler(w http.ResponseWriter, r *http.Request) {
-
 	fmt.Fprintf(w, "Testing Route!")
 }
 
@@ -257,15 +215,11 @@ func testingHandler(w http.ResponseWriter, r *http.Request) {
 
 
 
-var lockedDevice = false //TEMP
 
 func serverHandler(w http.ResponseWriter, r *http.Request) {
 	var cmd ServerCommand
   if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
-    fmt.Println("Failed To Parse Checkin Request")
-    fmt.Println(err)
-
-    // TODO: Debug Event To Error Logs
+    log.Debug("Error Parsing Checkin Request: ", err)
     w.WriteHeader(http.StatusBadRequest)
     return
 	}

@@ -22,7 +22,7 @@ import (
 	"github.com/gorilla/mux" // HTTP Router
   "github.com/go-pg/pg" // Database (Postgres)
 
-  "./appleMDM"
+  "./appleMDM" //TODO: Should These Be Put In Main() After Logging & Database Are Ready???
 	//"./windowsMDM"
 )
 
