@@ -34,6 +34,25 @@ type DeviceTokens struct {
   UnlockToken []byte `sql:"UnlockToken,notnull"`
 }
 
+///// Policies Model /////
+type Policy struct {
+  TableName struct{} `sql:"policies"`
+  UDID string `sql:"uuid,pk"`
+  Config PolicyConfig `sql:"config,notnull"`
+  Options PolicyOptions `sql:"options,notnull"`
+  Content string `sql:"content"` //////////////////////////////////////////////// Does This Break if Parsed Null
+}
+
+type PolicyConfig struct {
+  Name string `sql:"name"`
+  Targets []string `sql:"targets"`//ie. Mac, IOS and Software Versions
+  //Type string
+}
+
+type PolicyOptions struct { // Lots of Optional Values
+  PayloadInstallApplication
+}
+
 /* End */
 
 
@@ -172,8 +191,8 @@ type ServerCommandBody struct { //TODO: Is This Used
 }
 
 type PayloadInstallApplication struct {
-  ITunesStoreID int  `plist:"iTunesStoreID,omitempty"`
-  ManagementFlags int `plist:",omitempty"`
+  ITunesStoreID int  `plist:"iTunesStoreID,omitempty"` //TODO: Should I Have ,omitempty
+  ManagementFlags int `plist:",omitempty"` //TODO: Should I Have ,omitempty
 
   //ManifestURL string
   //  `plist:",omitempty"`

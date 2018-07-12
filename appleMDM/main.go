@@ -218,19 +218,6 @@ func testingHandler(w http.ResponseWriter, r *http.Request) {
 var run_commands = 1
 
 func serverHandler(w http.ResponseWriter, r *http.Request) {
-	/*buf, err := ioutil.ReadAll(r.Body)
-	//r.Body.Close()
-	if err != nil {
-		log.Error(err)
-		w.WriteHeader(http.StatusBadRequest)
-		return
-	}
-
-	fmt.Println(string(buf))*/
-
-
-	/* Break */
-
 	var cmd DeviceStatus
   if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
     log.Debug("Error Parsing Checkin Request: ", err)
@@ -238,6 +225,22 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
     return
 	}
 	device := getDevice(cmd.UDID)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	if device != nil && device.DeviceState == 3 {
 		if cmd.Status == "Idle" {
@@ -254,11 +257,51 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 			log.Debug("Unkown Device Status of: " + cmd.Status)
 		}
 
+		//TODO: Get Policys As A Struct Func
+		//			Policy To Plist (string) Func
+
+		if run_commands == 1 {
+
+			var policy Policy
+		  err := pgdb.Model(&policy).Where("uuid = ?", "WWDC_APP_UUID").Select()
+
+		  if err != nil {
+		    if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+		      log.Warning("Postgres Error: ", err);
+		       //TODO: Try Database Request Again Here
+		    }
+
+		    return
+		  }
+			
+			AppPayload := ServerCommand{
+				CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
+				Command: ServerCommandBody{
+					RequestType: "InstallApplication",
+					PayloadInstallApplication: policy.Options.PayloadInstallApplication,
+				},
+			}
+
+			out, err := plist.MarshalIndent(AppPayload, "     ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			fmt.Fprintf(w, string(out))
 
 
 
 
 
+
+		} else {
+			log.Debug("Device Deployed")
+			fmt.Fprintf(w, "")
+		}
+
+
+
+		/*
 		if run_commands == 1 {
 			run_commands = run_commands+1
 			log.Info("Sending Lock Payload")
@@ -297,7 +340,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 			}
 
 			fmt.Fprintf(w, string(out))
-			/*} else if run_commands == 3 {
+		} else if run_commands == 3 {
 				run_commands = run_commands+1
 				log.Info("Sending Block Facetime Profile Payload")
 
@@ -317,11 +360,12 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 					fmt.Println(err)
 				}
 
-				fmt.Fprintf(w, string(out))*/
+				fmt.Fprintf(w, string(out))
 		} else {
 			log.Debug("Device Deployed")
 			fmt.Fprintf(w, "")
 		}
+		*/
 
 
 
