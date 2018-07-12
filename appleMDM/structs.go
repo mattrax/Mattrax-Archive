@@ -7,6 +7,8 @@
 
 package appleMDM
 
+//TODO: Only Capitialise Stuff That Needs External Access
+
 // Devices Database Table
 type Device struct {
   TableName struct{} `sql:"devices"`
@@ -79,9 +81,48 @@ type userTokenUpdate struct { //TODO: Do I Need These/What Devices Send It
 
 
 
+/* Device Response */
+type DeviceStatus struct {
+  UDID  string
+  CommandUUID string
+  Status string
+  ErrorChain
+}
+
+type ErrorChain struct {
+  LocalizedDescription string
+  USEnglishDescription string ///// TODO: This Should be Optional
+  ErrorDomain string
+  ErrorCode int
+}
 
 
-type ServerCommand struct { //TODO: Is This Used
-	UDID   string
-	//Status string
+
+
+
+
+
+
+/* Server Response */
+type ServerCommand struct {
+  CommandUUID  string
+  Command      ServerCommandBody //TODO: Replace With Any Stuct (interface)
+}
+
+type ServerCommandBody struct { //TODO: Is This Used
+	RequestType string
+  PayloadInstallApplication
+  PayloadInstallProfile
+}
+
+type PayloadInstallApplication struct {
+  ITunesStoreID int  `plist:"iTunesStoreID,omitempty"`
+  ManagementFlags int `plist:",omitempty"`
+
+  //ManifestURL string
+  //  `plist:",omitempty"`
+}
+
+type PayloadInstallProfile struct {
+  Payload []byte
 }

@@ -18,17 +18,15 @@ import (
   "github.com/go-pg/pg" // Database (Postgres)
 
 	"github.com/groob/plist"
-	/*"encoding/hex"
-	"encoding/json"
-	"github.com/RobotsAndPencils/buford/certificate"
-	"github.com/RobotsAndPencils/buford/payload"
-	"github.com/RobotsAndPencils/buford/push"*/
 )
 
 var (
   log *logging.Logger // TODO: This is A TEMP Sub Logging Solution
   pgdb *pg.DB
 )
+
+//TODO:
+//	Auto Generate Profiles From Config Details Parsed In (Cache Sirectory)
 
 // TODO:
 //  Func Based (struct, err) Error Handling
@@ -59,6 +57,7 @@ func Mount(r *mux.Router) {
 
   r.HandleFunc("/ping-apns", pingApnsHandler).Methods("GET")
 	r.HandleFunc("/testing", testingHandler).Methods("GET")
+	r.HandleFunc("/WWDC_App.plist", wwdcHandler).Methods("GET")
 
 	r.HandleFunc("/enroll", enrollHandler).Methods("GET")
 	r.HandleFunc("/checkin", checkinHandler).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")
@@ -214,10 +213,23 @@ func testingHandler(w http.ResponseWriter, r *http.Request) {
 
 
 
-
+var run_commands = 1
 
 func serverHandler(w http.ResponseWriter, r *http.Request) {
-	var cmd ServerCommand
+	/*buf, err := ioutil.ReadAll(r.Body)
+	//r.Body.Close()
+	if err != nil {
+		log.Error(err)
+		w.WriteHeader(http.StatusBadRequest)
+		return
+	}
+
+	fmt.Println(string(buf))*/
+
+
+	/* Break */
+
+	var cmd DeviceStatus
   if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
     log.Debug("Error Parsing Checkin Request: ", err)
     w.WriteHeader(http.StatusBadRequest)
@@ -226,9 +238,95 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 	device := getDevice(cmd.UDID)
 
 	if device != nil && device.Deployed {
-		log.Debug("A Device Has Requested The Server: " + device.UDID)
+		if cmd.Status == "Idle" {
+			log.Debug("Idle Device: " + device.UDID)
+		} else if cmd.Status == "Acknowledged" { //TODO: Storing Feedback
+			log.Warning("Device Successed At: " + cmd.CommandUUID)
+		} else if cmd.Status == "Error" { //TODO: Storing Feedback
+			log.Warning("Device Failed At: " + cmd.CommandUUID)
+			log.Warning(cmd.ErrorChain)
+
+
+
+		} else {
+			log.Debug("Unkown Device Status of: " + cmd.Status)
+		}
+
+
+
+
+
+
+		if run_commands == 1 {
+			run_commands = run_commands+1
+			log.Info("Sending Lock Payload")
+
+			LockPayload := ServerCommand{
+				CommandUUID: "BBA5879E-2649-43B1-9934-D0D26BBC0E5D", //TODO: Build Generator For These
+				Command: ServerCommandBody{
+					RequestType: "DeviceLock",
+				},
+			}
+
+			out, err := plist.MarshalIndent(LockPayload, "   ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+			if err != nil {
+				fmt.Println(err)
+			}
+			fmt.Fprintf(w, string(out))
+		} else if run_commands == 2 {
+			run_commands = run_commands+1
+			log.Info("Sending WWDC App Payload")
+
+			AppPayload := ServerCommand{
+				CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
+				Command: ServerCommandBody{
+					RequestType: "InstallApplication",
+					PayloadInstallApplication: PayloadInstallApplication{
+						ITunesStoreID: 640199958, //WWDC App
+						//ManifestURL: "https://mdm.otbeaumont.me/apple/WWDC_App.plist",
+						ManagementFlags: 4, //Understand This
+					},
+				},
+			}
+
+			out, err := plist.MarshalIndent(AppPayload, "     ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+			if err != nil {
+				fmt.Println(err)
+			}
+
+			fmt.Fprintf(w, string(out))
+			/*} else if run_commands == 3 {
+				run_commands = run_commands+1
+				log.Info("Sending Block Facetime Profile Payload")
+
+				profileContent, _ := ioutil.ReadFile("BlockFacetime.mobileconfig") //TODO: Handle Errors
+				AppPayload := ServerCommand{
+					CommandUUID: "5428B959-BDD2-4H45-Q558-397I0DABD56B", //TODO: Build Generator For These
+					Command: ServerCommandBody{
+						RequestType: "InstallProfile",
+						PayloadInstallProfile: PayloadInstallProfile{
+							Payload: []byte(profileContent),
+						},
+					},
+				}
+
+				out, err := plist.MarshalIndent(AppPayload, "     ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+				if err != nil {
+					fmt.Println(err)
+				}
+
+				fmt.Fprintf(w, string(out))*/
+		} else {
+			log.Debug("Device Deployed")
+			fmt.Fprintf(w, "")
+		}
+
+
+
+
+
 	} else {
-		log.Warning("A Device Attempted To Get Actions From Server Without Having Send APNS Tokens Yet")
+		log.Warning("A Device Attempted To Get Actions From Server Without Fully Enrolling")
 	}
 
 
@@ -283,7 +381,15 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 	*/
 }
 
-func exitOnError(err error) {
+func wwdcHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "text/xml")
+	http.ServeFile(w, r, "WWDC_App.plist")
+}
+
+
+
+
+func exitOnError(err error) { //TODO: Maybe Remove This Or Merge To New Version
 	if err != nil {
 		fmt.Println(err)
 		os.Exit(1)
