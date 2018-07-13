@@ -17,6 +17,7 @@ type Device struct {
   DeviceState int `sql:"DeviceState,notnull"`
   DeviceDetails DeviceDetails `sql:"DeviceDetails,notnull"`
   DeviceTokens DeviceTokens `sql:"DeviceTokens,notnull"`
+  DevicePolicies DevicePolicies `sql:"DevicePolicies,notnull"`
 }
 
 type DeviceDetails struct {
@@ -34,6 +35,11 @@ type DeviceTokens struct {
   UnlockToken []byte `sql:"UnlockToken,notnull"`
 }
 
+type DevicePolicies struct {
+  Queued []string `sql:"queued,notnull"`
+  Installed []string `sql:"installed,notnull"`
+}
+
 ///// Policies Model /////
 type Policy struct {
   TableName struct{} `sql:"policies"`
@@ -46,12 +52,15 @@ type Policy struct {
 type PolicyConfig struct {
   Name string `sql:"name"`
   Targets []string `sql:"targets"`//ie. Mac, IOS and Software Versions
+  PolicyType string `sql:"name"`
   //Type string
 }
 
 type PolicyOptions struct { // Lots of Optional Values
   PayloadInstallApplication
 }
+
+//TOD: mak Everything Not NULLS To These
 
 /* End */
 

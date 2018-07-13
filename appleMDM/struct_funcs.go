@@ -11,6 +11,57 @@ import (
   "github.com/go-pg/pg" // Database (Postgres)
 )
 
+///// Devices Functions /////
+
+///// Policies Functions /////
+func getPolicy(uuid string) {
+
+}
+
+func parsePolicy(policy Policy) (string, error) {
+
+
+
+
+
+
+  
+  // Returns The XML Output After Parsing The Inputted Policy
+  return "hello world", nil
+}
+
+/*
+if policy.Config.PolicyType == "InstallApplication" {
+
+
+  AppPayload := ServerCommand{
+    CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
+    Command: ServerCommandBody{
+      RequestType: "InstallApplication",
+      PayloadInstallApplication: policy.Options.PayloadInstallApplication,
+    },
+  }
+
+  out, err := plist.MarshalIndent(AppPayload, "     ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+  if err != nil {
+    fmt.Println(err)
+  }
+
+  fmt.Fprintf(w, string(out))
+
+  // Move Out Of The Queue
+
+  device.DevicePolicies.Queued[index] //Delete It
+  //Add To The installed
+
+
+} else {
+  fmt.Fprintf(w, "")
+}
+*/
+
+/* End */
+
 
 
 

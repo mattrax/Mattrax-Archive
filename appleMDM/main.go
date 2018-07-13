@@ -25,6 +25,17 @@ var (
   pgdb *pg.DB
 )
 
+func init() {
+
+
+	policy := getPolicy()
+	parsePolicy()
+
+	//http.Error(w, err.Error(), 500)
+
+	os.Exit(2)
+}
+
 
 // Try To:
 //	 Simplier Logging Library. Less Configuration and More Opionated. -> Subfile Logging (Separated) Support
@@ -234,12 +245,36 @@ func serverHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	device := getDevice(cmd.UDID)
 
+	if device != nil && device.DeviceState == 3 {
+		for index, policy_name := range device.DevicePolicies.Queued {
+			log.Info("Pushing Policy '" + policy_name + "' To Device '" + device.UDID + "'")
 
 
+			/* Start Get Policy Function */
+			var policy Policy
+		  err := pgdb.Model(&policy).Where("uuid = ?", policy_name).Select()
+
+		  if err != nil {
+		    if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+		      log.Warning("Postgres Error: ", err);
+		    }
+
+				log.Info("Error Blank Database")
+		    return
+		  }
+			/* End Get Policy Function */
+
+			//Parse The Policy
+			parsePolicy(policy)
 
 
+		}
+
+		return
+	}
 
 
+	return //Kill Below
 
 
 
