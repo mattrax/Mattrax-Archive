@@ -1,0 +1,156 @@
+package errorHandling
+
+import (
+  "log"
+  "net/http"
+  //"net"
+  "strings"
+
+
+  "github.com/go-pg/pg"
+)
+
+//TODO: Redo This File. It Is A Mess And Uses Sketchy Code
+
+/*
+type pgError struct {
+  // Code Line The Error Occured On/Was Created From
+  message string
+}
+
+func NewPG(_msg string) error {
+    return &pgError{
+      message: _msg,
+    }
+}*/
+
+func New(_msg string) error {
+    return &internalError{
+      errorCode: 0,
+      message: "Internal Error: " + _msg,
+      fatal: false,
+    }
+}
+
+type internalError struct {
+  // Code Line The Error Occured On/Was Created From
+  errorCode int
+  message string
+  fatal bool //Should App Kill Everything
+}
+
+func (e *internalError) Error() string { //TODO: Understand This
+    return e.message
+}
+
+
+
+
+
+
+
+
+
+
+func PgError(_err error) bool {
+  if _err == pg.ErrNoRows || _err == pg.ErrMultiRows {
+    return false
+  } else {
+    return true
+  }
+}
+
+
+
+
+
+
+
+/*
+type ErrorPG struct {
+	s string
+}
+
+func (err ErrorPG) Error() string {
+	return err.s
+}
+*/
+
+// HTTP Error Handling
+type Handler func(http.ResponseWriter, *http.Request) (int, error)
+
+func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+  returnStatus, err := fn(w, r) //returnStatus
+
+  if returnStatus == 200 { return }
+  if err == nil { return }
+
+  switch err.(type) {
+    case *internalError:
+      log.Println(err)
+    default:
+      errorTXT := err.Error()
+
+
+
+      if strings.HasPrefix(errorTXT, "pg:") { //TODO: This Needs To Go
+        if err == pg.ErrNoRows || err == pg.ErrMultiRows {
+          log.Println("Blank PG Database")
+        //} else if strings.HasPrefix(errorTXT, "pg: Model(non-pointer") { //TODO: This Need To Go Even More. IT IS BAD CODE!!
+        //  log.Println("Entry Already Exists")
+        } else {
+          log.Println(err)
+        }
+      } else {
+        log.Println("External Error: ", err)
+      }
+  }
+
+  http.Error(w, "An Error Occured", returnStatus)
+
+
+  //Is It A Database Error
+  //Is It An Internal Error
+  //Else
+
+  //Handle Different Postgress Errors With Logging And Make Outright Failing And Make Everything Return Error
+
+  /*if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+    log.Warning("Postgres Error: ", err);
+     //TODO: Try Database Request Again Here
+  }*/
+
+  // If http.StatusNotFound is True Then Show Custom Error Page
+
+  /*if returnStatus, err = fn(w, r); err != nil {
+    log.Println("HTTPS Error", err.Error())
+    http.Error(w, "A Server Side Error Occured", 500)
+  }*/
+
+  //log.Println(pg.Error)
+  //log.Println(err.isNetworkError())
+
+  //_, ok := err.(net.Error)
+  //log.Println(ok)
+
+
+
+
+  /*if _, ok := err.(ErrorPG); !ok {
+      log.Println("PG Error")
+  }*/
+
+
+  // plist Parser Error
+  //    Error
+  //    Parsing/Encoding Failed
+  // Daatabse Errors
+  //    Network
+  //    Breaking Ingrity Checks
+  //    etc
+
+  //log.Println(returnStatus) //Return This HTTP Code
+  //http.Error(w, "A Server Side Error Occured", 200)
+}
+
+//Handle Logging From Here. Custom Formatting Functions Probally

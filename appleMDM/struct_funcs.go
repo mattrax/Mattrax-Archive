@@ -12,11 +12,37 @@ import (
 )
 
 ///// Devices Functions /////
+func newDevice(cmd CheckinCommand) Device {
+  return Device{
+    UDID: cmd.UDID,
+    DeviceState: 0, //cmd.DeviceState,
+    DeviceDetails: DeviceDetails{
+      OSVersion: cmd.auth.OSVersion,
+      BuildVersion: cmd.auth.BuildVersion,
+      ProductName: cmd.auth.ProductName,
+      SerialNumber: cmd.auth.SerialNumber,
+      IMEI: cmd.IMEI,
+      MEID: cmd.MEID,
+    },
+    DeviceTokens: DeviceTokens{
+      Token: []byte{},
+      PushMagic: "",
+      UnlockToken: []byte{},
+    },
+    DevicePolicies: DevicePolicies{
+      Queued: []string{},
+      Installed: []string{},
+    },
+  }
+}
+
+
+
 
 ///// Policies Functions /////
-func getPolicy(uuid string) {
+/*func getPolicy(uuid string) {
 
-}
+}*/
 
 func parsePolicy(policy Policy) (string, error) {
 
@@ -25,10 +51,14 @@ func parsePolicy(policy Policy) (string, error) {
 
 
 
-  
+
   // Returns The XML Output After Parsing The Inputted Policy
   return "hello world", nil
 }
+
+
+//TODO: Redo Error Hanling For This File. eg. Use: "err != nil && ierror.PgError(err) { return 403, err }"
+//TODO: Keep This Line For Later: if err := pgdb.Delete(&device); err != nil && ierror.PgError(err) { return 405, err }
 
 /*
 if policy.Config.PolicyType == "InstallApplication" {
@@ -80,25 +110,28 @@ if policy.Config.PolicyType == "InstallApplication" {
 
 
 
-func getDevice(_UDID string) *Device {
+// getDevice()
+
+
+/*func getDevice(_UDID string) (Device, error) {
   var device Device
   err := pgdb.Model(&device).Where("uuid = ?", _UDID).Select()
+  if err != nil { return err }
+  return device, nil
+}*/
 
-  /*if err == pg.ErrNoRows || err == pg.ErrMultiRows {
-    log.Debug("getDevice(): Searching Empty Database");
-    return nil
-  } else*/
-  if err != nil {
-    if err != pg.ErrNoRows && err != pg.ErrMultiRows {
-      log.Warning("Postgres Error: ", err);
-       //TODO: Try Database Request Again Here
-    }
-
-    return nil
+/*if err == pg.ErrNoRows || err == pg.ErrMultiRows {
+  log.Debug("getDevice(): Searching Empty Database");
+  return nil
+} else
+if err != nil {
+  if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+    log.Warning("Postgres Error: ", err);
+     //TODO: Try Database Request Again Here
   }
-  return &device
-}
 
+  return nil
+}*/
 
 
 
@@ -120,40 +153,7 @@ func getDevices() []Device {
   return devices
 }
 
-func newDevice(cmd CheckinCommand) *Device {
-  return &Device{
-    UDID: cmd.UDID,
-    DeviceState: 0,
-    DeviceDetails: DeviceDetails{
-      OSVersion: cmd.auth.OSVersion,
-      BuildVersion: cmd.auth.BuildVersion,
-      ProductName: cmd.auth.ProductName,
-      SerialNumber: cmd.auth.SerialNumber,
-      IMEI: cmd.IMEI,
-      MEID: cmd.MEID,
-    },
-    DeviceTokens: DeviceTokens{
-      Token: []byte{},
-      PushMagic: "",
-      UnlockToken: []byte{},
-    },
 
-    /*UDID: cmd.UDID,
-    // Device Details
-    OSVersion: cmd.auth.OSVersion,
-    BuildVersion: cmd.auth.BuildVersion,
-    ProductName: cmd.auth.ProductName,
-    SerialNumber: cmd.auth.SerialNumber,
-    IMEI: cmd.IMEI,
-    MEID: cmd.MEID,
-    // APNS
-    Token: []byte{},
-    PushMagic: "",
-    UnlockToken: []byte{},
-    //Status
-    Deployed: false,*/
-  }
-}
 
 func editDevice(_device *Device, exists bool) bool {
   if _device == nil  {

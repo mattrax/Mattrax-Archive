@@ -1,0 +1,231 @@
+var cmd DeviceStatus
+if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
+  log.Debug("Error Parsing Checkin Request: ", err)
+  w.WriteHeader(http.StatusBadRequest)
+  return
+}
+device := getDevice(cmd.UDID)
+
+if device != nil && device.DeviceState == 3 {
+  for _, policy_name := range device.DevicePolicies.Queued {
+    log.Info("Pushing Policy '" + policy_name + "' To Device '" + device.UDID + "'")
+
+
+    /* Start Get Policy Function */
+    var policy Policy
+    err := pgdb.Model(&policy).Where("uuid = ?", policy_name).Select()
+
+    if err != nil {
+      if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+        log.Warning("Postgres Error: ", err);
+      }
+
+      log.Info("Error Blank Database")
+      return
+    }
+    /* End Get Policy Function */
+
+    //Parse The Policy
+    parsePolicy(policy)
+
+
+  }
+
+  return
+}
+
+
+return //Kill Below
+
+
+
+
+
+
+
+
+
+
+if device != nil && device.DeviceState == 3 {
+  if cmd.Status == "Idle" {
+    log.Debug("Idle Device: " + device.UDID)
+  } else if cmd.Status == "Acknowledged" { //TODO: Storing Feedback
+    log.Warning("Device Successed At: " + cmd.CommandUUID)
+  } else if cmd.Status == "Error" { //TODO: Storing Feedback
+    log.Warning("Device Failed At: " + cmd.CommandUUID)
+    log.Warning(cmd.ErrorChain)
+
+
+
+  } else {
+    log.Debug("Unkown Device Status of: " + cmd.Status)
+  }
+
+  //TODO: Get Policys As A Struct Func
+  //			Policy To Plist (string) Func
+
+  if run_commands == 1 {
+
+    var policy Policy
+    err := pgdb.Model(&policy).Where("uuid = ?", "WWDC_APP_UUID").Select()
+
+    if err != nil {
+      if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+        log.Warning("Postgres Error: ", err);
+         //TODO: Try Database Request Again Here
+      }
+
+      return
+    }
+
+    AppPayload := ServerCommand{
+      CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
+      Command: ServerCommandBody{
+        RequestType: "InstallApplication",
+        PayloadInstallApplication: policy.Options.PayloadInstallApplication,
+      },
+    }
+
+    out, err := plist.MarshalIndent(AppPayload, "     ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+    if err != nil {
+      fmt.Println(err)
+    }
+
+    fmt.Fprintf(w, string(out))
+
+
+
+
+
+
+  } else {
+    log.Debug("Device Deployed")
+    fmt.Fprintf(w, "")
+  }
+
+
+
+  /*
+  if run_commands == 1 {
+    run_commands = run_commands+1
+    log.Info("Sending Lock Payload")
+
+    LockPayload := ServerCommand{
+      CommandUUID: "BBA5879E-2649-43B1-9934-D0D26BBC0E5D", //TODO: Build Generator For These
+      Command: ServerCommandBody{
+        RequestType: "DeviceLock",
+      },
+    }
+
+    out, err := plist.MarshalIndent(LockPayload, "   ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+    if err != nil {
+      fmt.Println(err)
+    }
+    fmt.Fprintf(w, string(out))
+  } else if run_commands == 2 {
+    run_commands = run_commands+1
+    log.Info("Sending WWDC App Payload")
+
+    AppPayload := ServerCommand{
+      CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
+      Command: ServerCommandBody{
+        RequestType: "InstallApplication",
+        PayloadInstallApplication: PayloadInstallApplication{
+          ITunesStoreID: 640199958, //WWDC App
+          //ManifestURL: "https://mdm.otbeaumont.me/apple/WWDC_App.plist",
+          ManagementFlags: 4, //Understand This
+        },
+      },
+    }
+
+    out, err := plist.MarshalIndent(AppPayload, "     ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+    if err != nil {
+      fmt.Println(err)
+    }
+
+    fmt.Fprintf(w, string(out))
+  } else if run_commands == 3 {
+      run_commands = run_commands+1
+      log.Info("Sending Block Facetime Profile Payload")
+
+      profileContent, _ := ioutil.ReadFile("BlockFacetime.mobileconfig") //TODO: Handle Errors
+      AppPayload := ServerCommand{
+        CommandUUID: "5428B959-BDD2-4H45-Q558-397I0DABD56B", //TODO: Build Generator For These
+        Command: ServerCommandBody{
+          RequestType: "InstallProfile",
+          PayloadInstallProfile: PayloadInstallProfile{
+            Payload: []byte(profileContent),
+          },
+        },
+      }
+
+      out, err := plist.MarshalIndent(AppPayload, "     ") //TODO: Clean This Plist Parsing And Error Handling (And Other Ones Using The Same Code)
+      if err != nil {
+        fmt.Println(err)
+      }
+
+      fmt.Fprintf(w, string(out))
+  } else {
+    log.Debug("Device Deployed")
+    fmt.Fprintf(w, "")
+  }
+  */
+
+
+
+
+
+} else {
+  log.Warning("A Device Attempted To Get Actions From Server Without Fully Enrolling")
+}
+
+
+
+/*buf, err := ioutil.ReadAll(r.Body)
+r.Body.Close()
+if err != nil {
+  //Do something
+  fmt.Println(err)
+}
+
+fmt.Println(string(buf))
+w.WriteHeader(http.StatusOK)
+return*/
+
+/*var cmd ServerCommand
+  if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
+    fmt.Println("Failed To Parse Checkin Request")
+    fmt.Println(err)
+
+    // TODO: Debug Event To Error Logs
+    w.WriteHeader(http.StatusBadRequest)
+    return
+  }
+
+  if cmd.Status == "Idle" {
+    fmt.Println("The Device Is Idle")
+
+    if !lockedDevice {
+      lockedDevice = true
+      fmt.Println("Sending A Lock Command")
+
+      DeviceLock := struct {
+        RequestType string
+      }{
+        RequestType: "RestartDevice",
+      }
+
+      out, err := plist.MarshalIndent(DeviceLock, "   ")
+      if err != nil {
+        fmt.Println(err)
+      }
+
+      fmt.Println(string(out))
+      fmt.Fprintf(w, string(out))
+    } else {
+      fmt.Fprintf(w, "")
+    }
+  } else {
+    fmt.Fprintf(w, "")
+  }
+*/

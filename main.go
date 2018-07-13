@@ -22,6 +22,7 @@ import (
 	"github.com/gorilla/mux" // HTTP Router
   "github.com/go-pg/pg" // Database (Postgres)
 
+  //"./errorHandling" //TODO: Change All Of These Imports From Dyanmic Paths
   "./appleMDM" //TODO: Should These Be Put In Main() After Logging & Database Are Ready???
 	//"./windowsMDM"
 )
@@ -41,6 +42,9 @@ var (
   address     = "0.0.0.0:8000" //TODO: Make This Alot Less Hardcoded
   //TODO: Database Creds From Maybe .env file or command line in
 )
+
+//TODO: Get The Database Config From Somewhere
+//TODO: Redo Start and Shutdown Logging Messages
 
 func main() {
   flag.Parse() // Parse The Command Line Arguments
@@ -73,6 +77,17 @@ func main() {
 	os.Exit(0)
 }
 
+
+/* HTTP Custom Error Handling */
+/*type ErrorHandling func(http.ResponseWriter, *http.Request) error
+
+func (fn ErrorHandling) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+  if err := fn(w, r); err != nil {
+    fmt.Println("HTTPS Error", err.Error())
+    http.Error(w, "A Server Side Error Occured", 500)
+  }
+}*/
+/* End HTTP Custom Error Handling */
 
 
 
