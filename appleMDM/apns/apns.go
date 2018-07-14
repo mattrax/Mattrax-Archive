@@ -5,7 +5,7 @@
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
 
-package appleMDM
+package apns
 
 import (
   "encoding/hex"
@@ -14,7 +14,15 @@ import (
   "github.com/RobotsAndPencils/buford/certificate"
   "github.com/RobotsAndPencils/buford/payload"
   "github.com/RobotsAndPencils/buford/push"
+
+  "github.com/sirupsen/logrus" // Logging
+	"github.com/go-pg/pg" // Database (Postgres)
+
+  structs "github.com/mattrax/mattrax/appleMDM/structs"
 )
+
+var ( log *logrus.Logger; pgdb *pg.DB )
+func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
 
 //var cert tls.Certificate
 
@@ -45,7 +53,7 @@ func loadAPNSCertificate(certFile string, password string) *tls.Certificate {
 }
 */
 
-func deviceUpdate(_device Device) bool { //TODO: Clean This Up (Maybe Remove Client And Make It Global)
+func DeviceUpdate(_device structs.Device) bool { //TODO: Clean This Up (Maybe Remove Client And Make It Global)
   cert, err := certificate.Load("data/PushCert.p12", "password") //TODO: Load This From Config (Maybe .env)
 
   if err != nil {

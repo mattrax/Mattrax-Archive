@@ -12,79 +12,38 @@ import (
   "net/http"
 
 	"github.com/sirupsen/logrus" // Logging
+	//"github.com/go-pg/pg" // Database (Postgres)
 	"github.com/gorilla/mux" // HTTP Router
-  "github.com/go-pg/pg" // Database (Postgres)
 	"github.com/groob/plist" //Plist Parsing
 
-	errors "github.com/mattrax/mattrax/utils/errors" // Internal Error Handling (For HTTP)
+	errors "github.com/mattrax/mattrax/internal/errors" // Internal Error Handling (For HTTP)
+	restAPI "github.com/mattrax/mattrax/appleMDM/api"
+	structs "github.com/mattrax/mattrax/appleMDM/structs"
+
+	mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
 )
 
-var (
-  log *logrus.Logger
-  pgdb *pg.DB
-)
+var pgdb = mdb.Database()
 
-func Init(_pgdb *pg.DB, _log *logrus.Logger) {
-  pgdb = _pgdb
-  log = _log
+var log *logrus.Logger //; pgdb *pg.DB )
+
+func Init(_log *logrus.Logger) {  log = _log //pgdb = _pgdb; //_pgdb *pg.DB,
 	log.Info("Started The Apple MDM Module!")
+	restAPI.Init(pgdb, _log)
 }
 
 func Mount(r *mux.Router) {
 	r.HandleFunc("/", genericResponse).Methods("GET")
-
-	/* Start TEMP For Development */
-  r.HandleFunc("/ping-apns", pingApnsHandler).Methods("GET")
 	r.HandleFunc("/enroll", enrollHandler).Methods("GET")
-	/* End TEMP For Development */
-
-	// REST API Endpoints
-
+	//REST API
+	restAPI.Mount(r.PathPrefix("/api/").Subrouter())
 	// MDM Device Endpoints
 	r.Handle("/checkin", errors.Handler(checkinHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")
 	r.Handle("/server", errors.Handler(serverHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm")
 }
 
-func genericResponse(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Apple Mobile Device Management Server!")
-}
-
-func enrollHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/x-apple-aspen-config")
-	http.ServeFile(w, r, "data/enroll.mobileconfig")
-	//fmt.Fprintf(w, generateEnrollmentProfile())
-}
-/*
-func generateEnrollmentProfile() {
-	//Load Values From Config
-
-	//Generate Profile
-}
-*/
-
-func pingApnsHandler(w http.ResponseWriter, r *http.Request) {
-	devices := getDevices()
-
-	if devices == nil { //[]Device{} {
-		log.Debug("Error Getting Devices Or There Are None")
-		w.WriteHeader(http.StatusBadRequest)
-		fmt.Fprintf(w, "Error Getting Devices Or There Are None")
-		return
-	}
-
-  for _, device := range devices {
-    log.Debug("APNS Update Sent To Device " + device.UDID)
-		status := deviceUpdate(device)
-
-		if !status {
-	    w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "Error Sending APNS Update To The Device: " + device.UDID)
-	    return
-	  }
-  }
-
-  fmt.Fprintf(w, "All Devices Have Been Told To Update")
-}
+func genericResponse(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Apple Mobile Device Management Server!") }
+func enrollHandler(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "application/x-apple-aspen-config"); http.ServeFile(w, r, "data/enroll.mobileconfig") }
 
 
 
@@ -99,17 +58,17 @@ func pingApnsHandler(w http.ResponseWriter, r *http.Request) {
 // The "/checkin" route is used to check if the device can join the mdm and update its push token to the server
 func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	//Parse Request
-	var cmd CheckinCommand
+	var cmd structs.CheckinCommand
   if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil { return 403, err }
 	//Attempt To Get The Device From the Database
-	var device Device
+	var device structs.Device
   if err := pgdb.Model(&device).Where("uuid = ?", cmd.UDID).Select(); err != nil && errors.PgError(err) { return 403, err }
 	//Handle The Request
   if cmd.MessageType == "Authenticate" { //New Device Requesting To Enrolling
-    if cmd.auth.OSVersion == "" && cmd.auth.BuildVersion == "" && cmd.auth.ProductName == "" && cmd.auth.SerialNumber == "" && cmd.auth.IMEI == "" && cmd.auth.MEID == "" {
+    if cmd.Auth.OSVersion == "" && cmd.Auth.BuildVersion == "" && cmd.Auth.ProductName == "" && cmd.Auth.SerialNumber == "" && cmd.Auth.IMEI == "" && cmd.Auth.MEID == "" {
 			return 403, errors.New("Internal: The Request To 'Authenticate' From The Device Is Malformed")
 		} else { //Create A New Device In The Database And Return Success To The Device
-			enrollingDevice := newDevice(cmd)
+			enrollingDevice := structs.NewDevice(cmd)
 			enrollingDevice.DeviceState = 1
 			if device.DeviceState == 3 {
 				return 403, errors.New("A Device That is Already Enrolled Attempted To Enroll")
@@ -123,7 +82,7 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 			return 200, nil
     }
 	} else if cmd.MessageType == "TokenUpdate" {
-		if cmd.update.Token == nil && cmd.update.PushMagic == "" && cmd.update.UnlockToken == nil && (cmd.update.AwaitingConfiguration == true || cmd.update.AwaitingConfiguration == false) {
+		if cmd.Update.Token == nil && cmd.Update.PushMagic == "" && cmd.Update.UnlockToken == nil && (cmd.Update.AwaitingConfiguration == true || cmd.Update.AwaitingConfiguration == false) {
 			return 403, errors.New("The Request To 'TokenUpdate' From The Device Is Malformed Or Thier Device Is Pre IOS 9 or Is Missing The Device Information Permission In The Profile")
 		} else if device.DeviceState == 0 {
 			return 403, errors.New("A Device Tried To Do A TokenUpdate Without Having Enrolled Via A 'Authenticate' Request")
@@ -141,14 +100,14 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 			log.Info("A New Device Joined The MDM: " + device.UDID)
 		} else if device.DeviceState == 4 {
 			return 403, errors.New("A Not Enrolled Device Tried To Do A 'TokenUpdate'")
-		} else if cmd.update.AwaitingConfiguration { //Device Enrollment Program
+		} else if cmd.Update.AwaitingConfiguration { //Device Enrollment Program
 			// TODO: Do DEP Prestage Enrollment By Pushing The Profiles Now Then Run The Fully Setup Thing Then Push The Finished Command
 			return 403, errors.New("DEP Is Currently Not Supported But Is Coming Soon")
 		}
 
-		device.DeviceTokens.Token = cmd.update.Token
-		device.DeviceTokens.PushMagic = cmd.update.PushMagic
-		if cmd.update.UnlockToken != nil { device.DeviceTokens.UnlockToken = cmd.update.UnlockToken }
+		device.DeviceTokens.Token = cmd.Update.Token
+		device.DeviceTokens.PushMagic = cmd.Update.PushMagic
+		if cmd.Update.UnlockToken != nil { device.DeviceTokens.UnlockToken = cmd.Update.UnlockToken }
 
 		if err := pgdb.Update(&device); err != nil { return 403, err }
 		log.Debug("Device Updated Its APNS Keys: " + device.UDID)
@@ -156,7 +115,7 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	} else if cmd.MessageType == "CheckOut" {
 		device.DeviceState = 4
 		if err := pgdb.Update(&device); err != nil { return 403, err }
-		log.Debug("A Device Has Been Removed From The MDM: " + cmd.UDID)
+		log.Info("A Device Has Been Removed From The MDM: " + cmd.UDID)
 		return 200, nil
   } else {
 		return 403, errors.New("A Device Not In The Database Attempted An Action: " + cmd.MessageType)

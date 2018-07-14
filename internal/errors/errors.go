@@ -1,14 +1,20 @@
 package errorHandling
 
 import (
-  "log"
+  //"log"
   "net/http"
-  //"net"
   "strings"
 
-
-  "github.com/go-pg/pg"
+  "github.com/sirupsen/logrus" // Logging
+	"github.com/go-pg/pg" // Database (Postgres)
 )
+
+var ( log *logrus.Logger; pgdb *pg.DB )
+
+func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
+
+
+
 
 //FIXME: Redo This File. It Is A Mess And Uses Sketchy Code
 
@@ -73,7 +79,7 @@ func (err ErrorPG) Error() string {
 type Handler func(http.ResponseWriter, *http.Request) (int, error)
 
 func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-  returnStatus, err := fn(w, r) //returnStatus
+  returnStatus, err := fn(w, r) //returnStatus    // TODO HERE Inject: pgdb *pg.DB
 
   if returnStatus == 200 { return }
   if err == nil { return }

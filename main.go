@@ -22,14 +22,14 @@ import (
   "github.com/rifflock/lfshook" // Logging -> Console and File Output With Different Formattings
   "github.com/gorilla/handlers" // HTTP Handlers
 	"github.com/gorilla/mux" // HTTP Router
-  "github.com/go-pg/pg" // Database (Postgres)
+  //"github.com/go-pg/pg" // Database (Postgres)
 
 
 
 
 
 
-
+  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
 
 
 
@@ -37,10 +37,13 @@ import (
 	//"github.com/mattrax/mattrax/windowsMDM" // The Windows MDM Module
 )
 
+var pgdb = mdb.Database()
+
+
 var (
   config = Config{} // The Configuration ('config.json')
   log = logrus.New() // The Logger //TODO: Is this Still needed. not Just have it Blank
-  pgdb *pg.DB // The Database
+  //pgdb *pg.DB // The Database
   srv *http.Server // The Webserver
 )
 
@@ -72,14 +75,14 @@ func main() {
 	))
 
   //Database
-  if options, err := pg.ParseURL(config.Database); err != nil { log.Fatal(err) } else {
+  /*if options, err := pg.ParseURL(config.Database); err != nil { log.Fatal(err) } else {
     pgdb = pg.Connect(options)
   }
-  if _, err := pgdb.Exec("SELECT 1"); err != nil { logrus.Fatal("Error Communicating With The Database: ", err) }
-  if !correctSchema() { initDatabaseSchema() }
+  if _, err := pgdb.Exec("SELECT 1"); err != nil { log.Fatal("Error Communicating With The Database: ", err) }
+  if !correctSchema() { initDatabaseSchema() }*/
 
   //Load The Modules
-  appleMDM.Init(pgdb, log)
+  appleMDM.Init(log) //pgdb
   //windowsMDM.Init()
 
   //Webserver Routes
@@ -181,7 +184,8 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 //Now
 // FUTURE FEATURE: Redo Separator Between Blocks Of Function -> They Don't Stand Out Enought
 // TODO: Contant Pinging Database To Stop HTTP Soon As It Stops Connecting
-// TODO: Better Log Formatting For Console (Including Color) //var format = logging.MustStringFormatter(`%{color}[%{level}]%{color:reset} %{time:15:04:05} ▶ %{message}`) // :-7s //%{shortfunc} ▶ %{level:.4s} %{id:03x} %{message}
+
+// Log Wiping After Restart (Fix That)
 //      Redo Logging For Subfiles To Use The Features Of The New System
 // TODO: Log File Roation So The Log Files Doesn't Get To Big
 //      Config Options For External Logging Server

@@ -5,22 +5,26 @@
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
 
-package appleMDM
+package appleStruct
 
 import (
+  "github.com/sirupsen/logrus" // Logging
   "github.com/go-pg/pg" // Database (Postgres)
 )
 
+var ( log *logrus.Logger; pgdb *pg.DB )
+func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
+
 ///// Devices Functions /////
-func newDevice(cmd CheckinCommand) Device {
+func NewDevice(cmd CheckinCommand) Device {
   return Device{
     UDID: cmd.UDID,
     DeviceState: 0, //cmd.DeviceState,
     DeviceDetails: DeviceDetails{
-      OSVersion: cmd.auth.OSVersion,
-      BuildVersion: cmd.auth.BuildVersion,
-      ProductName: cmd.auth.ProductName,
-      SerialNumber: cmd.auth.SerialNumber,
+      OSVersion: cmd.Auth.OSVersion,
+      BuildVersion: cmd.Auth.BuildVersion,
+      ProductName: cmd.Auth.ProductName,
+      SerialNumber: cmd.Auth.SerialNumber,
       IMEI: cmd.IMEI,
       MEID: cmd.MEID,
     },
@@ -44,7 +48,7 @@ func newDevice(cmd CheckinCommand) Device {
 
 }*/
 
-func parsePolicy(policy Policy) (string, error) {
+func ParsePolicy(policy Policy) (string, error) {
 
 
 
@@ -143,7 +147,7 @@ if err != nil {
 
 
 
-func getDevices() []Device {
+func GetDevices() []Device {
   var devices []Device
   err := pgdb.Model(&devices).Select()
   if err != nil {
@@ -155,7 +159,7 @@ func getDevices() []Device {
 
 
 
-func editDevice(_device *Device, exists bool) bool {
+func EditDevice(_device *Device, exists bool) bool {
   if _device == nil  {
     log.Debug("editDevice() Parsed A Nil Device")
     return false
@@ -181,7 +185,7 @@ func editDevice(_device *Device, exists bool) bool {
 }
 
 
-func deleteDevice(_device **Device) bool {
+func DeleteDevice(_device **Device) bool {
 
   err := pgdb.Delete(&_device)
 

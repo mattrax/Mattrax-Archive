@@ -5,7 +5,7 @@
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
 
-package appleMDM
+package appleStruct
 
 //TODO:
 //  Track Device Events (When They Enrolled, When They Checkin)
@@ -128,12 +128,12 @@ type CheckinCommand struct {
 	MessageType string // Could Be Authenticate or TokenUpdate or CheckOut
 	Topic       string
 	UDID        string
-	auth
-	update
+	Auth
+	Update
 }
 
 // Authenticate Message Type
-type auth struct {
+type Auth struct {
 	OSVersion    string
 	BuildVersion string
 	ProductName  string
@@ -147,7 +147,7 @@ type auth struct {
 }
 
 // TokenUpdate Mesage Type
-type update struct {
+type Update struct {
 	Token                 []byte
 	PushMagic             string
 	UnlockToken           []byte
