@@ -23,8 +23,7 @@ import (
 	mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
 )
 
-var pgdb = mdb.Database()
-
+var pgdb = mdb.GetDatabase()
 var log *logrus.Logger //; pgdb *pg.DB )
 
 func Init(_log *logrus.Logger) {  log = _log //pgdb = _pgdb; //_pgdb *pg.DB,

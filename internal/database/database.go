@@ -9,6 +9,7 @@ import (
 
 var pgdb *pg.DB
 
+//TODO: Go Doc
 func init() { //Should Only Run Once
   fmt.Println("Ran Database Load")
 
@@ -22,7 +23,7 @@ func init() { //Should Only Run Once
 }
 
 // TODO: Go Doc
-func Database() *pg.DB { return pgdb }
+func GetDatabase() *pg.DB { return pgdb }
 
 
 //Clenaup Handling

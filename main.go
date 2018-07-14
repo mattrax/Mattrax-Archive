@@ -9,40 +9,32 @@ package main
 import (
   "fmt"
   "os"
-  "io/ioutil"
-  //"io"
+  //"io/ioutil"
   "time"
   "context"
 	"net/http"
 	"os/signal"
-  "encoding/json"
+  //"encoding/json"
 
-  "github.com/sirupsen/logrus" // Logging
-  //rotatelogs "github.com/lestrrat-go/file-rotatelogs" // Logging -> Log Rotation
-  "github.com/rifflock/lfshook" // Logging -> Console and File Output With Different Formattings
   "github.com/gorilla/handlers" // HTTP Handlers
 	"github.com/gorilla/mux" // HTTP Router
-  //"github.com/go-pg/pg" // Database (Postgres)
-
-
-
-
-
-
+  // Internal Functions
   mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
-
-
-
+  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
+  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+  // Modules
   "github.com/mattrax/mattrax/appleMDM" // The Apple MDM Module
 	//"github.com/mattrax/mattrax/windowsMDM" // The Windows MDM Module
 )
 
-var pgdb = mdb.Database()
+var pgdb = mdb.GetDatabase()
+var log = mlg.GetLogger()
+var config = mcf.GetConfig()
 
 
 var (
-  config = Config{} // The Configuration ('config.json')
-  log = logrus.New() // The Logger //TODO: Is this Still needed. not Just have it Blank
+  //config = Config{} // The Configuration ('config.json')
+  //log = logrus.New() // The Logger //TODO: Is this Still needed. not Just have it Blank
   //pgdb *pg.DB // The Database
   srv *http.Server // The Webserver
 )
@@ -50,21 +42,21 @@ var (
 // This Function Loads/Creates The Config, Connects To The Database, Mounts The Webserver Routes And Starts The Webserver. It Also Handles Clean Of These Things On Exit
 func main() {
   // Load/Create The Configuration
-  if configFile, err := os.Open("config.json"); os.IsNotExist(err) {
+  /*if configFile, err := os.Open("config.json"); os.IsNotExist(err) {
     json, err := json.MarshalIndent(newConfig(), "", "  ")
-    if err != nil { logrus.Fatal("Error Generating The Config File:", err) }
-    if err := ioutil.WriteFile("config.json", json, 0644); err != nil { logrus.Fatal("Error Saving The New Config File To './config.json'") }
-    logrus.Warning("A New Config Was Created. Please Populate The Correct Information Before Starting Mattrax Again.")
+    if err != nil { log.Fatal("Error Generating The Config File:", err) }
+    if err := ioutil.WriteFile("config.json", json, 0644); err != nil { log.Fatal("Error Saving The New Config File To './config.json'") }
+    log.Warning("A New Config Was Created. Please Populate The Correct Information Before Starting Mattrax Again.")
     return
   } else if err != nil {
-    logrus.Fatal("Error Loading The Config File:", err)
+    log.Fatal("Error Loading The Config File:", err)
   } else {
-    if err := json.NewDecoder(configFile).Decode(&config); err != nil { logrus.Fatal("Error Parsing The Config File:", err) }
-  }
+    if err := json.NewDecoder(configFile).Decode(&config); err != nil { log.Fatal("Error Parsing The Config File:", err) }
+  }*/
   //FIXME: Optional Values In The Config
 
   //Logging (File and Console Output)
-  log.Formatter = &logrus.TextFormatter{
+  /*log.Formatter = &logrus.TextFormatter{
       DisableColors: false,
       TimestampFormat : "02/01/06 15:04:05",
       FullTimestamp:true,
@@ -72,7 +64,7 @@ func main() {
 	log.Hooks.Add(lfshook.NewHook(
 		config.LogFile, //TODO: Append Data/Data+Number For Rolling Log Files Between Restarts
 		&logrus.JSONFormatter{},
-	))
+	))*/
 
   //Database
   /*if options, err := pg.ParseURL(config.Database); err != nil { log.Fatal(err) } else {
@@ -109,7 +101,7 @@ func main() {
 }
 
 /* Local Configuration */
-func newConfig() Config {
+/*func newConfig() Config {
   return Config{
     Name: "Acme Inc",
     Domain: "mdm.acme.com",
@@ -127,7 +119,7 @@ type Config struct {
   LogFile string `json:"logFile"`
   Port int `json:"port"`
   Database string `json:"database"`
-}
+}*/
 
 /* Database Initialisation */ //FIXME: Make This Entire Section Work
 func correctSchema() bool {
@@ -184,6 +176,8 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 //Now
 // FUTURE FEATURE: Redo Separator Between Blocks Of Function -> They Don't Stand Out Enought
 // TODO: Contant Pinging Database To Stop HTTP Soon As It Stops Connecting
+
+// FIXME: Handle Device Removing From MDM Without Being In The Database
 
 // Log Wiping After Restart (Fix That)
 //      Redo Logging For Subfiles To Use The Features Of The New System
