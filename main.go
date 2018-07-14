@@ -10,17 +10,28 @@ import (
   "fmt"
   "os"
   "io/ioutil"
-  "io"
+  //"io"
   "time"
   "context"
 	"net/http"
 	"os/signal"
   "encoding/json"
 
-  "github.com/Sirupsen/logrus" // Logging
+  "github.com/sirupsen/logrus" // Logging
+  //rotatelogs "github.com/lestrrat-go/file-rotatelogs" // Logging -> Log Rotation
+  "github.com/rifflock/lfshook" // Logging -> Console and File Output With Different Formattings
   "github.com/gorilla/handlers" // HTTP Handlers
 	"github.com/gorilla/mux" // HTTP Router
   "github.com/go-pg/pg" // Database (Postgres)
+
+
+
+
+
+
+
+
+
 
   "github.com/mattrax/mattrax/appleMDM" // The Apple MDM Module
 	//"github.com/mattrax/mattrax/windowsMDM" // The Windows MDM Module
@@ -28,12 +39,12 @@ import (
 
 var (
   config = Config{} // The Configuration ('config.json')
-  log = logrus.New() // The Logger
+  log = logrus.New() // The Logger //TODO: Is this Still needed. not Just have it Blank
   pgdb *pg.DB // The Database
   srv *http.Server // The Webserver
 )
 
-// TODO Docs
+// This Function Loads/Creates The Config, Connects To The Database, Mounts The Webserver Routes And Starts The Webserver. It Also Handles Clean Of These Things On Exit
 func main() {
   // Load/Create The Configuration
   if configFile, err := os.Open("config.json"); os.IsNotExist(err) {
@@ -47,15 +58,18 @@ func main() {
   } else {
     if err := json.NewDecoder(configFile).Decode(&config); err != nil { logrus.Fatal("Error Parsing The Config File:", err) }
   }
-  //TODO: Optional Values In The Config
+  //FIXME: Optional Values In The Config
 
   //Logging (File and Console Output)
-  logFile, logError := os.OpenFile(config.LogFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666);
-  if logError != nil { log.Fatal("Error Loading Log File", logError) }
-  log.SetOutput(io.MultiWriter(logFile, os.Stdout))
-  if config.Verbose { log.Level = logrus.DebugLevel }
-  log.Info("Started The Mattrax Daemon...")
-  //TODO: Custom Format For Console (File Is Good Now). Colored Logging Format For Warning
+  log.Formatter = &logrus.TextFormatter{
+      DisableColors: false,
+      TimestampFormat : "02/01/06 15:04:05",
+      FullTimestamp:true,
+  }
+	log.Hooks.Add(lfshook.NewHook(
+		config.LogFile, //TODO: Append Data/Data+Number For Rolling Log Files Between Restarts
+		&logrus.JSONFormatter{},
+	))
 
   //Database
   if options, err := pg.ParseURL(config.Database); err != nil { log.Fatal(err) } else {
@@ -112,7 +126,7 @@ type Config struct {
   Database string `json:"database"`
 }
 
-/* Database Initialisation */ //TODO: Make This Entire Section Work
+/* Database Initialisation */ //FIXME: Make This Entire Section Work
 func correctSchema() bool {
   if _, err := pgdb.Exec("SELECT * FROM devices"); err != nil {
     //Find Out If Error Was Database Table If Not Log Fatal
@@ -135,7 +149,7 @@ func startWebserver(router *mux.Router) {
   }
 
 	srv = &http.Server{
-		Addr:         fmt.Sprintf("%v:%v", "0.0.0.0", config.Port), //TODO Configurable Listen IP
+		Addr:         fmt.Sprintf("%v:%v", "0.0.0.0", config.Port), //FIXME Configurable Listen IP (Optional)
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
@@ -165,14 +179,17 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 
 /* The End */
 //Now
-// TODO: Redo Separator Between Blocks Of Function -> They Don't Stand Out Enought
+// FUTURE FEATURE: Redo Separator Between Blocks Of Function -> They Don't Stand Out Enought
 // TODO: Contant Pinging Database To Stop HTTP Soon As It Stops Connecting
 // TODO: Better Log Formatting For Console (Including Color) //var format = logging.MustStringFormatter(`%{color}[%{level}]%{color:reset} %{time:15:04:05} ▶ %{message}`) // :-7s //%{shortfunc} ▶ %{level:.4s} %{id:03x} %{message}
 //      Redo Logging For Subfiles To Use The Features Of The New System
 // TODO: Log File Roation So The Log Files Doesn't Get To Big
 //      Config Options For External Logging Server
+// TODO: Godoc Documentation Throughout Code
+// TODO: GoDEP Package Management
+// TODO: Check Line Ending for ; and Remove (Maybe Add Test To Check For Them)
 
 //Far In The Future
-// TODO: HTTPS And HTTP Support With Automatic Redirection Between
+// IDEA: HTTPS And HTTP Support With Automatic Redirection Between
 //      Certbot ACME Built In For Automaticly Issuing And Renewing Cert
-// TODO: Built In IP Whitelist For Access To The Admin Area
+// IDEA: Built In IP Whitelist For Access To The Admin Area

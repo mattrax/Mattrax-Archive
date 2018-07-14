@@ -10,19 +10,12 @@ import (
   "github.com/go-pg/pg"
 )
 
-//TODO: Redo This File. It Is A Mess And Uses Sketchy Code
+//FIXME: Redo This File. It Is A Mess And Uses Sketchy Code
 
-/*
-type pgError struct {
-  // Code Line The Error Occured On/Was Created From
-  message string
-}
 
-func NewPG(_msg string) error {
-    return &pgError{
-      message: _msg,
-    }
-}*/
+
+
+
 
 func New(_msg string) error {
     return &internalError{
