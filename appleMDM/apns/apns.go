@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Descripton: This is the Code For Interfacing with APNS.
+ * File Description: This is the Code For Interfacing with APNS.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */

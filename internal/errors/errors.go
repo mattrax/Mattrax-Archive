@@ -30,7 +30,7 @@ func New(_msg string) error {
 }
 
 type internalError struct {
-	// Code Line The Error Occured On/Was Created From
+	// Code Line The Error Occurred On/Was Created From
 	errorCode int
 	message   string
 	fatal     bool //Should App Kill Everything
@@ -97,7 +97,7 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	http.Error(w, "An Error Occured", returnStatus)
+	http.Error(w, "An Error Occurred", returnStatus)
 
 	//Is It A Database Error
 	//Is It An Internal Error
@@ -114,7 +114,7 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	/*if returnStatus, err = fn(w, r); err != nil {
 	  log.Println("HTTPS Error", err.Error())
-	  http.Error(w, "A Server Side Error Occured", 500)
+	  http.Error(w, "A Server Side Error Occurred", 500)
 	}*/
 
 	//log.Println(pg.Error)
@@ -136,7 +136,7 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//    etc
 
 	//log.Println(returnStatus) //Return This HTTP Code
-	//http.Error(w, "A Server Side Error Occured", 200)
+	//http.Error(w, "A Server Side Error Occurred", 200)
 }
 
 //Handle Logging From Here. Custom Formatting Functions Probally

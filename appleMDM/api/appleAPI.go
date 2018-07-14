@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Descripton: This is the REST API For The Apple MDM Server. This Is Used By The Web Interface To Interface With The Backend.
+ * File Description: This is the REST API For The Apple MDM Server. This Is Used By The Web Interface To Interface With The Backend.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */

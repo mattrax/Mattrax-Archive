@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Descripton: This is The Core. It Loads The Database, Logging and The Webserver Components.
+ * File Description: This is The Core. It Loads The Database, Logging and The Webserver Components.
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
 
@@ -50,7 +50,7 @@ func main() {
 	go func() { startWebserver(router) }()
 	log.Info("The Mattrax Webserver Is Listening At " + fmt.Sprintf("%v:%v", "0.0.0.0", config.Port))
 
-	//Wait Untill Shutting Down
+	//Wait Until Shutting Down
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
@@ -146,6 +146,7 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 //	The /server Route
 
 // Does os.Exit(int) Run The Cleanup Functions If Not make it
+// For Test, Test "gofmt -s -w ." And Break If It Does't Parse 100%
 // FUTURE FEATURE: Redo Separator Between Blocks Of Function -> They Don't Stand Out Enought
 // TODO: Contant Pinging Database To Stop HTTP Soon As It Stops Connecting
 
@@ -169,7 +170,7 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 
 //Far In The Future
 //   Build Tests -> For All Function And Routes (Fake Device Requests/Response Verifying)
-//	 Optimisng Preformance
+//	 Optimisng Performance
 // IDEA: HTTPS And HTTP Support With Automatic Redirection Between
-//      Certbot ACME Built In For Automaticly Issuing And Renewing Cert
+//      Certbot ACME Built In For Automatically Issuing And Renewing Cert
 // IDEA: Built In IP Whitelist For Access To The Admin Area

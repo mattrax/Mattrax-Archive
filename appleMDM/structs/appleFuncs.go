@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Descripton: This is A File Of Function To Do Repeatable Actions With The Stucts.
+ * File Description: This is A File Of Function To Do Repeatable Actions With The Stucts.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */

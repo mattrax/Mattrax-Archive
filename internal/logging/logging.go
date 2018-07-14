@@ -2,7 +2,7 @@ package logging
 
 import (
 	// External Deps
-	"github.com/rifflock/lfshook" // Controlling Outputs And Thier Formatting
+	"github.com/rifflock/lfshook" // Controlling Outputs And Their Formatting
 	"github.com/sirupsen/logrus"  // Logging
 
 	// Internal Functions

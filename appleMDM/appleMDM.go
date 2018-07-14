@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Descripton: This is The Apple MDM Core. It Manages The Webserver Routes and APNS for Apples MDM.
+ * File Description: This is The Apple MDM Core. It Manages The Webserver Routes and APNS for Apples MDM.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
@@ -88,7 +88,7 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 		}
 	} else if cmd.MessageType == "TokenUpdate" {
 		if cmd.Update.Token == nil && cmd.Update.PushMagic == "" && cmd.Update.UnlockToken == nil && (cmd.Update.AwaitingConfiguration == true || cmd.Update.AwaitingConfiguration == false) {
-			return 403, errors.New("The Request To 'TokenUpdate' From The Device Is Malformed Or Thier Device Is Pre IOS 9 or Is Missing The Device Information Permission In The Profile")
+			return 403, errors.New("The Request To 'TokenUpdate' From The Device Is Malformed Or Their Device Is Pre IOS 9 or Is Missing The Device Information Permission In The Profile")
 		} else if device.DeviceState == 0 {
 			return 403, errors.New("A Device Tried To Do A TokenUpdate Without Having Enrolled Via A 'Authenticate' Request")
 		} else if device.DeviceState == 1 {

@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Descripton: This is The Apple MDM Structs. These Are The Go Structs For Database Communication and Plist Generation.
+ * File Description: This is The Apple MDM Structs. These Are The Go Structs For Database Communication and Plist Generation.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
