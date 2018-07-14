@@ -9,19 +9,14 @@ package appleMDM
 
 import (
 	"fmt" //// TODO: Eliminate This (Only Used Once)
-  //"io/ioutil"
   "net/http"
-  //"os"
-	//"errors"
 
-  //"github.com/op/go-logging" // Logging
+  "github.com/Sirupsen/logrus" // Logging
 	"github.com/gorilla/mux" // HTTP Router
   "github.com/go-pg/pg" // Database (Postgres)
-	ierror "../utils/errors" // Internal Error Handling (TODO: Chnage Name From ierror)
+	"github.com/groob/plist" //Plist Parsing
 
-	"github.com/Sirupsen/logrus"
-
-	"github.com/groob/plist"
+	ierror "github.com/mattrax/mattrax/utils/errors" // Internal Error Handling (TODO: Chnage Name From ierror)
 )
 
 var (

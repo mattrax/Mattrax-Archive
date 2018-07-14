@@ -85,6 +85,13 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
   if returnStatus == 200 { return }
   if err == nil { return }
 
+  /*
+  log.WithFields(logrus.Fields{
+    "animal": "walrus",
+    "size":   10,
+  }).Info("A group of walrus emerges from the ocean")
+  */
+
   switch err.(type) {
     case *internalError:
       log.Println(err)

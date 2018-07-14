@@ -1,12 +1,8 @@
 {
-  "name": "Oscar's Academy",
+  "name": "Oscar's MDM",
+  "domain": "mdm.otbeaumont.me",
   "verbose": true,
   "logFile": "data/log.txt",
   "port": 8000,
-  "database": {
-    "username": "oscar.beaumont",
-    "password": "",
-    "host": "",
-    "port": ""
-  }
+  "database": "postgres://oscar.beaumont:@localhost/mattrax?sslmode=disable"
 }
