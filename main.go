@@ -72,6 +72,7 @@ func main() {
   router := mux.NewRouter()
   r := router.Host(config.Domain).Subrouter()
   r.HandleFunc("/", indexHandler).Methods("GET")
+  r.HandleFunc("/enroll", enrollmentHandler).Methods("GET")
   appleMDM.Mount(r.PathPrefix("/apple/").Subrouter())
 
   //Start The Webserver (In The Background)
@@ -155,6 +156,12 @@ func verboseRequestLogger(handler http.Handler) http.Handler {
 func indexHandler(w http.ResponseWriter, r *http.Request) {
 	fmt.Fprintf(w, "Mattrax MDM Server!")
 }
+
+func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
+  //TODO: This Will Show Interface To Guide User Through Enrollment
+  http.Redirect(w, r, "/apple/enroll", 301)
+}
+
 
 /* The End */
 //Now
