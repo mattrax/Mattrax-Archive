@@ -8,35 +8,31 @@
 package appleAPI
 
 import (
-  "fmt"
-  "net/http"
+	"fmt"
+	"net/http"
 
-  // External Deps
-  "github.com/gorilla/mux" // HTTP Router
-  "github.com/mattrax/mattrax/appleMDM/apns" // Apple Push Notification Service
+	// External Deps
+	"github.com/gorilla/mux"                   // HTTP Router
+	"github.com/mattrax/mattrax/appleMDM/apns" // Apple Push Notification Service
 
-  // Internal Functions
-  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
-  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
-  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	// Internal Functions
+	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	mdb "github.com/mattrax/mattrax/internal/database"      //Mattrax Database
+	mlg "github.com/mattrax/mattrax/internal/logging"       //Mattrax Logging
 
-  // Internal Modules
-  structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	// Internal Modules
+	structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
-var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
+var pgdb = mdb.GetDatabase()
+var log = mlg.GetLogger()
+var config = mcf.GetConfig() // Get The Internal State
 
 /* API Endpoints */
 
 func Mount(r *mux.Router) {
-  r.HandleFunc("/apns", pingApnsHandler).Methods("GET")
+	r.HandleFunc("/apns", pingApnsHandler).Methods("GET")
 }
-
-
-
-
-
-
 
 func pingApnsHandler(w http.ResponseWriter, r *http.Request) { // TEMP: This And APNS Handling Needs Redoing
 	devices := structs.GetDevices()
@@ -48,16 +44,16 @@ func pingApnsHandler(w http.ResponseWriter, r *http.Request) { // TEMP: This And
 		return
 	}
 
-  for _, device := range devices {
-    log.Debug("APNS Update Sent To Device " + device.UDID)
+	for _, device := range devices {
+		log.Debug("APNS Update Sent To Device " + device.UDID)
 		status := apns.DeviceUpdate(device)
 
 		if !status {
-	    w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "Error Sending APNS Update To The Device: " + device.UDID)
-	    return
-	  }
-  }
+			w.WriteHeader(http.StatusBadRequest)
+			fmt.Fprintf(w, "Error Sending APNS Update To The Device: "+device.UDID)
+			return
+		}
+	}
 
-  fmt.Fprintf(w, "All Devices Have Been Told To Update")
+	fmt.Fprintf(w, "All Devices Have Been Told To Update")
 }

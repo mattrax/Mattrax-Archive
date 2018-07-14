@@ -8,43 +8,41 @@
 package appleStruct
 
 import (
-  //External Deps
-  "github.com/go-pg/pg" // Database (Postgres)
+	//External Deps
+	"github.com/go-pg/pg" // Database (Postgres)
 
-  // Internal Functions
-  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
-  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
+	// Internal Functions
+	mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
+	mlg "github.com/mattrax/mattrax/internal/logging"  //Mattrax Logging
 )
 
-var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger() // Get The Internal State
+var pgdb = mdb.GetDatabase()
+var log = mlg.GetLogger() // Get The Internal State
 
 ///// Devices Functions /////
 func NewDevice(cmd CheckinCommand) Device {
-  return Device{
-    UDID: cmd.UDID,
-    DeviceState: 0, //cmd.DeviceState,
-    DeviceDetails: DeviceDetails{
-      OSVersion: cmd.Auth.OSVersion,
-      BuildVersion: cmd.Auth.BuildVersion,
-      ProductName: cmd.Auth.ProductName,
-      SerialNumber: cmd.Auth.SerialNumber,
-      IMEI: cmd.IMEI,
-      MEID: cmd.MEID,
-    },
-    DeviceTokens: DeviceTokens{
-      Token: []byte{},
-      PushMagic: "",
-      UnlockToken: []byte{},
-    },
-    DevicePolicies: DevicePolicies{
-      Queued: []string{},
-      Installed: []string{},
-    },
-  }
+	return Device{
+		UDID:        cmd.UDID,
+		DeviceState: 0, //cmd.DeviceState,
+		DeviceDetails: DeviceDetails{
+			OSVersion:    cmd.Auth.OSVersion,
+			BuildVersion: cmd.Auth.BuildVersion,
+			ProductName:  cmd.Auth.ProductName,
+			SerialNumber: cmd.Auth.SerialNumber,
+			IMEI:         cmd.IMEI,
+			MEID:         cmd.MEID,
+		},
+		DeviceTokens: DeviceTokens{
+			Token:       []byte{},
+			PushMagic:   "",
+			UnlockToken: []byte{},
+		},
+		DevicePolicies: DevicePolicies{
+			Queued:    []string{},
+			Installed: []string{},
+		},
+	}
 }
-
-
-
 
 ///// Policies Functions /////
 /*func getPolicy(uuid string) {
@@ -53,16 +51,9 @@ func NewDevice(cmd CheckinCommand) Device {
 
 func ParsePolicy(policy Policy) (string, error) {
 
-
-
-
-
-
-
-  // Returns The XML Output After Parsing The Inputted Policy
-  return "hello world", nil
+	// Returns The XML Output After Parsing The Inputted Policy
+	return "hello world", nil
 }
-
 
 //TODO: Redo Error Hanling For This File. eg. Use: "err != nil && ierror.PgError(err) { return 403, err }"
 //TODO: Keep This Line For Later: if err := pgdb.Delete(&device); err != nil && ierror.PgError(err) { return 405, err }
@@ -99,26 +90,7 @@ if policy.Config.PolicyType == "InstallApplication" {
 
 /* End */
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 // getDevice()
-
 
 /*func getDevice(_UDID string) (Device, error) {
   var device Device
@@ -140,84 +112,68 @@ if err != nil {
   return nil
 }*/
 
-
-
-
-
-
-
-
-
-
-
 func GetDevices() []Device {
-  var devices []Device
-  err := pgdb.Model(&devices).Select()
-  if err != nil {
+	var devices []Device
+	err := pgdb.Model(&devices).Select()
+	if err != nil {
 		log.Error(err)
 		return []Device{}
 	}
-  return devices
+	return devices
 }
-
-
 
 func EditDevice(_device *Device, exists bool) bool {
-  if _device == nil  {
-    log.Debug("editDevice() Parsed A Nil Device")
-    return false
-  }
-  var err error
-  if exists {
-    err = pgdb.Update(_device)
-  } else {
-    //Create New
-    _, err = pgdb.Model(_device).
-      Set("uuid = ?", _device.UDID).
-      Insert()
-  }
+	if _device == nil {
+		log.Debug("editDevice() Parsed A Nil Device")
+		return false
+	}
+	var err error
+	if exists {
+		err = pgdb.Update(_device)
+	} else {
+		//Create New
+		_, err = pgdb.Model(_device).
+			Set("uuid = ?", _device.UDID).
+			Insert()
+	}
 
-  if err != nil {
-    if err != pg.ErrNoRows && err != pg.ErrMultiRows {
-      log.Warning("Postgres Error (Exists: ", exists, "): ", err);
-       //TODO: Try Database Request Again Here
-    }
-    return false
-  }
-  return true
+	if err != nil {
+		if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+			log.Warning("Postgres Error (Exists: ", exists, "): ", err)
+			//TODO: Try Database Request Again Here
+		}
+		return false
+	}
+	return true
 }
-
 
 func DeleteDevice(_device **Device) bool {
 
-  err := pgdb.Delete(&_device)
+	err := pgdb.Delete(&_device)
 
-  //Eror Handle nil _device
+	//Eror Handle nil _device
 
-  //err := pgdb.Delete(&_device)
+	//err := pgdb.Delete(&_device)
 
+	/*out, err := pgdb.
+	  Model(Device{
+	    UDID: _device.UDID,
+	  }).
+	  //Where("uuid = ?", _device.UDID).
+	  //Select().
+	  //Set("uuid = ?", _device.UDID).
+	  //Select().
+	  Delete() //*_device
 
+	log.Debug(out)*/
 
-
-  /*out, err := pgdb.
-    Model(Device{
-      UDID: _device.UDID,
-    }).
-    //Where("uuid = ?", _device.UDID).
-    //Select().
-    //Set("uuid = ?", _device.UDID).
-    //Select().
-    Delete() //*_device
-
-  log.Debug(out)*/
-
-  if err != nil {
-    if err != pg.ErrNoRows && err != pg.ErrMultiRows {
-      log.Warning("Postgres Error: ", err);
-       return false
-    } else {
-      return true
-    }
-  }
-  return true
+	if err != nil {
+		if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+			log.Warning("Postgres Error: ", err)
+			return false
+		} else {
+			return true
+		}
+	}
+	return true
 }

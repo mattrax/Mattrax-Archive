@@ -7,57 +7,61 @@
 package main
 
 import (
-  "fmt"
-  "os"
-  "time"
-  "context"
+	"context"
+	"fmt"
 	"net/http"
+	"os"
 	"os/signal"
+	"time"
 
-  // External Deps
-  "github.com/gorilla/handlers" // HTTP Handlers
-	"github.com/gorilla/mux" // HTTP Router
+	// External Deps
+	"github.com/gorilla/handlers" // HTTP Handlers
+	"github.com/gorilla/mux"      // HTTP Router
 
-  // Internal Functions
-  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
-  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
-  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	// Internal Functions
+	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	mdb "github.com/mattrax/mattrax/internal/database"      //Mattrax Database
+	mlg "github.com/mattrax/mattrax/internal/logging"       //Mattrax Logging
 
-  // Internal Modules
-  "github.com/mattrax/mattrax/appleMDM" // The Apple MDM Module
+	// Internal Modules
+	"github.com/mattrax/mattrax/appleMDM" // The Apple MDM Module
 	//"github.com/mattrax/mattrax/windowsMDM" // The Windows MDM Module
 )
 
-var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
-var srv *http.Server // The Webserver
+var pgdb = mdb.GetDatabase()
+var log = mlg.GetLogger()
+var config = mcf.GetConfig() // Get The Internal State
+var srv *http.Server         // The Webserver
 
 // This Function Handles The Webserver And Cleanup When Exitting The Application
 func main() {
-  //Load The Modules
-  appleMDM.Init()
-  //windowsMDM.Init()
+	//Load The Modules
+	appleMDM.Init()
+	//windowsMDM.Init()
 
-  //Webserver Routes
-  router := mux.NewRouter()
-  r := router.Host(config.Domain).Subrouter()
-  r.HandleFunc("/", indexHandler).Methods("GET")
-  r.HandleFunc("/enroll", enrollmentHandler).Methods("GET")
-  appleMDM.Mount(r.PathPrefix("/apple/").Subrouter())
+	//Webserver Routes
+	router := mux.NewRouter()
+	r := router.Host(config.Domain).Subrouter()
+	r.HandleFunc("/", indexHandler).Methods("GET")
+	r.HandleFunc("/enroll", enrollmentHandler).Methods("GET")
+	appleMDM.Mount(r.PathPrefix("/apple/").Subrouter())
 
-  //Start The Webserver (In The Background)
-  go func() { startWebserver(router) }()
-  log.Info("The Mattrax Webserver Is Listening At " + fmt.Sprintf("%v:%v", "0.0.0.0", config.Port))
+	//Start The Webserver (In The Background)
+	go func() { startWebserver(router) }()
+	log.Info("The Mattrax Webserver Is Listening At " + fmt.Sprintf("%v:%v", "0.0.0.0", config.Port))
 
-  //Wait Untill Shutting Down
+	//Wait Untill Shutting Down
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c
 
-  //Cleanup
-  log.Info("Mattrax is Shutting Down...")
-  mdb.Cleanup() //Shutdown The Database
-  ctx, cancel := context.WithTimeout(context.Background(), time.Second*15); defer cancel(); srv.Shutdown(ctx) // Shutdown The Webserver
-	os.Exit(0) //Exit Successfully
+	//Cleanup
+	log.Info("Mattrax is Shutting Down...")
+	mdb.Cleanup() //Shutdown The Database
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+	srv.Shutdown(ctx) // Shutdown The Webserver
+	os.Exit(0)        //Exit Successfully
 }
 
 /* Local Configuration */
@@ -83,25 +87,25 @@ type Config struct {
 
 /* Database Initialisation */ //FIXME: Make This Entire Section Work
 func correctSchema() bool {
-  if _, err := pgdb.Exec("SELECT * FROM devices"); err != nil {
-    //Find Out If Error Was Database Table If Not Log Fatal
-    return false
-  }
-  return true
+	if _, err := pgdb.Exec("SELECT * FROM devices"); err != nil {
+		//Find Out If Error Was Database Table If Not Log Fatal
+		return false
+	}
+	return true
 }
 
 func initDatabaseSchema() {
-  panic("This will create the database schema")
+	panic("This will create the database schema")
 }
 
 /* The Webserver */
 func startWebserver(router *mux.Router) {
-  var handler http.Handler
-  if config.Verbose {
-    handler = verboseRequestLogger(handlers.CORS()(router))
-  } else {
-    handler = handlers.CORS()(router)
-  }
+	var handler http.Handler
+	if config.Verbose {
+		handler = verboseRequestLogger(handlers.CORS()(router))
+	} else {
+		handler = handlers.CORS()(router)
+	}
 
 	srv = &http.Server{
 		Addr:         fmt.Sprintf("%v:%v", "0.0.0.0", config.Port), //FIXME Configurable Listen IP (Optional)
@@ -111,12 +115,14 @@ func startWebserver(router *mux.Router) {
 		Handler:      handler,
 	}
 
-	if err := srv.ListenAndServe(); err != nil { log.Fatal(err) }
+	if err := srv.ListenAndServe(); err != nil {
+		log.Fatal(err)
+	}
 }
 
 func verboseRequestLogger(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    log.Debug("Request: " + r.RemoteAddr + " " + r.Method + " " + r.URL.String())
+		log.Debug("Request: " + r.RemoteAddr + " " + r.Method + " " + r.URL.String())
 		handler.ServeHTTP(w, r)
 	})
 }
@@ -127,10 +133,9 @@ func indexHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
-  //TODO: This Will Show Interface To Guide User Through Enrollment
-  http.Redirect(w, r, "/apple/enroll", 301)
+	//TODO: This Will Show Interface To Guide User Through Enrollment
+	http.Redirect(w, r, "/apple/enroll", 301)
 }
-
 
 /* The End */
 //Now
@@ -139,7 +144,6 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 //	Clean The errorHandling Package + Chnage Import Name (utils)
 //	Clean/Redo The main.go File
 //	The /server Route
-
 
 // Does os.Exit(int) Run The Cleanup Functions If Not make it
 // FUTURE FEATURE: Redo Separator Between Blocks Of Function -> They Don't Stand Out Enought

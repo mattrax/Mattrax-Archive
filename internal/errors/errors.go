@@ -1,73 +1,52 @@
 package errorHandling
 
 import (
-  "net/http"
-  "strings"
+	"net/http"
+	"strings"
 
-  // External Deps
+	// External Deps
 	"github.com/go-pg/pg" // Database (Postgres)
 
-  // Internal Functions
-  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
-  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
-  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	// Internal Functions
+	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	mdb "github.com/mattrax/mattrax/internal/database"      //Mattrax Database
+	mlg "github.com/mattrax/mattrax/internal/logging"       //Mattrax Logging
 )
 
-var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
+var pgdb = mdb.GetDatabase()
+var log = mlg.GetLogger()
+var config = mcf.GetConfig() // Get The Internal State
 //var ( log *logrus.Logger; pgdb *pg.DB )
 //func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
 
-
-
-
 //FIXME: Redo This File. It Is A Mess And Uses Sketchy Code
 
-
-
-
-
-
 func New(_msg string) error {
-    return &internalError{
-      errorCode: 0,
-      message: "Internal Error: " + _msg,
-      fatal: false,
-    }
+	return &internalError{
+		errorCode: 0,
+		message:   "Internal Error: " + _msg,
+		fatal:     false,
+	}
 }
 
 type internalError struct {
-  // Code Line The Error Occured On/Was Created From
-  errorCode int
-  message string
-  fatal bool //Should App Kill Everything
+	// Code Line The Error Occured On/Was Created From
+	errorCode int
+	message   string
+	fatal     bool //Should App Kill Everything
 }
 
 func (e *internalError) Error() string { //TODO: Understand This
-    return e.message
+	return e.message
 }
-
-
-
-
-
-
-
-
-
 
 func PgError(_err error) bool {
-  if _err == pg.ErrNoRows || _err == pg.ErrMultiRows {
-    return false
-  } else {
-    return true
-  }
+	if _err == pg.ErrNoRows || _err == pg.ErrMultiRows {
+		return false
+	} else {
+		return true
+	}
 }
-
-
-
-
-
-
 
 /*
 type ErrorPG struct {
@@ -83,84 +62,81 @@ func (err ErrorPG) Error() string {
 type Handler func(http.ResponseWriter, *http.Request) (int, error)
 
 func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-  returnStatus, err := fn(w, r) //returnStatus    // TODO HERE Inject: pgdb *pg.DB
+	returnStatus, err := fn(w, r) //returnStatus    // TODO HERE Inject: pgdb *pg.DB
 
-  if returnStatus == 200 { return }
-  if err == nil { return }
+	if returnStatus == 200 {
+		return
+	}
+	if err == nil {
+		return
+	}
 
-  /*
-  log.WithFields(logrus.Fields{
-    "animal": "walrus",
-    "size":   10,
-  }).Info("A group of walrus emerges from the ocean")
-  */
+	/*
+	  log.WithFields(logrus.Fields{
+	    "animal": "walrus",
+	    "size":   10,
+	  }).Info("A group of walrus emerges from the ocean")
+	*/
 
-  switch err.(type) {
-    case *internalError:
-      log.Println(err)
-    default:
-      errorTXT := err.Error()
+	switch err.(type) {
+	case *internalError:
+		log.Println(err)
+	default:
+		errorTXT := err.Error()
 
+		if strings.HasPrefix(errorTXT, "pg:") { //TODO: This Needs To Go
+			if err == pg.ErrNoRows || err == pg.ErrMultiRows {
+				log.Debug("Blank PG Database")
+				//} else if strings.HasPrefix(errorTXT, "pg: Model(non-pointer") { //TODO: This Need To Go Even More. IT IS BAD CODE!!
+				//  log.Println("Entry Already Exists")
+			} else {
+				log.Println(err)
+			}
+		} else {
+			log.Println("External Error: ", err)
+		}
+	}
 
+	http.Error(w, "An Error Occured", returnStatus)
 
-      if strings.HasPrefix(errorTXT, "pg:") { //TODO: This Needs To Go
-        if err == pg.ErrNoRows || err == pg.ErrMultiRows {
-          log.Debug("Blank PG Database")
-        //} else if strings.HasPrefix(errorTXT, "pg: Model(non-pointer") { //TODO: This Need To Go Even More. IT IS BAD CODE!!
-        //  log.Println("Entry Already Exists")
-        } else {
-          log.Println(err)
-        }
-      } else {
-        log.Println("External Error: ", err)
-      }
-  }
+	//Is It A Database Error
+	//Is It An Internal Error
+	//Else
 
-  http.Error(w, "An Error Occured", returnStatus)
+	//Handle Different Postgress Errors With Logging And Make Outright Failing And Make Everything Return Error
 
+	/*if err != pg.ErrNoRows && err != pg.ErrMultiRows {
+	  log.Warning("Postgres Error: ", err);
+	   //TODO: Try Database Request Again Here
+	}*/
 
-  //Is It A Database Error
-  //Is It An Internal Error
-  //Else
+	// If http.StatusNotFound is True Then Show Custom Error Page
 
-  //Handle Different Postgress Errors With Logging And Make Outright Failing And Make Everything Return Error
+	/*if returnStatus, err = fn(w, r); err != nil {
+	  log.Println("HTTPS Error", err.Error())
+	  http.Error(w, "A Server Side Error Occured", 500)
+	}*/
 
-  /*if err != pg.ErrNoRows && err != pg.ErrMultiRows {
-    log.Warning("Postgres Error: ", err);
-     //TODO: Try Database Request Again Here
-  }*/
+	//log.Println(pg.Error)
+	//log.Println(err.isNetworkError())
 
-  // If http.StatusNotFound is True Then Show Custom Error Page
+	//_, ok := err.(net.Error)
+	//log.Println(ok)
 
-  /*if returnStatus, err = fn(w, r); err != nil {
-    log.Println("HTTPS Error", err.Error())
-    http.Error(w, "A Server Side Error Occured", 500)
-  }*/
+	/*if _, ok := err.(ErrorPG); !ok {
+	    log.Println("PG Error")
+	}*/
 
-  //log.Println(pg.Error)
-  //log.Println(err.isNetworkError())
+	// plist Parser Error
+	//    Error
+	//    Parsing/Encoding Failed
+	// Daatabse Errors
+	//    Network
+	//    Breaking Ingrity Checks
+	//    etc
 
-  //_, ok := err.(net.Error)
-  //log.Println(ok)
-
-
-
-
-  /*if _, ok := err.(ErrorPG); !ok {
-      log.Println("PG Error")
-  }*/
-
-
-  // plist Parser Error
-  //    Error
-  //    Parsing/Encoding Failed
-  // Daatabse Errors
-  //    Network
-  //    Breaking Ingrity Checks
-  //    etc
-
-  //log.Println(returnStatus) //Return This HTTP Code
-  //http.Error(w, "A Server Side Error Occured", 200)
+	//log.Println(returnStatus) //Return This HTTP Code
+	//http.Error(w, "A Server Side Error Occured", 200)
 }
 
 //Handle Logging From Here. Custom Formatting Functions Probally

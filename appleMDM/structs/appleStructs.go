@@ -9,61 +9,57 @@ package appleStruct
 
 ///// Device Model /////
 type Device struct {
-  TableName struct{} `sql:"devices"`
-  UDID string `sql:"uuid,pk"`
-  DeviceState int `sql:"DeviceState,notnull"`
-  DeviceDetails DeviceDetails `sql:"DeviceDetails,notnull"`
-  DeviceTokens DeviceTokens `sql:"DeviceTokens,notnull"`
-  DevicePolicies DevicePolicies `sql:"DevicePolicies,notnull"`
+	TableName      struct{}       `sql:"devices"`
+	UDID           string         `sql:"uuid,pk"`
+	DeviceState    int            `sql:"DeviceState,notnull"`
+	DeviceDetails  DeviceDetails  `sql:"DeviceDetails,notnull"`
+	DeviceTokens   DeviceTokens   `sql:"DeviceTokens,notnull"`
+	DevicePolicies DevicePolicies `sql:"DevicePolicies,notnull"`
 }
 
 type DeviceDetails struct {
-  OSVersion string `sql:"OSVersion,notnull"`
-  BuildVersion string `sql:"BuildVersion,notnull"`
-  ProductName string `sql:"ProductName,notnull"`
-  SerialNumber string `sql:"SerialNumber,notnull"`
-  IMEI string `sql:"IMEI,notnull"`
-  MEID string `sql:"MEID,notnull"`
+	OSVersion    string `sql:"OSVersion,notnull"`
+	BuildVersion string `sql:"BuildVersion,notnull"`
+	ProductName  string `sql:"ProductName,notnull"`
+	SerialNumber string `sql:"SerialNumber,notnull"`
+	IMEI         string `sql:"IMEI,notnull"`
+	MEID         string `sql:"MEID,notnull"`
 }
 
 type DeviceTokens struct {
-  Token []byte `sql:"Token,notnull"`
-  PushMagic string `sql:"PushMagic,notnull"`
-  UnlockToken []byte `sql:"UnlockToken,notnull"`
+	Token       []byte `sql:"Token,notnull"`
+	PushMagic   string `sql:"PushMagic,notnull"`
+	UnlockToken []byte `sql:"UnlockToken,notnull"`
 }
 
 type DevicePolicies struct {
-  Queued []string `sql:"queued,notnull"`
-  Installed []string `sql:"installed,notnull"`
+	Queued    []string `sql:"queued,notnull"`
+	Installed []string `sql:"installed,notnull"`
 }
 
 ///// Policies Model /////
 type Policy struct {
-  TableName struct{} `sql:"policies"`
-  UDID string `sql:"uuid,pk"`
-  Config PolicyConfig `sql:"config,notnull"`
-  Options PolicyOptions `sql:"options,notnull"`
-  Content string `sql:"content"` //////////////////////////////////////////////// Does This Break if Parsed Null
+	TableName struct{}      `sql:"policies"`
+	UDID      string        `sql:"uuid,pk"`
+	Config    PolicyConfig  `sql:"config,notnull"`
+	Options   PolicyOptions `sql:"options,notnull"`
+	Content   string        `sql:"content"` //////////////////////////////////////////////// Does This Break if Parsed Null
 }
 
 type PolicyConfig struct {
-  Name string `sql:"name"`
-  Targets []string `sql:"targets"`//ie. Mac, IOS and Software Versions
-  PolicyType string `sql:"name"`
-  //Type string
+	Name       string   `sql:"name"`
+	Targets    []string `sql:"targets"` //ie. Mac, IOS and Software Versions
+	PolicyType string   `sql:"name"`
+	//Type string
 }
 
 type PolicyOptions struct { // Lots of Optional Values
-  PayloadInstallApplication
+	PayloadInstallApplication
 }
 
 //TODO: Add "Not NULLS" To Everything
 
 /* End */
-
-
-
-
 
 // CheckinRequest represents an MDM checkin command struct.
 type CheckinCommand struct {
@@ -105,47 +101,38 @@ type userTokenUpdate struct { //TODO: Do I Need These/What Devices Send It
 	NotOnConsole  bool   `plist:",omitempty"`
 }
 
-
-
 /* Device Response */
 type DeviceStatus struct {
-  UDID  string
-  CommandUUID string
-  Status string
-  ErrorChain
+	UDID        string
+	CommandUUID string
+	Status      string
+	ErrorChain
 }
 
 type ErrorChain struct {
-  LocalizedDescription string
-  USEnglishDescription string ///// TODO: This Should be Optional
-  ErrorDomain string
-  ErrorCode int
+	LocalizedDescription string
+	USEnglishDescription string ///// TODO: This Should be Optional
+	ErrorDomain          string
+	ErrorCode            int
 }
-
-
-
-
-
-
-
 
 /* Server Response */
 type ServerCommand struct {
-  CommandUUID  string
-  Command      ServerCommandBody //TODO: Replace With Any Stuct (interface)
+	CommandUUID string
+	Command     ServerCommandBody //TODO: Replace With Any Stuct (interface)
 }
 
 type ServerCommandBody struct { //TODO: Is This Used
 	RequestType string
-  PayloadInstallApplication
-  PayloadInstallProfile
+	PayloadInstallApplication
+	PayloadInstallProfile
 }
 
 type PayloadInstallApplication struct {
-  ITunesStoreID int  `plist:"iTunesStoreID,omitempty"` //TODO: Should I Have ,omitempty
-  ManagementFlags int `plist:",omitempty"` //TODO: Should I Have ,omitempty
+	ITunesStoreID   int `plist:"iTunesStoreID,omitempty"` //TODO: Should I Have ,omitempty
+	ManagementFlags int `plist:",omitempty"`              //TODO: Should I Have ,omitempty
 }
 
 type PayloadInstallProfile struct {
-  Payload []byte
+	Payload []byte
 }

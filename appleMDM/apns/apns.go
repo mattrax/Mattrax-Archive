@@ -8,31 +8,31 @@
 package apns
 
 import (
-  "encoding/hex"
-  "encoding/json"
+	"encoding/hex"
+	"encoding/json"
 
-  //External Deps
-  "github.com/RobotsAndPencils/buford/certificate" // Apple Push Notification Service -> Certificates
-  "github.com/RobotsAndPencils/buford/payload" // Apple Push Notification Service -> Payloads
-  "github.com/RobotsAndPencils/buford/push" // Apple Push Notification Service -> Push
+	//External Deps
+	"github.com/RobotsAndPencils/buford/certificate" // Apple Push Notification Service -> Certificates
+	"github.com/RobotsAndPencils/buford/payload"     // Apple Push Notification Service -> Payloads
+	"github.com/RobotsAndPencils/buford/push"        // Apple Push Notification Service -> Push
 
-  // Internal Functions
-  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
-  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
-  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	// Internal Functions
+	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	mdb "github.com/mattrax/mattrax/internal/database"      //Mattrax Database
+	mlg "github.com/mattrax/mattrax/internal/logging"       //Mattrax Logging
 
-  // Internal Modules
-  structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	// Internal Modules
+	structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
-var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
+var pgdb = mdb.GetDatabase()
+var log = mlg.GetLogger()
+var config = mcf.GetConfig() // Get The Internal State
 
 func init() {
-  //Load The Certficate From where The Config Said
-  log.Debug(config.Name) //This Is To Not Cause Unused var Error
+	//Load The Certficate From where The Config Said
+	log.Debug(config.Name) //This Is To Not Cause Unused var Error
 }
-
-
 
 /*
 func ExInit() { // TODO: Fix This - The Old not Functioal init()
@@ -59,47 +59,47 @@ func loadAPNSCertificate(certFile string, password string) *tls.Certificate {
 */
 
 func DeviceUpdate(_device structs.Device) bool { //TODO: Clean This Up (Maybe Remove Client And Make It Global)
-  cert, err := certificate.Load("data/PushCert.p12", "password") //TODO: Load This From Config (Maybe .env)
+	cert, err := certificate.Load("data/PushCert.p12", "password") //TODO: Load This From Config (Maybe .env)
 
-  if err != nil {
-    log.Error(err) //TODO: Should Exit
-    return false
-  }
+	if err != nil {
+		log.Error(err) //TODO: Should Exit
+		return false
+	}
 
-  client, err := push.NewClient(cert)
-  if err != nil {
-    log.Error(err)
-    return false
-  }
+	client, err := push.NewClient(cert)
+	if err != nil {
+		log.Error(err)
+		return false
+	}
 
-  service := push.NewService(client, push.Production)
+	service := push.NewService(client, push.Production)
 
-  // construct a payload to send to the device:
-  p := payload.MDM{
-    Token: _device.DeviceTokens.PushMagic,
-  }
-  b, err := json.Marshal(p)
-  if err != nil {
-    log.Error(err)
-    return false
-  }
+	// construct a payload to send to the device:
+	p := payload.MDM{
+		Token: _device.DeviceTokens.PushMagic,
+	}
+	b, err := json.Marshal(p)
+	if err != nil {
+		log.Error(err)
+		return false
+	}
 
-  // push the notification:
-  deviceToken := hex.EncodeToString(_device.DeviceTokens.Token)
+	// push the notification:
+	deviceToken := hex.EncodeToString(_device.DeviceTokens.Token)
 
-  if !push.IsDeviceTokenValid(deviceToken) {
-    log.Warning("The Device Token Is Incorrect")
-    return false
-  }
+	if !push.IsDeviceTokenValid(deviceToken) {
+		log.Warning("The Device Token Is Incorrect")
+		return false
+	}
 
-  id, err := service.Push(deviceToken, nil, b)
-  if err != nil {
-    log.Error("1", err)
-    return false
-  }
+	id, err := service.Push(deviceToken, nil, b)
+	if err != nil {
+		log.Error("1", err)
+		return false
+	}
 
-  log.Debug("APNS ID: " + id)
-  return true
+	log.Debug("APNS ID: " + id)
+	return true
 }
 
 /*cert, err := certificate.Load("PushCert.p12", "password")
