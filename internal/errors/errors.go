@@ -1,17 +1,21 @@
 package errorHandling
 
 import (
-  //"log"
   "net/http"
   "strings"
 
-  "github.com/sirupsen/logrus" // Logging
+  // External Deps
 	"github.com/go-pg/pg" // Database (Postgres)
+
+  // Internal Functions
+  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
+  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
+  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
 )
 
-var ( log *logrus.Logger; pgdb *pg.DB )
-
-func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
+var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
+//var ( log *logrus.Logger; pgdb *pg.DB )
+//func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
 
 
 
@@ -101,7 +105,7 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
       if strings.HasPrefix(errorTXT, "pg:") { //TODO: This Needs To Go
         if err == pg.ErrNoRows || err == pg.ErrMultiRows {
-          log.Println("Blank PG Database")
+          log.Debug("Blank PG Database")
         //} else if strings.HasPrefix(errorTXT, "pg: Model(non-pointer") { //TODO: This Need To Go Even More. IT IS BAD CODE!!
         //  log.Println("Entry Already Exists")
         } else {

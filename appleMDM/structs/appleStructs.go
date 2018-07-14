@@ -1,14 +1,11 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Descripton: This is The Apple MDM Stricts. These Are The Go Structs For Database Communication and Plist Generation.
+ * File Descripton: This is The Apple MDM Structs. These Are The Go Structs For Database Communication and Plist Generation.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
 
 package appleStruct
-
-//TODO:
-//  Track Device Events (When They Enrolled, When They Checkin)
 
 ///// Device Model /////
 type Device struct {
@@ -60,64 +57,9 @@ type PolicyOptions struct { // Lots of Optional Values
   PayloadInstallApplication
 }
 
-//TOD: mak Everything Not NULLS To These
+//TODO: Add "Not NULLS" To Everything
 
 /* End */
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-//TODO: Only Capitialise Stuff That Needs External Access
-
-// Devices Database Table
-/*
-type Device struct {
-  TableName struct{} `sql:"devices"`
-  UDID          string `sql:"udid,pk"`
-  // Device Details
-  OSVersion    string `sql:"OSVersion"`
-	BuildVersion string `sql:"BuildVersion"`
-	ProductName  string `sql:"ProductName"`
-	SerialNumber string `sql:"SerialNumber"`
-	IMEI         string `sql:"IMEI"`
-	MEID         string `sql:"MEID"`
-  // APNS
-  Token         []byte `sql:"Token"`
-  PushMagic     string `sql:"PushMagic"`
-  UnlockToken   []byte `sql:"UnlockToken"`
-  //Status
-  Deployed      bool `sql:"Deployed,notnull"`
-
-  //Registered Time (To Detect Deployed Errors)
-}
-*/
-
-
-
-
 
 
 
@@ -202,9 +144,6 @@ type ServerCommandBody struct { //TODO: Is This Used
 type PayloadInstallApplication struct {
   ITunesStoreID int  `plist:"iTunesStoreID,omitempty"` //TODO: Should I Have ,omitempty
   ManagementFlags int `plist:",omitempty"` //TODO: Should I Have ,omitempty
-
-  //ManifestURL string
-  //  `plist:",omitempty"`
 }
 
 type PayloadInstallProfile struct {

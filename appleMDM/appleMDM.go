@@ -8,34 +8,35 @@
 package appleMDM
 
 import (
-	"fmt" //// TODO: Eliminate This (Only Used Once)
+	"fmt"
   "net/http"
 
-	"github.com/sirupsen/logrus" // Logging
-	//"github.com/go-pg/pg" // Database (Postgres)
+	//External Deps
 	"github.com/gorilla/mux" // HTTP Router
 	"github.com/groob/plist" //Plist Parsing
 
-	errors "github.com/mattrax/mattrax/internal/errors" // Internal Error Handling (For HTTP)
-	restAPI "github.com/mattrax/mattrax/appleMDM/api"
-	structs "github.com/mattrax/mattrax/appleMDM/structs"
+	// Internal Functions
+  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
+  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
+  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	errors "github.com/mattrax/mattrax/internal/errors" // Mattrax Error Handling
 
-	mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
+	// Internal Modules
+	structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	restAPI "github.com/mattrax/mattrax/appleMDM/api" // The Apple MDM REST API
 )
 
-var pgdb = mdb.GetDatabase()
-var log *logrus.Logger //; pgdb *pg.DB )
+var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
 
-func Init(_log *logrus.Logger) {  log = _log //pgdb = _pgdb; //_pgdb *pg.DB,
-	log.Info("Started The Apple MDM Module!")
-	restAPI.Init(pgdb, _log)
-}
+func Init() { log.Info("Loaded The Apple MDM Module") }
 
 func Mount(r *mux.Router) {
 	r.HandleFunc("/", genericResponse).Methods("GET")
 	r.HandleFunc("/enroll", enrollHandler).Methods("GET")
+
 	//REST API
 	restAPI.Mount(r.PathPrefix("/api/").Subrouter())
+
 	// MDM Device Endpoints
 	r.Handle("/checkin", errors.Handler(checkinHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")
 	r.Handle("/server", errors.Handler(serverHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm")
@@ -43,14 +44,6 @@ func Mount(r *mux.Router) {
 
 func genericResponse(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Apple Mobile Device Management Server!") }
 func enrollHandler(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "application/x-apple-aspen-config"); http.ServeFile(w, r, "data/enroll.mobileconfig") }
-
-
-
-
-
-
-
-
 
 
 
@@ -123,12 +116,15 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 
 
-// TOMORROW:
-//	New Logging
-//	Clean Chrome
-//	Clean The errorHandling Package + Chnage Import Name (utils)
-//	Clean/Redo The main.go File
-//	The /server Route
+
+
+
+
+
+
+
+
+
 
 
 
@@ -161,13 +157,6 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 //Handle Devices DOSing The Server When it Keeps Failing -> Prevent It Fast And Alert The Admin
 
-// Try To:
-//	 Simplier Logging Library. Less Configuration and More Opionated. -> Subfile Logging (Separated) Support
-//	 Better/Neater Error Handling
-// 				-  Handle PG Errors From (Maybe Add More In PR If Needed To Add More): https://github.com/go-pg/pg/blob/master/error.go
-//   Func Based (struct, err) Error Handling Insead Of *struct (Remove All Of *struct)
-//	 Neater Error Messages/Logging Output (Decide What Each Log Level Is For)
-
 // Features:
 //	 Auto Generate Profiles From Config Details Parsed In (Cache In Subdirectory)
 //	 After Enrolling Do Inventory -> Get All The Devices Profiles, Apps, Details, Configuration, etc
@@ -177,10 +166,5 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 //	 Clean APNS. Combine Multiple APNS Into One Request (For Bulk Without DOSing Apple)
 //	 Prevent Forging Enrollment Certificates
 //	 Prestage Enrollment (Template For Devices) -> DEP Support
-
-// Future Features:
-//   Build Tests -> For All Function And Routes (Fake Device Requests/Response Verifying)
-//	 Optimisng Preformance
-
 
 //  See What Checkin Does If None Of The Core Values (4 Of Them) Are Not Given By The Client Does It Plist Parsing Error?

@@ -9,72 +9,32 @@ package main
 import (
   "fmt"
   "os"
-  //"io/ioutil"
   "time"
   "context"
 	"net/http"
 	"os/signal"
-  //"encoding/json"
 
+  // External Deps
   "github.com/gorilla/handlers" // HTTP Handlers
 	"github.com/gorilla/mux" // HTTP Router
+
   // Internal Functions
   mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
   mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
   mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
-  // Modules
+
+  // Internal Modules
   "github.com/mattrax/mattrax/appleMDM" // The Apple MDM Module
 	//"github.com/mattrax/mattrax/windowsMDM" // The Windows MDM Module
 )
 
-var pgdb = mdb.GetDatabase()
-var log = mlg.GetLogger()
-var config = mcf.GetConfig()
+var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
+var srv *http.Server // The Webserver
 
-
-var (
-  //config = Config{} // The Configuration ('config.json')
-  //log = logrus.New() // The Logger //TODO: Is this Still needed. not Just have it Blank
-  //pgdb *pg.DB // The Database
-  srv *http.Server // The Webserver
-)
-
-// This Function Loads/Creates The Config, Connects To The Database, Mounts The Webserver Routes And Starts The Webserver. It Also Handles Clean Of These Things On Exit
+// This Function Handles The Webserver And Cleanup When Exitting The Application
 func main() {
-  // Load/Create The Configuration
-  /*if configFile, err := os.Open("config.json"); os.IsNotExist(err) {
-    json, err := json.MarshalIndent(newConfig(), "", "  ")
-    if err != nil { log.Fatal("Error Generating The Config File:", err) }
-    if err := ioutil.WriteFile("config.json", json, 0644); err != nil { log.Fatal("Error Saving The New Config File To './config.json'") }
-    log.Warning("A New Config Was Created. Please Populate The Correct Information Before Starting Mattrax Again.")
-    return
-  } else if err != nil {
-    log.Fatal("Error Loading The Config File:", err)
-  } else {
-    if err := json.NewDecoder(configFile).Decode(&config); err != nil { log.Fatal("Error Parsing The Config File:", err) }
-  }*/
-  //FIXME: Optional Values In The Config
-
-  //Logging (File and Console Output)
-  /*log.Formatter = &logrus.TextFormatter{
-      DisableColors: false,
-      TimestampFormat : "02/01/06 15:04:05",
-      FullTimestamp:true,
-  }
-	log.Hooks.Add(lfshook.NewHook(
-		config.LogFile, //TODO: Append Data/Data+Number For Rolling Log Files Between Restarts
-		&logrus.JSONFormatter{},
-	))*/
-
-  //Database
-  /*if options, err := pg.ParseURL(config.Database); err != nil { log.Fatal(err) } else {
-    pgdb = pg.Connect(options)
-  }
-  if _, err := pgdb.Exec("SELECT 1"); err != nil { log.Fatal("Error Communicating With The Database: ", err) }
-  if !correctSchema() { initDatabaseSchema() }*/
-
   //Load The Modules
-  appleMDM.Init(log) //pgdb
+  appleMDM.Init()
   //windowsMDM.Init()
 
   //Webserver Routes
@@ -95,7 +55,7 @@ func main() {
 
   //Cleanup
   log.Info("Mattrax is Shutting Down...")
-  pgdb.Close() //Shutdown The Database
+  mdb.Cleanup() //Shutdown The Database
   ctx, cancel := context.WithTimeout(context.Background(), time.Second*15); defer cancel(); srv.Shutdown(ctx) // Shutdown The Webserver
 	os.Exit(0) //Exit Successfully
 }
@@ -174,6 +134,14 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 
 /* The End */
 //Now
+
+// TOMORROW:
+//	Clean The errorHandling Package + Chnage Import Name (utils)
+//	Clean/Redo The main.go File
+//	The /server Route
+
+
+// Does os.Exit(int) Run The Cleanup Functions If Not make it
 // FUTURE FEATURE: Redo Separator Between Blocks Of Function -> They Don't Stand Out Enought
 // TODO: Contant Pinging Database To Stop HTTP Soon As It Stops Connecting
 
@@ -183,11 +151,21 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 //      Redo Logging For Subfiles To Use The Features Of The New System
 // TODO: Log File Roation So The Log Files Doesn't Get To Big
 //      Config Options For External Logging Server
-// TODO: Godoc Documentation Throughout Code
+// TODO: Godoc Documentation Throughout Code -> On All Functions And Structs
 // TODO: GoDEP Package Management
 // TODO: Check Line Ending for ; and Remove (Maybe Add Test To Check For Them)
+// TODO: Redo/Add Separators Between Part Of Code That Are Clean And Easy To See
+//   Func Based (struct, err) Error Handling Insead Of *struct (Remove All Of *struct)
+// Using The New Logging Information Log Structs/Varibles/State To mMake Debugging Easier (On log.Debug Only)
+//TODO: Track Device Events (When They Enrolled, When They Checkin)
+// Add Time Register To The Device Information
+//  Lint/Test Check That Stuff Isn't Exports (Capitalised) Unless Used
+// TODO: Update The Documentation URL In Each File To Match What is in It
+// Disable File Logging, Log To Syslog
 
 //Far In The Future
+//   Build Tests -> For All Function And Routes (Fake Device Requests/Response Verifying)
+//	 Optimisng Preformance
 // IDEA: HTTPS And HTTP Support With Automatic Redirection Between
 //      Certbot ACME Built In For Automaticly Issuing And Renewing Cert
 // IDEA: Built In IP Whitelist For Access To The Admin Area

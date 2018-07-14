@@ -1,13 +1,16 @@
 package logging
 
 import (
+  // External Deps
   "github.com/sirupsen/logrus" // Logging
-  "github.com/rifflock/lfshook" // Logging -> Console and File Output With Different Formattings
+  "github.com/rifflock/lfshook" // Controlling Outputs And Thier Formatting
+
+  // Internal Functions
+  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
 )
 
-//var Logrus = logrus // TODO: Test This
-
-var log = logrus.New()
+var config = mcf.GetConfig() // Get The Internal State
+var log = logrus.New() // The Logger
 
 //TODO: Go Doc
 func init() {
@@ -17,7 +20,7 @@ func init() {
       FullTimestamp:true,
   }
 	log.Hooks.Add(lfshook.NewHook(
-		"data/log.txt", // FIXME: config.LogFile  //TODO: Append Data/Data+Number For Rolling Log Files Between Restarts
+		config.LogFile,  //TODO: Append Data/Data+Number For Rolling Log Files Between Restarts
 		&logrus.JSONFormatter{},
 	))
 }

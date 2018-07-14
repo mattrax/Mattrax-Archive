@@ -11,29 +11,25 @@ import (
   "fmt"
   "net/http"
 
-  "github.com/sirupsen/logrus" // Logging
-  "github.com/go-pg/pg" // Database (Postgres)
+  // External Deps
   "github.com/gorilla/mux" // HTTP Router
-
-  structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Go Structs And Functions
   "github.com/mattrax/mattrax/appleMDM/apns" // Apple Push Notification Service
+
+  // Internal Functions
+  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
+  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
+  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+
+  // Internal Modules
+  structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
-var (
-  log *logrus.Logger
-  pgdb *pg.DB
-)
-
-func Init(_pgdb *pg.DB, _log *logrus.Logger) {
-  pgdb = _pgdb
-  log = _log
-	log.Info("Started The Apple MDM Module!")
-}
+var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
 
 /* API Endpoints */
 
 func Mount(r *mux.Router) {
-  r.HandleFunc("/ping-apns", pingApnsHandler).Methods("GET")
+  r.HandleFunc("/apns", pingApnsHandler).Methods("GET")
 }
 
 

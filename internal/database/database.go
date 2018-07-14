@@ -1,29 +1,29 @@
 package database
 
 import (
-  "fmt"
-  "log" // Chnage TO Main Logger
-
+  // External Deps
   "github.com/go-pg/pg" // Database (Postgres)
+
+  // Internal Functions
+  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
+  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
 )
 
-var pgdb *pg.DB
+var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
+var pgdb *pg.DB // The Database
 
 //TODO: Go Doc
-func init() { //Should Only Run Once
-  fmt.Println("Ran Database Load")
-
-
-
-  if options, err := pg.ParseURL("postgres://oscar.beaumont:@localhost/mattrax?sslmode=disable"); err != nil { log.Fatal(err) } else { //config.Database
+func init() {
+  if options, err := pg.ParseURL(config.Database); err != nil { log.Fatal(err) } else {
     pgdb = pg.Connect(options)
   }
   if _, err := pgdb.Exec("SELECT 1"); err != nil { log.Fatal("Error Communicating With The Database: ", err) } //logrus.Fatal
   //if !correctSchema() { initDatabaseSchema() }
+  log.Info("The Database Connected Successfully")
 }
 
 // TODO: Go Doc
 func GetDatabase() *pg.DB { return pgdb }
 
-
-//Clenaup Handling
+// TODO: Go Doc
+func Cleanup() { pgdb.Close() }

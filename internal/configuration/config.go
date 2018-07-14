@@ -4,22 +4,19 @@ import (
   "encoding/json"
   "os"
   "io/ioutil"
-
-  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
+  "log" //Uses This Instead of My Logger Because of Import Cycle Error
 )
 
-var (
-  log = mlg.GetLogger()
-  config = Config{}
-)
+var config = Config{} // The Configuration
 
+// TODO: Go Doc
 func init() {
   if configFile, err := os.Open("config.json"); os.IsNotExist(err) {
     json, err := json.MarshalIndent(newConfig(), "", "  ")
     if err != nil { log.Fatal("Error Generating The Config File:", err) }
     if err := ioutil.WriteFile("config.json", json, 0644); err != nil { log.Fatal("Error Saving The New Config File To './config.json'") }
-    log.Warning("A New Config Was Created. Please Populate The Correct Information Before Starting Mattrax Again.")
-    return
+    log.Println("A New Config Was Created. Please Populate The Correct Information Before Starting Mattrax Again.")
+    os.Exit(0)
   } else if err != nil {
     log.Fatal("Error Loading The Config File:", err)
   } else {
@@ -27,8 +24,10 @@ func init() {
   }
 }
 
+// TODO: Go Doc
 func GetConfig() Config { return config }
 
+// TODO: Go Doc
 func newConfig() Config {
   return Config{
     Name: "Acme Inc",
@@ -40,6 +39,7 @@ func newConfig() Config {
   }
 }
 
+// TODO: Go Doc
 type Config struct {
   Name string `json:"name"`
   Domain string `json:"domain"`

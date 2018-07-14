@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Descripton: This is Script Of Function To Do Repeatable Actions With The Stucts.
+ * File Descripton: This is A File Of Function To Do Repeatable Actions With The Stucts.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
@@ -8,12 +8,15 @@
 package appleStruct
 
 import (
-  "github.com/sirupsen/logrus" // Logging
+  //External Deps
   "github.com/go-pg/pg" // Database (Postgres)
+
+  // Internal Functions
+  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
+  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
 )
 
-var ( log *logrus.Logger; pgdb *pg.DB )
-func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
+var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger() // Get The Internal State
 
 ///// Devices Functions /////
 func NewDevice(cmd CheckinCommand) Device {
@@ -218,46 +221,3 @@ func DeleteDevice(_device **Device) bool {
   }
   return true
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*_, err := pgdb.Model(_device).
-  //OnConflict("(udid) DO UPDATE").
-  Where("udid = ?", _device.UDID).
-  Update()*/
-
-//log.Info(_device)
-
-//.Where("udid = ?", _device.UDID).OnConflict("(udid) DO UPDATE").Insert() //. Returning("udid")
-
-/*err := pgdb.Model(_device)OnConflict("(id) DO UPDATE").
-      Set("udid = ?", _device.UDID).
-      Create()
-*/
-      //.OnConflict("(udid) DO UPDATE").Create()
-//.Model(_device).
-  //OnConflict("(udid) DO UPDATE").
-  //Set("udid = ?", _device.UDID).
-
-
-  //Column("id").
-  //Where("udid = ?", _device.UDID).
-  //OnConflict("DO NOTHING"). // OnConflict is optional
-  //Returning("id").
-  //SelectOrCreate()
-  /*OnConflict("(udid) DO UPDATE").
-  Set("udid = ?", _device.UDID).
-  Insert()*/

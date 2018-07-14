@@ -10,25 +10,30 @@ package apns
 import (
   "encoding/hex"
   "encoding/json"
-  //"crypto/tls"
-  "github.com/RobotsAndPencils/buford/certificate"
-  "github.com/RobotsAndPencils/buford/payload"
-  "github.com/RobotsAndPencils/buford/push"
 
-  "github.com/sirupsen/logrus" // Logging
-	"github.com/go-pg/pg" // Database (Postgres)
+  //External Deps
+  "github.com/RobotsAndPencils/buford/certificate" // Apple Push Notification Service -> Certificates
+  "github.com/RobotsAndPencils/buford/payload" // Apple Push Notification Service -> Payloads
+  "github.com/RobotsAndPencils/buford/push" // Apple Push Notification Service -> Push
 
-  structs "github.com/mattrax/mattrax/appleMDM/structs"
+  // Internal Functions
+  mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
+  mlg "github.com/mattrax/mattrax/internal/logging" //Mattrax Logging
+  mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+
+  // Internal Modules
+  structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
-var ( log *logrus.Logger; pgdb *pg.DB )
-func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
-
-//var cert tls.Certificate
+var pgdb = mdb.GetDatabase(); var log = mlg.GetLogger(); var config = mcf.GetConfig() // Get The Internal State
 
 func init() {
-
+  //Load The Certficate From where The Config Said
+  log.Debug(config.Name) //This Is To Not Cause Unused var Error
 }
+
+
+
 /*
 func ExInit() { // TODO: Fix This - The Old not Functioal init()
   var err error
