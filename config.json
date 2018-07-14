@@ -1,0 +1,12 @@
+{
+  "name": "Oscar's Academy",
+  "verbose": true,
+  "logFile": "data/log.txt",
+  "port": 8000,
+  "database": {
+    "username": "oscar.beaumont",
+    "password": "",
+    "host": "",
+    "port": ""
+  }
+}

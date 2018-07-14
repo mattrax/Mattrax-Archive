@@ -7,7 +7,7 @@
 package main
 
 import (
-  "fmt" //// TODO: Eliminate This (Only Used Once)
+  "fmt"
 
   "context"
 	"net/http"
@@ -15,83 +15,241 @@ import (
 	"time"
 
   "os"
-  "flag"
 
-  "github.com/op/go-logging" // Logging
+  "encoding/json"
+  "io"
+
+  "github.com/Sirupsen/logrus" // Logging
   "github.com/gorilla/handlers" // HTTP Handlers
 	"github.com/gorilla/mux" // HTTP Router
   "github.com/go-pg/pg" // Database (Postgres)
 
-  //"./errorHandling" //TODO: Change All Of These Imports From Dyanmic Paths
-  "./appleMDM" //TODO: Should These Be Put In Main() After Logging & Database Are Ready???
-	//"./windowsMDM"
+  //TODO: Change All Of These Imports From Dyanmic Paths
+  "github.com/mattrax/mattrax/appleMDM" //TODO: Should These Be Put In Main() After Logging & Database Are Ready???
+	//"github.com/mattrax/mattrax/windowsMDM"
 )
 
-/* Internal Global Varibles */
 var (
-  log = logging.MustGetLogger("main") // Logger
-  pgdb *pg.DB // The Daatabse
+  config = Config{}
+  log = logrus.New()
+  pgdb *pg.DB // The Database
   srv *http.Server // The Webserver
 )
 
-/* Command Line Arguments */
-var (
-  logFile     = flag.String("log-file", "log.txt", "The File For Log To Be Stored To. Blank To Disable")
-  verbose     = flag.Bool("verbose", false, "Log With More Detail. To Be Used For Debugging Only")
-
-  address     = "0.0.0.0:8000" //TODO: Make This Alot Less Hardcoded
-  //TODO: Database Creds From Maybe .env file or command line in
-)
-
-//TODO: Get The Database Config From Somewhere
-//TODO: Redo Start and Shutdown Logging Messages
+type Config struct {
+  Name string `json:"name"`
+  Verbose bool `json:"verbose"`
+  LogFile string `json:"logFile"`
+  Port int `json:"port"`
+  Database struct {
+    Username string `json:"username"`
+    Password string `json:"password"`
+    Host string `json:"host"`
+    Port string `json:"port"`
+  } `json:"database"`
+}
 
 func main() {
-  flag.Parse() // Parse The Command Line Arguments
-  setupLogger() // Setup The Logger
-  log.Info("Started The Mattrax Daemon...")
-  loadDatabase()
+  //flag.Parse() // Parse The Command Line Arguments //TODO: Remove It
 
+  //TODO: Handle Error By Quitting During This Func -> INcluding config Errors
+
+  // Load The Configuration
+  if configFile, err := os.Open("config.json"); err != nil { logrus.Fatal("Error Loading The Config File:", err) } else {
+    if err := json.NewDecoder(configFile).Decode(&config); err != nil { logrus.Fatal("Error Parsing The Config File:", err) }
+  }
+
+
+  // TODO: Create Default Config If Missing
+
+  /*defer file.Close()
+  decoder := json.NewDecoder(file)
+  configuration := Configuration{}
+  err := decoder.Decode(&configuration)
+  if err != nil {
+    fmt.Println("error:", err)
+  }
+  fmt.Println(configuration.Users)*/
+
+
+
+
+
+
+  //Logging (File and Console Output)
+  //log = logrus.New()
+  var logFile io.Writer
+  var logError error //TODO: Attempt To Remove This
+  if logFile, logError = os.OpenFile(config.LogFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666); logError != nil { log.Fatal("Error Loading Log File", logError) }
+
+  //logFile, _ := os.OpenFile(*logFile, os.O_CREATE|os.O_APPEND|os.O_RDWR, 0666)   //TODO: Close The Logging File On Shutdown
+  //TODO: Optional Values In The Config
+
+
+
+
+  log.SetOutput(io.MultiWriter(logFile, os.Stdout))
+  if config.Verbose { log.Level = logrus.DebugLevel }
+  log.Info("Started The Mattrax Daemon...")
+
+  //Database
+  pgdb = pg.Connect(&pg.Options{
+    User:     "oscar.beaumont", //TODO: Load These Settings From Somewhere
+    //Password: "",
+    Database: "mattrax",
+    //Host:     postgres.Host,
+    //Port:     postgres.Port,
+  })
+
+  pgdb = pgdb.WithTimeout(30 * time.Second) //TODO: Check This Works
+  // TODO: Initialise Schema Here For New DB's
+  // TODO: if database scheme doesn't exist run initDatabaseSchema()
+
+  //Load The Modules
   appleMDM.Init(pgdb, log)
   //windowsMDM.Init()
 
+  //Webserver Routes
   router := mux.NewRouter()
-	r := router.Host("mdm.otbeaumont.me").Subrouter() //.Schemes("http")
+
+
+  /* Redo Rouets */
+	r := router.Host("mdm.otbeaumont.me").Subrouter() //.Schemes("http") //TODO: Get Hostnames From Config
 	r.HandleFunc("/", indexHandler).Methods("GET")
 	appleMDM.Mount(r.PathPrefix("/apple/").Subrouter())
 	//windowsMDM.Mount(r.PathPrefix("/windows10/").Subrouter(), router.Host("enterpriseenrollment.otbeaumont.me").Subrouter())
 	authServices := router.Host("auth.otbeaumont.me").Subrouter()
 	authServices.HandleFunc("/", authHandler).Methods("GET")
+  /* End Redo Routes */
 
-  startWebserver(router, address)
+  //Start The Webserver
+  go func() { startWebserver(router) }() //log.Info("The Mattrax Webserver Is Listening At " + address)
 
-  log.Info("The Mattrax Webserver Is Listening At " + address)
+  //Wait For Shutdown Interupt
+  //logFile.Close()
+
+
+
 	c := make(chan os.Signal, 1)
 	signal.Notify(c, os.Interrupt)
 	<-c // Wait Until Shutdown Signal Received.
 
   log.Warning("Shutting Down...")
-  shutdownDatabase()
+  pgdb.Close()
   shutdownWebserver()
   log.Warning("Shutdown Complete")
 	os.Exit(0)
 }
 
 
-/* HTTP Custom Error Handling */
-/*type ErrorHandling func(http.ResponseWriter, *http.Request) error
 
-func (fn ErrorHandling) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-  if err := fn(w, r); err != nil {
-    fmt.Println("HTTPS Error", err.Error())
-    http.Error(w, "A Server Side Error Occured", 500)
+func initDatabaseSchema() {
+  panic("This will create the database schema")
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func startWebserver(router *mux.Router) {
+  var handler http.Handler
+  if config.Verbose {
+    handler = logRequest(handlers.CORS()(router))
+  } else {
+    handler = handlers.CORS()(router)
   }
-}*/
-/* End HTTP Custom Error Handling */
+
+	srv = &http.Server{
+		Addr:         fmt.Sprintf("%v:%v", "0.0.0.0", config.Port), //TODO Configurable Listen IP
+		WriteTimeout: time.Second * 15,
+		ReadTimeout:  time.Second * 15,
+		IdleTimeout:  time.Second * 60,
+		Handler:      handler,
+	}
+
+	// Run in a Goroutine So That It Doesn't Block.
+	//go func() {
+	if err := srv.ListenAndServe(); err != nil {
+		//fatalLog(err) //// TODO: Fix This Error Parsing The Error In (Cause Its Not A String)
+		fmt.Println(err) //// ^
+	}
+	//}()
+}
+
+func shutdownWebserver() {
+  //log.Warning("Wait For Webserver Request To All Be Complete...")
+  ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
+	defer cancel()
+	// Tried To Shutdown The Server If Fails To Do It Before The Deadline Kill It
+	srv.Shutdown(ctx)
+  //log.Warning("All Webserver Request Complete. The Webserver Has Been Shutdown.")
+}
+
+
+func logRequest(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+    log.Debug("Request: " + r.RemoteAddr + " " + r.Method + " " + r.URL.String())
+		handler.ServeHTTP(w, r)
+	})
+}
 
 
 
 
+
+
+
+/* Placeholder Routes */
+func indexHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "Hello World!")
+}
+
+func authHandler(w http.ResponseWriter, r *http.Request) {
+	fmt.Fprintf(w, "This is the Authentication Service!")
+}
+
+
+
+
+
+
+
+
+
+
+
+/*
+func shutdownDatabase() {
+  pgdb.Close()
+  //log.Warning("Database Connection Closed")
+}
+*/
+
+/*
+func loadDatabase() {
+  //Initialise Schema Here For New DB's
+  // if database scheme doesn't exist run initDatabaseSchema()
+
+  pgdb = pg.Connect(&pg.Options{ //https://github.com/go-pg/pg/issues/188
+    User: "oscar.beaumont",
+    Database: "mattrax",
+    //Host:     postgres.Host,
+    //Port:     postgres.Port,
+  })
+}
+*/
+
+/*
 func setupLogger() {
   var format logging.Formatter
   if *verbose {
@@ -139,91 +297,7 @@ func setupLogger() {
     if *logFile != "" { fileBackend.SetLevel(logging.INFO, "") }
   }
 }
-
-func loadDatabase() {
-  //Initialise Schema Here For New DB's
-  // if database scheme doesn't exist run initDatabaseSchema()
-
-  pgdb = pg.Connect(&pg.Options{ //https://github.com/go-pg/pg/issues/188
-    User: "oscar.beaumont",
-    Database: "mattrax",
-    //Host:     postgres.Host,
-    //Port:     postgres.Port,
-  })
-}
-func shutdownDatabase() {
-  pgdb.Close()
-  log.Warning("Database Connection Closed")
-}
-
-func initDatabaseSchema() {
-  panic("This will create the database schema")
-
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-func startWebserver(router *mux.Router, address string) {
-  var handler http.Handler
-  if *verbose {
-    handler = logRequest(handlers.CORS()(router))
-  } else {
-    handler = handlers.CORS()(router)
-  }
-
-	srv = &http.Server{
-		Addr:         address,
-		WriteTimeout: time.Second * 15,
-		ReadTimeout:  time.Second * 15,
-		IdleTimeout:  time.Second * 60,
-		Handler:      handler,
-	}
-
-	// Run in a Goroutine So That It Doesn't Block.
-	go func() {
-		if err := srv.ListenAndServe(); err != nil {
-			//fatalLog(err) //// TODO: Fix This Error Parsing The Error In (Cause Its Not A String)
-			fmt.Println(err) //// ^
-		}
-	}()
-}
-
-func shutdownWebserver() {
-  log.Warning("Wait For Webserver Request To All Be Complete...")
-  ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
-	defer cancel()
-	// Tried To Shutdown The Server If Fails To Do It Before The Deadline Kill It
-	srv.Shutdown(ctx)
-  log.Warning("All Webserver Request Complete. The Webserver Has Been Shutdown.")
-}
-
-
-func logRequest(handler http.Handler) http.Handler {
-	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-    log.Debug("Request: " + r.RemoteAddr + " " + r.Method + " " + r.URL.String())
-		handler.ServeHTTP(w, r)
-	})
-}
-
-func indexHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Hello World!")
-}
-
-func authHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "This is the Authentication Service!")
-}
-
+*/
 
 /*log.Debug("debug")
 log.Info("info")
@@ -261,6 +335,15 @@ func testingHandler(w http.ResponseWriter, r *http.Request) {
 }
 */
 
+/*
+func init() {
+  logging2.Testing()
+  os.Exit(1)
+}
+*/
+
+// TODO: Get The Database Config From Somewhere
+// TODO: Redo Start and Shutdown Logging Messages
 // TODO: Contant Pining Database To Stop HTTP Soon As It Stops Connecting
 // TODO: Retrys For The Database If it Fails The First Time
 // TODO: Better Lookin Error Handling (The If Statements Everywhere)
@@ -269,5 +352,6 @@ func testingHandler(w http.ResponseWriter, r *http.Request) {
 // TODO: HTTPS And HTTP Support With Automatic Redirection Between
 // TODO: Firewalling IP Allowed To Access Admin Area
 // TODO: Postgress Database Workers Queue For Better Preformance
+// TODO: Initilise Database Schema
 
 //var format = logging.MustStringFormatter(`%{color}[%{level}]%{color:reset} %{time:15:04:05} ▶ %{message}`) // :-7s //%{shortfunc} ▶ %{level:.4s} %{id:03x} %{message}

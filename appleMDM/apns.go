@@ -46,7 +46,7 @@ func loadAPNSCertificate(certFile string, password string) *tls.Certificate {
 */
 
 func deviceUpdate(_device Device) bool { //TODO: Clean This Up (Maybe Remove Client And Make It Global)
-  cert, err := certificate.Load("PushCert.p12", "password") //TODO: Load This From Config (Maybe .env)
+  cert, err := certificate.Load("data/PushCert.p12", "password") //TODO: Load This From Config (Maybe .env)
 
   if err != nil {
     log.Error(err) //TODO: Should Exit

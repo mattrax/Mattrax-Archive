@@ -14,17 +14,18 @@ import (
   //"os"
 	//"errors"
 
-  "github.com/op/go-logging" // Logging
+  //"github.com/op/go-logging" // Logging
 	"github.com/gorilla/mux" // HTTP Router
   "github.com/go-pg/pg" // Database (Postgres)
-	ierror "../errorHandling" // Internal Error Handling (TODO: Chnage Name From ierror)
+	ierror "../utils/errors" // Internal Error Handling (TODO: Chnage Name From ierror)
 
+	"github.com/Sirupsen/logrus"
 
 	"github.com/groob/plist"
 )
 
 var (
-  log *logging.Logger // TODO: This is A TEMP Sub Logging Solution
+  log *logrus.Logger
   pgdb *pg.DB
 )
 
@@ -67,7 +68,7 @@ var (
 
 //  See What Checkin Does If None Of The Core Values (4 Of Them) Are Not Given By The Client Does It Plist Parsing Error?
 
-func Init(_pgdb *pg.DB, _log *logging.Logger) {
+func Init(_pgdb *pg.DB, _log *logrus.Logger) {
   pgdb = _pgdb
   log = _log
 	fmt.Println("Started The Apple MDM Module!")
@@ -94,7 +95,7 @@ func genericResponse(w http.ResponseWriter, r *http.Request) {
 
 func enrollHandler(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "application/x-apple-aspen-config")
-	http.ServeFile(w, r, "enroll.mobileconfig")
+	http.ServeFile(w, r, "data/enroll.mobileconfig")
 	//fmt.Fprintf(w, generateEnrollmentProfile())
 }
 /*
@@ -208,8 +209,12 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 
 
-
-
+// TOMORROW:
+//	New Logging
+//	Clean Chrome
+//	Clean The errorHandling Package + Chnage Import Name (utils)
+//	Clean/Redo The main.go File
+//	The /server Route
 
 
 
@@ -217,6 +222,12 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 var run_commands = 1
 
 func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
+
+
+
+
+
+
 	return 200, nil //TEMP (Disable Everything Below) //TODO: Next Few Comit This Will Be Redone For Pushing Policies
 
 	//The Code That Goes Here Is In A File Called backup_server_handler Before The Redo (Error Handling Broke It)
