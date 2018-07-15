@@ -1,12 +1,19 @@
+/**
+ * Mattrax: An Open Source Device Management System
+ * File Description: This File Has All of The Structs For The Checkin Hanlder.
+ * Package Description: These Are The Structs For The Plist (Device Communication) and JSON (API) Data.
+ * A HUGE Thanks To MicroMDM. This Package Is A Modied Version Of The (github.com/micromdm/mdm) Package. It Is Used Under The MIT Licence and The Original Work Is Copyright Of MicroMDM.
+ * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
+ * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
+ */
+
 package mdm
 
 import "encoding/hex"
 
 // CheckinCommand represents an MDM checkin command struct
 type CheckinCommand struct {
-	// MessageType can be either Authenticate,
-	// TokenUpdate or CheckOut
-	MessageType string
+	MessageType string // Either Authenticate, TokenUpdate or CheckOut
 	Topic       string
 	UDID        string
 	auth
@@ -47,6 +54,7 @@ type userTokenUpdate struct {
 // DEPEnrollmentRequest is a request sent
 // by the device to an MDM server during
 // DEP Enrollment
+/*
 type DEPEnrollmentRequest struct {
 	Language string `plist:"LANGUAGE"`
 	Product  string `plist:"PRODUCT"`
@@ -56,10 +64,10 @@ type DEPEnrollmentRequest struct {
 	IMEI     string `plist:"IMEI,omitempty"`
 	MEID     string `plist:"MEID,omitempty"`
 }
+*/
 
-// data decodes to []byte,
-// we can then attach a string method to the type
-// Tokens are encoded as Hex Strings
+// Custom Format With .String() Function
+// For Easy Conversion
 type hexData []byte
 
 func (d hexData) String() string {

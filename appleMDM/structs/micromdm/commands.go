@@ -1,11 +1,13 @@
+/**
+ * Mattrax: An Open Source Device Management System
+ * File Description: This File Has All of The Structs For The Server Hanlder.
+ * Package Description: These Are The Structs For The Plist (Device Communication) and JSON (API) Data.
+ * A HUGE Thanks To MicroMDM. This Package Is A Modied Version Of The (github.com/micromdm/mdm) Package. It Is Used Under The MIT Licence and The Original Work Is Copyright Of MicroMDM.
+ * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
+ * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
+ */
+
 package mdm
-
-//go:generate go run generate_marshaler_code.go -out marshaler.go
-//go:generate go run generate_payload_code.go -out new_payload.go
-
-import (
-	"github.com/satori/go.uuid"
-)
 
 // CommandRequest represents an MDM command request
 type CommandRequest struct {
@@ -168,6 +170,16 @@ type Settings struct {
 	Settings []Setting `plist:",omitempty" json:"settings,omitempty"`
 }
 
+// Settings Is The Devices Configuration In Settings (User Device Customisation)
+type Setting struct {
+	Item       string            `json:"item"`
+	Enabled    *bool             `plist:",omitempty" json:"enabled,omitempty"`
+	DeviceName *string           `plist:",omitempty" json:"device_name,omitempty"`
+	HostName   *string           `plist:",omitempty" json:"hostname,omitempty"`
+	Identifier *string           `plist:",omitempty" json:"identifier"`
+	Attributes map[string]string `plist:",omitempty" json:"attributes,omitempty"`
+}
+
 type ManagedApplicationConfiguration struct {
 	Identifiers []string `plist:",omitempty" json:"identifiers,omitempty"`
 }
@@ -226,10 +238,4 @@ type ScheduleOSUpdateScan struct {
 	Force bool `plist:",omitempty" json:"force,omitempty"`
 }
 
-type data []byte
-
-func newPayload(requestType string) *Payload {
-	u, _ := uuid.NewV4() //TODO Handle Error
-	return &Payload{u.String(),
-		&Command{RequestType: requestType}}
-}
+type data []byte // TODO IS This Need With The One Declared In The Checkin
