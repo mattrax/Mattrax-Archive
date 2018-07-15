@@ -10,10 +10,14 @@ package appleStruct
 import (
 	//External Deps
 	"github.com/go-pg/pg" // Database (Postgres)
+	"github.com/satori/go.uuid" // UUID Generation
+	"github.com/groob/plist" //Plist Parsing
 
 	// Internal Functions
 	mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
 	mlg "github.com/mattrax/mattrax/internal/logging"  //Mattrax Logging
+
+
 )
 
 var pgdb = mdb.GetDatabase()
@@ -64,7 +68,7 @@ if policy.Config.PolicyType == "InstallApplication" {
 
   AppPayload := ServerCommand{
     CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
-    Command: ServerCommandBody{
+    Command: ServerPayload{
       RequestType: "InstallApplication",
       PayloadInstallApplication: policy.Options.PayloadInstallApplication,
     },
@@ -176,4 +180,32 @@ func DeleteDevice(_device **Device) bool {
 		}
 	}
 	return true
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* /Server Handling */
+func ParsePayload(_payload ServerPayload) (string, error) {
+	randomUUID, _ := uuid.NewV4() //TODO Erro hadnling
+	payload := ServerCommand{
+		CommandUUID: randomUUID.String(),
+		Command: _payload,
+	}
+
+	out, err := plist.MarshalIndent(payload, "     "); if err != nil { return "", err } //TODO: If Possible Remove Indents For Productions
+	return string(out), nil
 }

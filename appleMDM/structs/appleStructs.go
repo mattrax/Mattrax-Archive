@@ -42,7 +42,7 @@ type DevicePolicies struct {
 type DeviceCurrentAction struct {
 	UDID string `sql:"UDID,notnull"`
 	Name string `sql:"Name,notnull"`
-	Actions []ServerCommand `sql:"Actions,notnull"`
+	//Actions []ServerCommand `sql:"Actions,notnull"` ///////// FIXME TEMP
 }
 
 
@@ -68,7 +68,7 @@ type PolicyConfig struct {
 }
 
 type PolicyOptions struct { // Lots of Optional Values
-	PayloadInstallApplication
+	//PayloadInstallApplication //FIXEME TEMP
 }
 
 //TODO: Add "Not NULLS" To Everything
@@ -121,6 +121,7 @@ type DeviceStatus struct {
 	CommandUUID string
 	Status      string
 	ErrorChain
+	InstalledApplicationList
 }
 
 type ErrorChain struct {
@@ -130,13 +131,25 @@ type ErrorChain struct {
 	ErrorCode            int
 }
 
-/* Server Response */
-type ServerCommand struct {
-	CommandUUID string `plist:"CommandUUID,notnull"` //Check notnull work for plist
-	Command     ServerCommandBody `plist:"ServerCommandBody,notnull"` //TODO: Replace With Any Stuct (interface)
+type InstalledApplicationList struct {
+	Applications []Application `plist:"InstalledApplicationList,omitempty"`
 }
 
-type ServerCommandBody struct { //TODO: Is This Used
+type Application struct {
+	Identifier string
+	Version string
+	ShortVersion string
+	Name string
+}
+
+/* Server Response */
+
+type ServerCommand struct {
+	CommandUUID string `plist:"CommandUUID,notnull"` //Check notnull work for plist
+	Command     ServerPayload `plist:"Command,notnull"` //TODO: Replace With Any Stuct (interface)
+}
+
+type ServerPayload struct { //TODO: Is This Used
 	RequestType string `plist:"RequestType,notnull"`
 	PayloadInstallApplication
 	PayloadInstallProfile
@@ -155,3 +168,43 @@ type PayloadInstallProfile struct {
 type PayloadDeviceInformation struct {
 	Queries []string `plist:"Queries,omitempty"` //TODO: Should I Have ,omitempty
 }
+
+
+
+// Structs From The Old MicroMDM Project. Credit Goes To Them: https://github.com/micromdm/mdm/blob/master/command.go
+/*
+// CommandRequest represents an MDM command request
+type CommandRequest struct {
+	UDID string `json:"udid"`
+	Command
+}
+
+// Payload is an MDM payload
+type Payload struct {
+	CommandUUID string
+	Command     *Command
+}
+
+type Command struct {
+	RequestType string `json:"request_type"`
+	DeviceInformation
+	InstallApplication
+	AccountConfiguration
+	ScheduleOSUpdateScan
+	ScheduleOSUpdate
+	InstallProfile
+	RemoveProfile
+	InstallProvisioningProfile
+	RemoveProvisioningProfile
+	InstalledApplicationList
+	DeviceLock
+	ClearPasscode
+	EraseDevice
+	RequestMirroring
+	DeleteUser
+	EnableLostMode
+	ApplyRedemptionCode
+	InstallMedia
+	RemoveMedia
+	Settings
+}*/

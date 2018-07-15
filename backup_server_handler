@@ -80,7 +80,7 @@ if device != nil && device.DeviceState == 3 {
 
     AppPayload := ServerCommand{
       CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
-      Command: ServerCommandBody{
+      Command: ServerPayload{
         RequestType: "InstallApplication",
         PayloadInstallApplication: policy.Options.PayloadInstallApplication,
       },
@@ -112,7 +112,7 @@ if device != nil && device.DeviceState == 3 {
 
     LockPayload := ServerCommand{
       CommandUUID: "BBA5879E-2649-43B1-9934-D0D26BBC0E5D", //TODO: Build Generator For These
-      Command: ServerCommandBody{
+      Command: ServerPayload{
         RequestType: "DeviceLock",
       },
     }
@@ -128,7 +128,7 @@ if device != nil && device.DeviceState == 3 {
 
     AppPayload := ServerCommand{
       CommandUUID: "4424F929-BDD2-4D44-B518-393C0DABD56A", //TODO: Build Generator For These
-      Command: ServerCommandBody{
+      Command: ServerPayload{
         RequestType: "InstallApplication",
         PayloadInstallApplication: PayloadInstallApplication{
           ITunesStoreID: 640199958, //WWDC App
@@ -151,7 +151,7 @@ if device != nil && device.DeviceState == 3 {
       profileContent, _ := ioutil.ReadFile("BlockFacetime.mobileconfig") //TODO: Handle Errors
       AppPayload := ServerCommand{
         CommandUUID: "5428B959-BDD2-4H45-Q558-397I0DABD56B", //TODO: Build Generator For These
-        Command: ServerCommandBody{
+        Command: ServerPayload{
           RequestType: "InstallProfile",
           PayloadInstallProfile: PayloadInstallProfile{
             Payload: []byte(profileContent),

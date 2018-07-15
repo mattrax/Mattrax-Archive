@@ -25,6 +25,8 @@ import (
 	// Internal Modules
 	restAPI "github.com/mattrax/mattrax/appleMDM/api"     // The Apple MDM REST API
 	structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+
+	micromdm "github.com/mattrax/mattrax/appleMDM/structs/micromdm" // MicroMDM Structs TEMP: Redo This MSG
 )
 
 var pgdb = mdb.GetDatabase()
@@ -136,8 +138,99 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 var run_commands = 1
 var done = true
+var locked = false
 
 func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
+	response := &micromdm.Response{}
+	if err := plist.NewXMLDecoder(r.Body).Decode(response); err != nil { return 403, err }
+
+	log.Info(response.Status)
+
+	if !locked {
+		locked = true
+
+
+		// create a request
+		//request := micromdm.DeviceLock{ Message: "Locked" } //PIN: "",  , PhoneNumber: "123-4567"
+		/*request := &CommandRequest{
+			RequestType: "DeviceInformation",
+			Queries:     []string{"IsCloudBackupEnabled", "BatteryLevel"},
+		}*/
+
+
+
+		
+		request := &micromdm.CommandRequest{ // Working Lock Device
+			UDID: "HelloWorld",
+			Command: micromdm.Command{
+				RequestType: "DeviceLock",
+
+			},
+		}
+
+
+
+		payload, err := micromdm.NewPayload(request)
+		if err != nil {
+			return 403, err
+		}
+
+		// Encode in a plist and print to stdout
+	    // uses the github.com/groob/plist package
+		/*encoder := plist.NewEncoder(os.Stdout)
+		encoder.Indent("  ")
+		if err := encoder.Encode(payload); err != nil {
+			log.Fatal(err)
+		}*/ //Return The Stream For Web Request
+
+
+
+
+
+
+		plistCmd, err := plist.MarshalIndent(payload, "\t")
+		if err != nil { return 403, err }
+
+
+		log.Info(string(plistCmd))
+		fmt.Fprintf(w, string(plistCmd))
+
+
+		return 200, nil
+	}
+
+
+
+
+
+
+
+	return 200, nil
+}
+
+
+
+
+
+
+func old(w http.ResponseWriter, r *http.Request) (int, error) {
+	/*payload := structs.ServerCommand{
+		CommandUUID: "BBA5879E-2649-43B1-9934-D0D26BBC0E5D", //TODO: Build Generator For These
+		Command: structs.ServerPayload{
+			RequestType: "DeviceLock",
+		},
+	}
+
+	out, err := plist.MarshalIndent(payload, "     "); if err != nil { return 403, err } //TODO: If Possible Remove Indents For Productions
+	fmt.Fprintf(w, string(out)) // TODO: This Stuff Is Tiwse (The Plist PArsing) Make That Not A Thing
+
+	fmt.Println(string(out))
+	return 200, nil*/
+
+
+
+
+
 	//Parse The Request
 	var cmd structs.DeviceStatus
 	if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil { return 403, err }
@@ -147,6 +240,53 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	//Handle The Request
 	if !(device.DeviceState <= 3) { return 403, errors.New("A Device Tried To /server Without Existing In The DB") } //TODO: make This make Sense
 	if device.DeviceState != 3 { return 403, errors.New("A Device In A Not Fully Enrolled State Accessed The /server Route") } //TODO: make This make Sense
+
+	if cmd.Status == "Idle" {
+		log.Info("The Device Is Idle: ", device.UDID)
+	} else {
+		log.Warning("The Device Is Not Idle", cmd.Status) //TEMP
+	}
+
+	if !locked {
+		locked = true
+
+		out, _ := structs.ParsePayload(structs.ServerPayload{ //TODO Error Handling
+			RequestType: "DeviceLock",
+		})
+
+		log.Info(out)
+
+		fmt.Fprintf(w, out)
+		return 200, nil
+
+
+		/*payload := structs.ServerCommand{
+			CommandUUID: "BBA5879E-2649-43B1-9934-D0D26BBC0E5D", //TODO: Build Generator For These
+			Command: structs.ServerPayload{
+				RequestType: "DeviceLock",
+			},
+		}
+
+		out, err := plist.MarshalIndent(payload, "     "); if err != nil { return 403, err } //TODO: If Possible Remove Indents For Productions
+		fmt.Fprintf(w, string(out)) // TODO: This Stuff Is Tiwse (The Plist PArsing) Make That Not A Thing
+
+		fmt.Println(string(out))
+		return 200, nil*/
+	}
+
+	return 200, nil
+
+
+
+
+
+
+
+
+
+
+
+	//log.Info(cmd.InstalledApplicationList.Applications)
 
 	if cmd.Status == "Idle" {
 		log.Debug("Idle Device ", cmd.UDID)
@@ -161,21 +301,43 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 		done = false
 		log.Debug("Doing Inventory On Device: ", device.UDID)
 
+		//micromdm.NewPayload
+
+		/*payload := micromdm.Payload{u.String(),
+			&Command{RequestType: requestType}}
+
+		out, err := plist.MarshalIndent(payload, "     "); if err != nil { return 403, err } //TODO: If Possible Remove Indents For Productions
+		fmt.Fprintf(w, string(out))
+		log.Info(string(out))*/
+		return 200, nil
+
 
 		/* Kinda Temp Inventory */
-		currentAction := structs.ServerCommand{
+		/*currentAction := structs.ServerCommand{
 			CommandUUID: "741B39F2-649B-4BB6-A522-EE2YF2D99D26",
-			Command: structs.ServerCommandBody{
+			Command: structs.ServerPayload{
 				RequestType: "DeviceInformation",
 				PayloadDeviceInformation: structs.PayloadDeviceInformation{
 					Queries: []string{ "BatteryLevel" },
 				},
 			},
+		}*/
+
+		/*currentAction := structs.ServerCommand{
+			CommandUUID: "741B39F2-649B-4BB6-A522-EE2YF2D99D26",
+			Command: structs.ServerPayload{
+				RequestType: "InstalledApplicationList",
+			},
 		}
+
+
+
 
 		out, err := plist.MarshalIndent(currentAction, "     "); if err != nil { return 403, err } //TODO: If Possible Remove Indents For Productions
 		fmt.Fprintf(w, string(out)) // TODO: This Stuff Is Tiwse (The Plist PArsing) Make That Not A Thing
-		return 200, nil
+
+		fmt.Println(string(out))
+		return 200, nil*/
 		/* End Kinda Temp Inventory */
 	} else {
 		log.Debug("No Inventory is needed")
@@ -203,7 +365,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 			currentAction := structs.ServerCommand{
 				CommandUUID: "741B39F2-649B-4BB6-A522-EE2YF2D99D26",
-				Command: structs.ServerCommandBody{
+				Command: structs.ServerPayload{
 					RequestType: "DeviceInformation",
 					PayloadDeviceInformation: structs.PayloadDeviceInformation{
 						Queries: []string{ "BatteryLevel" },
@@ -246,7 +408,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 				device.DevicePolicies.CurrentAction.Actions = append(device.DevicePolicies.CurrentAction.Actions, structs.ServerCommand{
 					CommandUUID: "741B39F2-649B-4BB6-A522-EE2YF2D99D26",
-					Command: structs.ServerCommandBody{
+					Command: structs.ServerPayload{
 						RequestType: "DeviceInformation",
 						PayloadDeviceInformation: structs.PayloadDeviceInformation{
 							Queries: []string{ "BatteryLevel" },
