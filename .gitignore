@@ -17,6 +17,9 @@
 #Logs
 log.txt
 
+#Configuration
+config.json
+
 #Certificates
 *.pem
 *.crt

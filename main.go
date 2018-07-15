@@ -28,10 +28,12 @@ import (
 	//"github.com/mattrax/Mattrax/windowsMDM" // The Windows MDM Module
 )
 
-var pgdb = mdb.GetDatabase()
-var log = mlg.GetLogger()
-var config = mcf.GetConfig() // Get The Internal State
-var srv *http.Server         // The Webserver
+var ( // Get The Internal State
+	pgdb = mdb.GetDatabase()
+	log = mlg.GetLogger()
+	config = mcf.GetConfig()
+	srv *http.Server // The Webserver
+)
 
 // This Function Handles The Webserver And Cleanup When Exitting The Application
 func main() {

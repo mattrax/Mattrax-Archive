@@ -9,8 +9,6 @@
 
 package structs
 
-import "encoding/hex"
-
 // CheckinCommand represents an MDM checkin command struct
 type CheckinCommand struct {
 	MessageType string // Either Authenticate, TokenUpdate or CheckOut
@@ -36,9 +34,9 @@ type Auth struct {
 
 // TokenUpdate Mesage Type
 type Update struct {
-	Token                 hexData
+	Token                 []byte
 	PushMagic             string
-	UnlockToken           hexData
+	UnlockToken           []byte
 	AwaitingConfiguration bool
 	userTokenUpdate //TODO: Do I Need These/What Devices Send It and Handle or Remove it
 }
@@ -68,8 +66,8 @@ type DEPEnrollmentRequest struct {
 
 // Custom Format With .String() Function
 // For Easy Conversion
-type hexData []byte
+//type HexData []byte
 
-func (d hexData) String() string {
+/*func (d hexData) String() string {
 	return hex.EncodeToString(d)
-}
+}*/

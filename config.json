@@ -3,6 +3,12 @@
   "domain": "mdm.otbeaumont.me",
   "verbose": true,
   "logFile": "data/log.txt",
+  "APNS": {
+    "Make This Work": "It Is Cool"
+  },
+  "APNScert": "data/PushCert.p12",
+  "APNSProduction": true,
+  "APNSpass": "password",
   "port": 8000,
   "database": "postgres://oscar.beaumont:@localhost/mattrax?sslmode=disable"
 }

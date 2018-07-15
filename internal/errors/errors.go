@@ -17,9 +17,11 @@ import (
 	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
 )
 
-var pgdb = mdb.GetDatabase()
-var log = mlg.GetLogger()
-var config = mcf.GetConfig() // Get The Internal State
+var ( // Get The Internal State
+	pgdb = mdb.GetDatabase()
+	log = mlg.GetLogger()
+	config = mcf.GetConfig()
+)
 
 //FIXME: Redo This File. It Is A Mess And Uses Sketchy Code
 

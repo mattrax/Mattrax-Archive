@@ -9,6 +9,44 @@
 
 package structs
 
+
+
+
+
+import (
+  "log"
+  "github.com/groob/plist" //Plist Parsing
+)
+
+func init() {
+  payload := Command{
+    RequestType: "InstallApplication",
+    InstallApplication: InstallApplication{
+      ITunesStoreID: 640199958,
+			ChangeManagementState: "Managed",
+    },
+  }
+
+  plistCmd, err := plist.MarshalIndent(payload, "\t")
+	if err != nil { log.Println(err); return }
+  log.Println(string(plistCmd))
+}
+
+/*
+type InstallApplication struct {
+	ITunesStoreID   int `plist:"iTunesStoreID,omitempty"`
+}
+*/
+
+
+
+
+
+
+
+
+
+
 // CommandRequest represents an MDM command request
 type CommandRequest struct {
 	UDID string `json:"udid"`
@@ -22,7 +60,7 @@ type Payload struct {
 }
 
 type Command struct {
-	RequestType string `json:"request_type"`
+	RequestType string `plist:"RequestType,notnull" json:"request_type"`
 	DeviceInformation
 	InstallApplication
 	AccountConfiguration
@@ -40,8 +78,8 @@ type Command struct {
 	DeleteUser
 	EnableLostMode
 	ApplyRedemptionCode
-	InstallMedia
-	RemoveMedia
+	//InstallMedia
+	//RemoveMedia
 	Settings
 }
 
@@ -113,7 +151,7 @@ type EnableLostMode struct {
 // InstallApplication is an InstallApplication MDM Command
 type InstallApplication struct {
 	ITunesStoreID         int                        `plist:"iTunesStoreID,omitempty" json:"itunes_store_id,omitempty"`
-	Identifier            string                     `plist:",omitempty" json:"identifier,omitempty"`
+	Identifier            string                     `plist:"Identifier,omitempty" json:"identifier,omitempty"`
 	ManifestURL           string                     `plist:",omitempty" json:"manifest_url,omitempty"`
 	ManagementFlags       int                        `plist:",omitempty" json:"management_flags,omitempty"`
 	NotManaged            bool                       `plist:",omitempty" json:"not_managed,omitempty"`
@@ -141,12 +179,12 @@ type ManagedApplicationList struct {
 }
 
 type RemoveApplication struct {
-	Identifier string `json:"identifier,omitempty"`
+	Identifier string `plist:",omitempty" json:"identifier,omitempty"`
 }
 
 type InviteToProgram struct {
-	ProgramID     string `json:"program_id,omitempty"`
-	InvitationURL string `json:"invitation_url,omitempty"`
+	ProgramID     string `plist:",omitempty" json:"program_id,omitempty"`
+	InvitationURL string `plist:",omitempty" json:"invitation_url,omitempty"`
 }
 
 type ValidateApplications struct {
@@ -155,15 +193,15 @@ type ValidateApplications struct {
 
 type InstallMedia struct {
 	ITunesStoreID int    `plist:"iTunesStoreID,omitempty" json:"itunes_store_id,omitempty"`
-	MediaURL      string `plist:",omitempty" json:"media_url,omitempty"`
-	MediaType     string `json:"media_type"`
+	MediaURL      string `plist:"MediaURL,omitempty" json:"media_url,omitempty"`
+	MediaType     string `plist:"MediaType,omitempty" json:"media_type"`
 	// TODO: media url fields
 }
 
 type RemoveMedia struct {
-	MediaType     string `json:"media_type"`
+	MediaType     string `plist:"MediaType,omitempty" json:"media_type"`
 	ITunesStoreID int    `plist:"iTunesStoreID,omitempty" json:"itunes_store_id,omitempty"`
-	PersistentID  string `plist:",omitempty" json:"persistent_id,omitempty"`
+	PersistentID  string `plist:"PersistentID,omitempty" json:"persistent_id,omitempty"`
 }
 
 type Settings struct {
@@ -172,7 +210,7 @@ type Settings struct {
 
 // Settings Is The Devices Configuration In Settings (User Device Customisation)
 type Setting struct {
-	Item       string            `json:"item"`
+	Item       string            `plist:",omitempty" json:"item"`
 	Enabled    *bool             `plist:",omitempty" json:"enabled,omitempty"`
 	DeviceName *string           `plist:",omitempty" json:"device_name,omitempty"`
 	HostName   *string           `plist:",omitempty" json:"hostname,omitempty"`
@@ -185,7 +223,7 @@ type ManagedApplicationConfiguration struct {
 }
 
 type ApplicationConfiguration struct {
-	Identifier    string            `json:"identifier,omitempty"`
+	Identifier    string            `plist:",omitempty" json:"identifier,omitempty"`
 	Configuration map[string]string `plist:",omitempty" json:"configuration,omitempty"` // TODO: string map is temporary
 }
 
@@ -216,7 +254,7 @@ type AdminAccount struct {
 }
 
 type OSUpdate struct {
-	ProductKey string `json:"product_key"`
+	ProductKey string `plist:",omitempty" json:"product_key"`
 	/*
 		One of the following:
 		Default: Download and/or install the software update, depending on the current device state. See the UpdateResults dictionary, below, to determine which InstallAction is scheduled.
@@ -225,7 +263,7 @@ type OSUpdate struct {
 		NotifyOnly: Download the software update and notify the user via the App Store (macOS only).
 		InstallLater: Download the software update and install it at a later time (macOS only).
 	*/
-	InstallAction string `json:"install_action"`
+	InstallAction string `plist:",omitempty" json:"install_action"`
 }
 
 // ScheduleOSUpdate runs update(s) immediately

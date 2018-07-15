@@ -83,8 +83,8 @@ type Policy struct {
 	TableName struct{}      `sql:"policies"`
 	UDID      string        `sql:"uuid,pk"`
 
-	PolicyConfig  `sql:"config,notnull"`
-	PolicyOptions `sql:"options,notnull"`
+	Config PolicyConfig  `sql:"config,notnull"`
+	Options PolicyOptions `sql:"options,notnull"`
   Content   string        `sql:"content"` //////////////////////////////////////////////// Does This Break if Parsed Null
 
 
@@ -100,5 +100,5 @@ type PolicyConfig struct {
 }
 
 type PolicyOptions struct { // Lots of Optional Values
-	//PayloadInstallApplication //FIXEME TEMP
+	InstallApplication
 }

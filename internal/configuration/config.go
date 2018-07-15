@@ -40,6 +40,9 @@ func newConfig() Config {
 		Domain:   "mdm.acme.com",
 		Verbose:  false,
 		LogFile:  "data/log.txt",
+		APNScert: "data/PushCert.p123",
+		APNSProduction: true,
+		APNSpass: "password",
 		Port:     8000,
 		Database: "postgres://postgres:@postgres/postgres",
 	}
@@ -51,6 +54,9 @@ type Config struct {
 	Domain   string `json:"domain"`
 	Verbose  bool   `json:"verbose"`
 	LogFile  string `json:"logFile"`
+	APNScert string `json:"APNScert"`
+	APNSProduction bool `json:"APNSProduction"`
+	APNSpass string `json:"APNSpass"`
 	Port     int    `json:"port"`
 	Database string `json:"database"`
 }

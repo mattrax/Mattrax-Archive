@@ -25,9 +25,11 @@ import (
 	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
-var pgdb = mdb.GetDatabase()
-var log = mlg.GetLogger()
-var config = mcf.GetConfig() // Get The Internal State
+var ( // Get The Internal State
+	pgdb = mdb.GetDatabase()
+	log = mlg.GetLogger()
+	config = mcf.GetConfig()
+)
 
 /* API Endpoints */
 
@@ -48,11 +50,8 @@ func pingApnsHandler(w http.ResponseWriter, r *http.Request) { // TEMP: This And
 
 	for _, device := range devices {
 		if device.DeviceState == 3 {
-			log.Debug("APNS Update Sent To Device " + device.UDID)
-			status := apns.DeviceUpdate(device)
-
-			if !status { //Custom Error Handling (Detect Unenrolled Devices)
-
+			if err := apns.DeviceUpdate(device); err != nil { //TODO Custom Error Handling (Detect Unenrolled Devices)
+				log.Debug(err)
 				//fmt.Fprintf(w, "Error Sending APNS Update To The Device: " + device.UDID)
 
 				/*log.WithFields(mlg.Fields{

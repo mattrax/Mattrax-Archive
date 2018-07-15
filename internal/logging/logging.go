@@ -9,8 +9,10 @@ import (
 	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
 )
 
-var config = mcf.GetConfig() // Get The Internal State
-var log = logrus.New()       // The Logger
+var (
+	config = mcf.GetConfig() // Get The Internal State
+ 	log = logrus.New()       // The Logger
+)
 type Fields = logrus.Fields  // Export Logrus Fields (So It Does Have To Be Imported By Another Package)
 
 //TODO: Go Doc

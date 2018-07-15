@@ -32,7 +32,7 @@ func NewPayload(request *Command) (*Payload, error) {
 	case "InstallApplication":
 		payload.Command.InstallApplication = request.InstallApplication
 
-	case "AccountConfiguration":
+	/*case "AccountConfiguration":
 		payload.Command.AccountConfiguration = request.AccountConfiguration
 
 	case "ScheduleOSUpdateScan":
@@ -85,7 +85,7 @@ func NewPayload(request *Command) (*Payload, error) {
 
 	case "Settings":
 		payload.Command.Settings = request.Settings
-
+		*/
 	case "ProfileList",
 		"ProvisioningProfileList",
 		"CertificateList",

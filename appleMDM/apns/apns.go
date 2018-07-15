@@ -16,6 +16,7 @@ import (
 	"github.com/RobotsAndPencils/buford/payload"     // Apple Push Notification Service -> Payloads
 	"github.com/RobotsAndPencils/buford/push"        // Apple Push Notification Service -> Push
 
+  errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
 	// Internal Functions
 	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
 	mdb "github.com/mattrax/Mattrax/internal/database"      //Mattrax Database
@@ -58,18 +59,16 @@ func loadAPNSCertificate(certFile string, password string) *tls.Certificate {
 }
 */
 
-func DeviceUpdate(_device structs.Device) bool { //TODO: Clean This Up (Maybe Remove Client And Make It Global)
+func DeviceUpdate(_device structs.Device) error { //TODO: Clean This Up (Maybe Remove Client And Make It Global)
 	cert, err := certificate.Load("data/PushCert.p12", "password") //TODO: Load This From Config (Maybe .env)
 
 	if err != nil {
-		log.Error(err) //TODO: Should Exit
-		return false
+		return err //TODO: Should Exit
 	}
 
 	client, err := push.NewClient(cert)
 	if err != nil {
-		log.Error(err)
-		return false
+		return err
 	}
 
 	service := push.NewService(client, push.Production)
@@ -80,8 +79,7 @@ func DeviceUpdate(_device structs.Device) bool { //TODO: Clean This Up (Maybe Re
 	}
 	b, err := json.Marshal(p)
 	if err != nil {
-		log.Error(err)
-		return false
+		return err
 	}
 
 	// push the notification:
@@ -89,17 +87,16 @@ func DeviceUpdate(_device structs.Device) bool { //TODO: Clean This Up (Maybe Re
 
 	if !push.IsDeviceTokenValid(deviceToken) {
 		log.Warning("The Device Token Is Incorrect")
-		return false
+		return errors.New("Invalid Token")
 	}
 
 	id, err := service.Push(deviceToken, nil, b)
 	if err != nil {
-		log.Error("1", err)
-		return false
+		return err
 	}
 
 	log.Debug("APNS ID: " + id)
-	return true
+	return nil
 }
 
 /*cert, err := certificate.Load("PushCert.p12", "password")
