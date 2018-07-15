@@ -41,7 +41,7 @@ func Mount(r *mux.Router) {
 	restAPI.Mount(r.PathPrefix("/api/").Subrouter())
 
 	// MDM Device Endpoints
-	r.Handle("/checkin", errors.Handler(checkinHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")
+	r.Handle("/inform", errors.Handler(informHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")
 	r.Handle("/server", errors.Handler(serverHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm")
 }
 
@@ -53,8 +53,8 @@ func enrollHandler(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "data/enroll.mobileconfig")
 }
 
-// The "/checkin" route is used to check if the device can join the mdm and update its push token to the server
-func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
+// The "/inform" route is used to check if the device can join the mdm and update its push token to the server (In The Apple Docs This Is Refered To As The Check-In Route)
+func informHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	//Parse The Request
 	var cmd structs.CheckinCommand
 	if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil { return 403, err }

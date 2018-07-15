@@ -111,7 +111,7 @@
 			<key>AccessRights</key>
 			<integer>8191</integer>
 			<key>CheckInURL</key>
-			<string>https://mdm.otbeaumont.me/apple/checkin</string>
+			<string>https://mdm.otbeaumont.me/apple/inform</string>
 			<key>CheckOutWhenRemoved</key>
 			<true/>
 			<key>IdentityCertificateUUID</key>
