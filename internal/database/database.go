@@ -5,8 +5,8 @@ import (
 	"github.com/go-pg/pg" // Database (Postgres)
 
 	// Internal Functions
-	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
-	mlg "github.com/mattrax/mattrax/internal/logging"       //Mattrax Logging
+	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
+	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
 )
 
 var log = mlg.GetLogger()

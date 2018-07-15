@@ -17,12 +17,12 @@ import (
 	"github.com/RobotsAndPencils/buford/push"        // Apple Push Notification Service -> Push
 
 	// Internal Functions
-	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
-	mdb "github.com/mattrax/mattrax/internal/database"      //Mattrax Database
-	mlg "github.com/mattrax/mattrax/internal/logging"       //Mattrax Logging
+	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
+	mdb "github.com/mattrax/Mattrax/internal/database"      //Mattrax Database
+	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
 
 	// Internal Modules
-	structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
 var pgdb = mdb.GetDatabase()

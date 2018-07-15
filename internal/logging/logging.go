@@ -6,7 +6,7 @@ import (
 	logrus "github.com/sirupsen/logrus" // Logging
 
 	// Internal Functions
-	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
+	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
 )
 
 var config = mcf.GetConfig() // Get The Internal State

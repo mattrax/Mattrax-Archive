@@ -17,16 +17,16 @@ import (
 	"github.com/groob/plist" //Plist Parsing
 
 	// Internal Functions
-	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
-	mdb "github.com/mattrax/mattrax/internal/database"      //Mattrax Database
-	errors "github.com/mattrax/mattrax/internal/errors"     // Mattrax Error Handling
-	mlg "github.com/mattrax/mattrax/internal/logging"       //Mattrax Logging
+	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
+	mdb "github.com/mattrax/Mattrax/internal/database"      //Mattrax Database
+	errors "github.com/mattrax/Mattrax/internal/errors"     // Mattrax Error Handling
+	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
 
 	// Internal Modules
-	restAPI "github.com/mattrax/mattrax/appleMDM/api"     // The Apple MDM REST API
-	structs "github.com/mattrax/mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	restAPI "github.com/mattrax/Mattrax/appleMDM/api"     // The Apple MDM REST API
+	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 
-	micromdm "github.com/mattrax/mattrax/appleMDM/structs/micromdm" // MicroMDM Structs TEMP: Redo This MSG
+	micromdm "github.com/mattrax/Mattrax/appleMDM/structs/micromdm" // MicroMDM Structs TEMP: Redo This MSG
 )
 
 var pgdb = mdb.GetDatabase()

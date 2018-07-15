@@ -12,9 +12,9 @@ import (
 	"github.com/go-pg/pg" // Database (Postgres)
 
 	// Internal Functions
-	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
-	mdb "github.com/mattrax/mattrax/internal/database"      //Mattrax Database
-	mlg "github.com/mattrax/mattrax/internal/logging"       //Mattrax Logging
+	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
+	mdb "github.com/mattrax/Mattrax/internal/database"      //Mattrax Database
+	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
 )
 
 var pgdb = mdb.GetDatabase()

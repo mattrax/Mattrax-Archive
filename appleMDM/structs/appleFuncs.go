@@ -14,8 +14,8 @@ import (
 	"github.com/groob/plist" //Plist Parsing
 
 	// Internal Functions
-	mdb "github.com/mattrax/mattrax/internal/database" //Mattrax Database
-	mlg "github.com/mattrax/mattrax/internal/logging"  //Mattrax Logging
+	mdb "github.com/mattrax/Mattrax/internal/database" //Mattrax Database
+	mlg "github.com/mattrax/Mattrax/internal/logging"  //Mattrax Logging
 
 
 )
