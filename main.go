@@ -124,6 +124,7 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 // /server route
 
 
+//Remove All Evnly Formatted (Whietspaced) Structs
 // APNS Make Device update Every * Days -> Configurable Checkin Timeout Cause Big Deployments Will Need Longer
 // Does os.Exit(int) Run The Cleanup Functions If Not make it
 // For Test, Test "gofmt -s -w ." And Break If It Does't Parse 100%

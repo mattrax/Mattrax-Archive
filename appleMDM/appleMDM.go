@@ -10,7 +10,7 @@ package appleMDM
 import (
 	"fmt"
 	"net/http"
-	//"time"
+	"time"
 
 	//External Deps
 	"github.com/gorilla/mux" // HTTP Router
@@ -25,8 +25,6 @@ import (
 	// Internal Modules
 	restAPI "github.com/mattrax/Mattrax/appleMDM/api"     // The Apple MDM REST API
 	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
-
-	//micromdm "github.com/mattrax/Mattrax/appleMDM/structs/micromdm" // MicroMDM Structs TEMP: Redo This MSG
 )
 
 var pgdb = mdb.GetDatabase()
@@ -94,9 +92,7 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 			// TODO: Handle DEP (Currently Bypassed)
 			/* TEMP Bypass */
 			device.DeviceState = 3
-			if err := pgdb.Update(&device); err != nil {
-				return 403, err
-			}
+			if err := pgdb.Update(&device); err != nil { return 403, err }
 			log.Info("A New Device Joined The MDM: " + device.UDID)
 			/* End Bypass */
 
@@ -136,31 +132,159 @@ func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	}
 } //TODO: Double Check If It Tried To TokenUpdate Without DB Entry It Still Fails
 
-var run_commands = 1
-var done = true
+
+
+
+
+
+
+//TODO: Redo Exit Resaving DB Handler (Maybe Add it To The errors Router Controller)
+//TODO: Func Description -> Make Sure It Doesn't DOS Itself By Returning 403 Lots
+func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
+	//Parse The Request
+	var cmd structs.Response
+	if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil { return 403, err }
+	//Attempt To Get The Device From the Database
+	var device structs.Device
+	if err := pgdb.Model(&device).Where("uuid = ?", cmd.UDID).Select(); err != nil && errors.PgError(err) { return 403, err }
+	//Handle The Request
+	if device.DeviceState != 3 { return 403, errors.New("A Device That is Not Known To The MDM Tried To /server") } //TODO: Redo Message
+
+	if cmd.Status == "Acknowledged" {
+		if device.DevicePolicies.Inventory.CommandUUIDs[cmd.CommandUUID] != "" { //TODO: Cehck false isn't Returned By Blank
+			requestType := device.DevicePolicies.Inventory.CommandUUIDs[cmd.CommandUUID] //TODO: Rename This var
+
+			log.Warning("Inventory Req: ", cmd.CommandUUID)
+
+
+			//Switch Here -> requestType
+
+			if requestType == "ProfileList" {
+				device.DeviceDetails.Profiles = cmd.ProfileList
+
+
+			} else {
+				log.Warning("Don't Know How to Handle That")
+			}
+
+
+
+			delete(device.DevicePolicies.Inventory.CommandUUIDs, cmd.CommandUUID)
+		} else {
+			log.Warning("Authentication For Non Inventory Thingo")
+
+			//TODO
+
+
+
+
+		}
+	}
+
+
+
+
+
+
+
+
+
+
+
+
+	if (time.Now().Unix()-device.DevicePolicies.LastUpdate > 30) { //TODO: Redo Timer Mechanic And Set A Sane Default. Allow Changing Through config.json (Bigger Deployments Will Need it)
+		return doInventory(w, r, cmd, device)
+	} else {
+		if err := pgdb.Update(&device); err != nil { return 403, err }
+	  return 200, nil
+	}
+
+	//Check For Update Policies To Update
+
+	return 200, nil
+}
+
+func returnPlist(w http.ResponseWriter, payload *structs.Payload) error {
+	plistCmd, err := plist.MarshalIndent(payload, "\t")
+	if err != nil { return err }
+
+
+	//log.Info(string(plistCmd)) //TEMP
+	fmt.Fprintf(w, string(plistCmd)) //TODO: Can This be Done Without string() (Via Streams To Make It More Efficent)
+	return nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func temp(w http.ResponseWriter, r *http.Request) (int, error) {
+	request := new(structs.Command)
+	request.RequestType = "DeviceLock"
+	request.DeviceLock.Message = "Locked By Administrator" //Not Showing On Device
+
+	payload, err := structs.NewPayload(request)
+	if err != nil {
+		return 403, err
+	}
+
+	// Encode in a plist and print to stdout
+		// uses the github.com/groob/plist package
+	/*encoder := plist.NewEncoder(os.Stdout)
+	encoder.Indent("  ")
+	if err := encoder.Encode(payload); err != nil {
+		log.Fatal(err)
+	}*/ //Return The Stream For Web Request
+
+
+
+
+
+
+	plistCmd, err := plist.MarshalIndent(payload, "\t")
+	if err != nil { return 403, err }
+
+
+	log.Info(string(plistCmd)) //TEMP
+	fmt.Fprintf(w, string(plistCmd))
+
+
+	return 200, nil
+}
+
+
+
+
+
+
+
+
+
+
 var locked = false
 
-func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
+func Disabled(w http.ResponseWriter, r *http.Request) (int, error) {
 	response := &structs.Response{}
 	if err := plist.NewXMLDecoder(r.Body).Decode(response); err != nil { return 403, err }
 
 	if !locked {
 		locked = true
-
-		/*request := &structs.CommandRequest{ // Working Lock Device
-			UDID: "HelloWorld",
-			Command: structs.Command{
-				RequestType: "DeviceLock",
-
-			},
-		}*/
-
-		/*request := &structs.Command{ //Why & HEre
-				RequestType: "DeviceLock",
-				DeviceLock: &structs.DeviceLock{
-					Message: "Locked By Administrator",
-				},
-		}*/
 
 		request := new(structs.Command)
 		request.RequestType = "DeviceLock"
@@ -208,12 +332,18 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 
 
-
-
-
+//TODO: Come Up With a Better name For The /server route and the /checkin route and set it up
+//TODO: Reformat Apple MDM Code Files (MDM Routes Both In Independant Files)
+//TODO: Redo All Log Messages, Error Codes Before v1 Release
+//TODO: Handle Shutting Down In The Middle of An Inventory/Update And The The New Update Being Different
+//TODO: System For Updater To Backup The DB, Install Update Restart And Do Checks And Monitoring For An Hour (Auto Rollback On Certain Errors) Before Returning To Normal
+//TODO: Way To Using Postgres Get The Devices With A Policy
 //Handle Devices DOSing The Server When it Keeps Failing -> Prevent It Fast And Alert The Admin
 
-
+//TODO Maybe Do "/connect" Route Like The MDM Spec Wants For Trust Certs
+//Read Full MDM Spec And Make Everything Bar School Manager Intergration Work
+// VPP Support Through The API (Act As Proxy and Rate Limit, etc)
+// Label All Functions In The appleMDM/structs/database.go File
 //TODO: Is There A Need For A APNS Package?
 //Software Update Caching Server Built In (Separate Module)
 //TODO: Chnage /server to /checkin and /checkin to /register or something else

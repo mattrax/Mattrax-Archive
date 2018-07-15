@@ -25,12 +25,32 @@ type DeviceDetails struct {
 	SerialNumber string `sql:"SerialNumber,notnull"`
 	IMEI         string `sql:"IMEI,notnull"`
 	MEID         string `sql:"MEID,notnull"`
+	Profiles     []ProfileListItem `sql:"Profiles,notnull"`
 }
 
 type DeviceTokens struct {
 	Token       []byte `sql:"Token,notnull"`
 	PushMagic   string `sql:"PushMagic,notnull"`
 	UnlockToken []byte `sql:"UnlockToken,notnull"`
+}
+
+type DevicePolicies struct {
+	Installed []string `sql:"Installed,notnull"`
+	LastUpdate int64 `sql:"LastUpdate,notnull"`
+	Queued    []string `sql:"Queued,notnull"`
+	Inventory DevicePoliciesInventory `sql:"Inventory,notnull"`
+}
+
+type DevicePoliciesInventory struct {
+	State int `sql:"State,notnull"`
+	CommandUUIDs map[string]string `sql:"CommandUUIDs,notnull"` // [2]bool `sql:"CommandUUIDs,notnull"`
+	LastUpdate int64 `sql:"LastUpdate,notnull"`
+}
+
+/*
+type DevicePoliciesInventoryCommand struct {
+	RequestType string `sql:"RequestType,notnull"`
+	Status bool `sql:"Status,notnull"`
 }
 
 type DevicePolicies struct {
@@ -44,4 +64,41 @@ type DeviceCurrentAction struct {
 	UDID string `sql:"UDID,notnull"`
 	Name string `sql:"Name,notnull"`
 	//Actions []ServerCommand `sql:"Actions,notnull"` ///////// FIXME TEMP
+}
+*/
+
+
+
+
+
+
+
+
+
+
+
+
+
+type Policy struct {
+	TableName struct{}      `sql:"policies"`
+	UDID      string        `sql:"uuid,pk"`
+
+	PolicyConfig  `sql:"config,notnull"`
+	PolicyOptions `sql:"options,notnull"`
+  Content   string        `sql:"content"` //////////////////////////////////////////////// Does This Break if Parsed Null
+
+
+	//Config    PolicyConfig  `sql:"config,notnull"`
+	//Options   PolicyOptions `sql:"options,notnull"`
+}
+
+type PolicyConfig struct {
+	Name       string   `sql:"name"`
+	Targets    []string `sql:"targets"` //ie. Mac, IOS and Software Versions
+	PolicyType string   `sql:"name"`
+	//Type string
+}
+
+type PolicyOptions struct { // Lots of Optional Values
+	//PayloadInstallApplication //FIXEME TEMP
 }
