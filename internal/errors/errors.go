@@ -4,6 +4,10 @@ import (
 	"net/http"
 	"strings"
 
+	//"fmt" //TEMP
+	//"bytes" //TEMP
+	//"io/ioutil"
+
 	// External Deps
 	"github.com/go-pg/pg" // Database (Postgres)
 
@@ -16,8 +20,6 @@ import (
 var pgdb = mdb.GetDatabase()
 var log = mlg.GetLogger()
 var config = mcf.GetConfig() // Get The Internal State
-//var ( log *logrus.Logger; pgdb *pg.DB )
-//func Init(_pgdb *pg.DB, _log *logrus.Logger) { pgdb = _pgdb; log = _log }
 
 //FIXME: Redo This File. It Is A Mess And Uses Sketchy Code
 
@@ -62,6 +64,19 @@ func (err ErrorPG) Error() string {
 type Handler func(http.ResponseWriter, *http.Request) (int, error)
 
 func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	/* Body Dump */
+
+	/*body, err := ioutil.ReadAll(r.Body)
+	buf := bytes.NewBuffer(body) //buf := new(bytes.Buffer)
+	//buf.ReadFrom(r.Body)
+	log.Info(buf.String())*/
+
+
+	//r.Body.Close()
+	//fmt.Fprintf(w, "")
+	//return
+	/* End Body Dump */
+
 	returnStatus, err := fn(w, r) //returnStatus    // TODO HERE Inject: pgdb *pg.DB
 
 	if returnStatus == 200 {

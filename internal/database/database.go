@@ -24,7 +24,7 @@ func init() {
 		log.Fatal("Error Communicating With The Database: ", err)
 	} //logrus.Fatal
 	//if !correctSchema() { initDatabaseSchema() }
-	log.Info("The Database Connected Successfully")
+	log.Info("The Database Connected Successfuly")
 }
 
 // TODO: Go Doc

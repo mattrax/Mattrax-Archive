@@ -61,29 +61,8 @@ func main() {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 	srv.Shutdown(ctx) // Shutdown The Webserver
-	os.Exit(0)        //Exit Successfully
+	os.Exit(0)        //Exit Successfuly
 }
-
-/* Local Configuration */
-/*func newConfig() Config {
-  return Config{
-    Name: "Acme Inc",
-    Domain: "mdm.acme.com",
-    Verbose: false,
-    LogFile: "data/log.txt",
-    Port: 8000,
-    Database: "postgres://postgres:@postgres/postgres",
-  }
-}
-
-type Config struct {
-  Name string `json:"name"`
-  Domain string `json:"domain"`
-  Verbose bool `json:"verbose"`
-  LogFile string `json:"logFile"`
-  Port int `json:"port"`
-  Database string `json:"database"`
-}*/
 
 /* Database Initialisation */ //FIXME: Make This Entire Section Work
 func correctSchema() bool {
@@ -141,10 +120,11 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 //Now
 
 // TOMORROW:
-//	Clean The errorHandling Package + Chnage Import Name (utils)
-//	Clean/Redo The main.go File
-//	The /server Route
+// Redo The errors.go, apns.go and appleAPI.go
+// /server route
 
+
+// APNS Make Device update Every * Days -> Configurable Checkin Timeout Cause Big Deployments Will Need Longer
 // Does os.Exit(int) Run The Cleanup Functions If Not make it
 // For Test, Test "gofmt -s -w ." And Break If It Does't Parse 100%
 // FUTURE FEATURE: Redo Separator Between Blocks Of Function -> They Don't Stand Out Enought

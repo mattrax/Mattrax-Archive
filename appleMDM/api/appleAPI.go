@@ -10,6 +10,7 @@ package appleAPI
 import (
 	"fmt"
 	"net/http"
+	"encoding/json"
 
 	// External Deps
 	"github.com/gorilla/mux"                   // HTTP Router
@@ -45,15 +46,51 @@ func pingApnsHandler(w http.ResponseWriter, r *http.Request) { // TEMP: This And
 	}
 
 	for _, device := range devices {
-		log.Debug("APNS Update Sent To Device " + device.UDID)
-		status := apns.DeviceUpdate(device)
+		if device.DeviceState == 3 {
+			log.Debug("APNS Update Sent To Device " + device.UDID)
+			status := apns.DeviceUpdate(device)
 
-		if !status {
-			w.WriteHeader(http.StatusBadRequest)
-			fmt.Fprintf(w, "Error Sending APNS Update To The Device: "+device.UDID)
-			return
+			if !status { //Custom Error Handling (Detect Unenrolled Devices)
+
+				//fmt.Fprintf(w, "Error Sending APNS Update To The Device: " + device.UDID)
+
+				/*log.WithFields(mlg.Fields{
+			    "udid": device.UDID,
+					"DeviceState": device.DeviceState,
+					"DeviceDetails": device.DeviceDetails,
+			  }).Warning("Error Sending APNS Update")
+
+				log.WithFields(mlg.Fields{
+			    "udid": device.UDID,
+					"DeviceDetails": device.DeviceDetails,
+			  }).Debug("Error Sending APNS Update")*/
+
+
+				w.WriteHeader(http.StatusBadRequest)
+				json.NewEncoder(w).Encode(JSONStatus{
+					Success: true,
+					Message: "Error Sending APNS Update To Device",
+					Device: &structs.Device{
+						UDID: device.UDID,
+						DeviceState: device.DeviceState,
+						DeviceDetails: device.DeviceDetails,
+					},
+				})
+
+				return
+			}
 		}
 	}
 
-	fmt.Fprintf(w, "All Devices Have Been Told To Update")
+	json.NewEncoder(w).Encode(JSONStatus{
+		Success: true,
+		Message: "All Devices Have Been Told To Update",
+	})
+}
+
+
+type JSONStatus struct { //TODO: Move To Struts Package
+	Success bool `json:"status"`
+	Message string `json:"message"`
+	Device *structs.Device `json:"device,omitempty"`
 }

@@ -33,9 +33,23 @@ type DeviceTokens struct {
 }
 
 type DevicePolicies struct {
-	Queued    []string `sql:"queued,notnull"`
-	Installed []string `sql:"installed,notnull"`
+	CurrentAction DeviceCurrentAction `sql:"CurrentAction,notnull"` // FIXME: Probs This Is Optional
+	Queued    []string `sql:"Queued,notnull"`
+	Installed []string `sql:"Installed,notnull"`
+	LastUpdate int64 `sql:"LastUpdate,notnull"`
 }
+
+type DeviceCurrentAction struct {
+	UDID string `sql:"UDID,notnull"`
+	Name string `sql:"Name,notnull"`
+	Actions []ServerCommand `sql:"Actions,notnull"`
+}
+
+
+
+
+
+
 
 ///// Policies Model /////
 type Policy struct {
@@ -118,14 +132,15 @@ type ErrorChain struct {
 
 /* Server Response */
 type ServerCommand struct {
-	CommandUUID string
-	Command     ServerCommandBody //TODO: Replace With Any Stuct (interface)
+	CommandUUID string `plist:"CommandUUID,notnull"` //Check notnull work for plist
+	Command     ServerCommandBody `plist:"ServerCommandBody,notnull"` //TODO: Replace With Any Stuct (interface)
 }
 
 type ServerCommandBody struct { //TODO: Is This Used
-	RequestType string
+	RequestType string `plist:"RequestType,notnull"`
 	PayloadInstallApplication
 	PayloadInstallProfile
+	PayloadDeviceInformation
 }
 
 type PayloadInstallApplication struct {
@@ -134,5 +149,9 @@ type PayloadInstallApplication struct {
 }
 
 type PayloadInstallProfile struct {
-	Payload []byte
+	Payload []byte `plist:"Payload,omitempty"` //TODO Add This Here //TODO: Should I Have ,omitempty
+}
+
+type PayloadDeviceInformation struct {
+	Queries []string `plist:"Queries,omitempty"` //TODO: Should I Have ,omitempty
 }

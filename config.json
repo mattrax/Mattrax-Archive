@@ -3,6 +3,6 @@
   "domain": "mdm.otbeaumont.me",
   "verbose": true,
   "logFile": "data/log.txt",
-  "port": 8000,
+  "port": 8001,
   "database": "postgres://oscar.beaumont:@localhost/mattrax?sslmode=disable"
 }

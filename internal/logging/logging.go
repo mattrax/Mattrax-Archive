@@ -3,7 +3,7 @@ package logging
 import (
 	// External Deps
 	"github.com/rifflock/lfshook" // Controlling Outputs And Their Formatting
-	"github.com/sirupsen/logrus"  // Logging
+	logrus "github.com/sirupsen/logrus" // Logging
 
 	// Internal Functions
 	mcf "github.com/mattrax/mattrax/internal/configuration" //Mattrax Configuration
@@ -11,9 +11,11 @@ import (
 
 var config = mcf.GetConfig() // Get The Internal State
 var log = logrus.New()       // The Logger
+type Fields = logrus.Fields  // Export Logrus Fields (So It Does Have To Be Imported By Another Package)
 
 //TODO: Go Doc
 func init() {
+	if config.Verbose { log.Level = logrus.DebugLevel }
 	log.Formatter = &logrus.TextFormatter{
 		DisableColors:   false,
 		TimestampFormat: "02/01/06 15:04:05",
@@ -26,4 +28,4 @@ func init() {
 }
 
 //TODO: Go Doc
-func GetLogger() *logrus.Logger { return log }
+func GetLogger() *logrus.Logger { return log  }
