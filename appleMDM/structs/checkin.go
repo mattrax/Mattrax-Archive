@@ -1,13 +1,13 @@
 /**
  * Mattrax: An Open Source Device Management System
  * File Description: This File Has All of The Structs For The Checkin Hanlder.
- * Package Description: These Are The Structs For The Plist (Device Communication) and JSON (API) Data.
+ * Package Description: These Are The Structs and Helpers For Device Communication, The API and Database Communication.
  * A HUGE Thanks To MicroMDM. This Package Is A Modied Version Of The (github.com/micromdm/mdm) Package. It Is Used Under The MIT Licence and The Original Work Is Copyright Of MicroMDM.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
 
-package mdm
+package structs
 
 import "encoding/hex"
 
@@ -16,12 +16,12 @@ type CheckinCommand struct {
 	MessageType string // Either Authenticate, TokenUpdate or CheckOut
 	Topic       string
 	UDID        string
-	auth
-	update
+	Auth
+	Update
 }
 
 // Authenticate Message Type
-type auth struct {
+type Auth struct {
 	OSVersion    string
 	BuildVersion string
 	ProductName  string
@@ -35,12 +35,12 @@ type auth struct {
 }
 
 // TokenUpdate Mesage Type
-type update struct {
+type Update struct {
 	Token                 hexData
 	PushMagic             string
 	UnlockToken           hexData
 	AwaitingConfiguration bool
-	userTokenUpdate
+	userTokenUpdate //TODO: Do I Need These/What Devices Send It and Handle or Remove it
 }
 
 // TokenUpdate with user keys

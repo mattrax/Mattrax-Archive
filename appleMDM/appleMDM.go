@@ -26,7 +26,7 @@ import (
 	restAPI "github.com/mattrax/Mattrax/appleMDM/api"     // The Apple MDM REST API
 	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 
-	micromdm "github.com/mattrax/Mattrax/appleMDM/structs/micromdm" // MicroMDM Structs TEMP: Redo This MSG
+	//micromdm "github.com/mattrax/Mattrax/appleMDM/structs/micromdm" // MicroMDM Structs TEMP: Redo This MSG
 )
 
 var pgdb = mdb.GetDatabase()
@@ -141,32 +141,32 @@ var done = true
 var locked = false
 
 func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
-	response := &micromdm.Response{}
+	response := &structs.Response{}
 	if err := plist.NewXMLDecoder(r.Body).Decode(response); err != nil { return 403, err }
 
 	if !locked {
 		locked = true
 
-		/*request := &micromdm.CommandRequest{ // Working Lock Device
+		/*request := &structs.CommandRequest{ // Working Lock Device
 			UDID: "HelloWorld",
-			Command: micromdm.Command{
+			Command: structs.Command{
 				RequestType: "DeviceLock",
 
 			},
 		}*/
 
-		/*request := &micromdm.Command{ //Why & HEre
+		/*request := &structs.Command{ //Why & HEre
 				RequestType: "DeviceLock",
-				DeviceLock: &micromdm.DeviceLock{
+				DeviceLock: &structs.DeviceLock{
 					Message: "Locked By Administrator",
 				},
 		}*/
 
-		request := new(micromdm.Command)
+		request := new(structs.Command)
 		request.RequestType = "DeviceLock"
 		request.DeviceLock.Message = "Locked By Administrator" //Not Showing On Device
 
-		payload, err := micromdm.NewPayload(request)
+		payload, err := structs.NewPayload(request)
 		if err != nil {
 			return 403, err
 		}
@@ -214,6 +214,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 //Handle Devices DOSing The Server When it Keeps Failing -> Prevent It Fast And Alert The Admin
 
 
+//TODO: Is There A Need For A APNS Package?
 //Software Update Caching Server Built In (Separate Module)
 //TODO: Chnage /server to /checkin and /checkin to /register or something else
 // Features:

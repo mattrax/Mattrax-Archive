@@ -1,13 +1,13 @@
 /**
  * Mattrax: An Open Source Device Management System
  * File Description: This File Has All of The Structs For Errors Caused By The Other Files.
- * Package Description: These Are The Structs For The Plist (Device Communication) and JSON (API) Data.
+ * Package Description: These Are The Structs and Helpers For Device Communication, The API and Database Communication.
  * A HUGE Thanks To MicroMDM. This Package Is A Modied Version Of The (github.com/micromdm/mdm) Package. It Is Used Under The MIT Licence and The Original Work Is Copyright Of MicroMDM.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
 
-package mdm
+package structs
 
 type NSPOSIXErrorDomain int
 

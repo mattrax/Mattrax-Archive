@@ -36,7 +36,8 @@ func Mount(r *mux.Router) {
 }
 
 func pingApnsHandler(w http.ResponseWriter, r *http.Request) { // TEMP: This And APNS Handling Needs Redoing
-	devices := structs.GetDevices()
+	var devices []structs.Device
+	_ = pgdb.Model(&devices).Select() //TODO: Error Handling
 
 	if devices == nil { //[]Device{} {
 		log.Debug("Error Getting Devices Or There Are None")
