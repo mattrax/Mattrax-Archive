@@ -24,6 +24,7 @@ import (
 	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
 	mdb "github.com/mattrax/Mattrax/internal/database" //Mattrax Database
 	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
+  auth "github.com/mattrax/Mattrax/internal/authentication"
 
 	// Internal Modules
 	//restAPI "github.com/mattrax/Mattrax/windowsMDM/api" //The Windows MDM REST API
@@ -73,14 +74,95 @@ func enrollmentDiscover(w http.ResponseWriter, r *http.Request) (int, error) {
   bodyBytes, _ := ioutil.ReadAll(r.Body)
   log.Info(string(bodyBytes))
 
-  cmd := &soap.Envelope{ Body: soap.EnvelopeBody{ Payload: soap.DiscoverPayload{} } }
+  /*bodyBytes, _ := ioutil.ReadAll(r.Body)
+  log.Info(string(bodyBytes))
+  return 200, nil*/
+
+  envelope := soap.Envelope2{
+    A: "http://www.w3.org/2005/08/addressing",
+    S: "http://www.w3.org/2003/05/soap-envelope",
+  }
+
+  if err := xml.Unmarshal([]byte(string(bodyBytes)), &envelope); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
+
+  //if err := xml.NewDecoder(r.Body).Decode(&envelope); err != nil { return 403, err }
+  //cmd := soap.DiscoverPayload{}
+  //if err := xml.Unmarshal(envelope.Body.Payload, &cmd); err != nil { return 403, err }
+
+
+  //log.Info(env)
+
+  log.Warning(envelope.Header.Action.Payload)
+  log.Warning(envelope.Header.MessageID)
+  log.Warning(envelope.Header.ReplyTo.Address)
+  log.Warning(envelope.Header.To.Payload)
+  //log.Warning(cmd.Request.EmailAddress)
+
+
+  /*log.Warning(env.Header.Action.Payload)
+  log.Warning(env.Header.MessageID)
+  log.Warning(env.Header.ReplyTo.Address)
+  log.Warning(env.Header.To.Payload)
+  log.Warning(env.Header.To.AuthPolicies)
+  */
+
+
+
+  //log.Warning(string(env.Body.Payload))
+
+  //log.Warning(cmd.Request.EmailAddress) //Could Not be Email But Domain\Username
+
+
+
+
+
+
+  //Verify The To In The Headers Is Correct
+
+  //TODO: Check User Maybe (Is There Response For It)
+  //      Maybe Only Check The Email Is Of Correct Domains
+  //TODO: Check AuthPolicies Are In The Thing Before Using Them
+
+  //if auth.CheckUser
+  //log.Println(cmd)
+
+
+
+
+
+  return 200, nil
+}
+
+func djldk(w http.ResponseWriter, r *http.Request) (int, error) {
+  auth.IsUser("oscar")
+
+
+
+
+  bodyBytes, _ := ioutil.ReadAll(r.Body)
+  log.Info(string(bodyBytes))
+
+  //cmd := &soap.Envelope{ Body: soap.EnvelopeBody{ Payload: soap.DiscoverPayload{} } }
   //cmd.Body =
 
+  env := &soap.Envelope2{}
+  //Body
 
-  if err := xml.Unmarshal([]byte(string(bodyBytes)), cmd); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
 
-  log.Warning(cmd)
+  if err := xml.Unmarshal([]byte(string(bodyBytes)), env); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
 
+
+  /*cmd := &soap.DiscoverPayload{}
+  if err := xml.Unmarshal(env.Body.Payload, cmd); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
+
+  log.Info(env)
+
+  log.Warning(env.Header.Action.Payload)
+  log.Warning(env.Header.MessageID)
+  log.Warning(env.Header.ReplyTo.Address)
+  log.Warning(env.Header.To.Payload)
+  //log.Warning(string(env.Body.Payload))
+  log.Warning(cmd.Request.EmailAddress)*/
 
 
 
@@ -270,3 +352,4 @@ func enrollmentDiscover(w http.ResponseWriter, r *http.Request) (int, error) {
 
 //TODO:
 //  Add Thanks For The SOAP Library In Every Windows MDM File
+// Note The HTTP server response must not be chunked; it must be sent as one message.

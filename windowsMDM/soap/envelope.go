@@ -6,6 +6,66 @@ import (
 	//"bytes"
 )
 
+type Envelope2 struct {
+    XMLName xml.Name   `xml:"Envelope"` //http://www.w3.org/2003/05/soap-envelope
+		A	string   `xml:"xmlns:a,attr"`
+		S    string   `xml:"xmlns:s,attr"`
+
+		Header        Header2 //`xml:"s:Header"` //Header2
+		/*Body  struct {
+			Payload []byte `xml:",innerxml"`
+		} //`xml:"s:Body"` */
+}
+
+type Header2 struct {
+	//XMLName      xml.Name `xml:"s:Header"`
+	Action MustUnderstand //`xml:"a:Action"`
+	MessageID string //`xml:"http://www.w3.org/2005/08/addressing MessageID"`
+	ReplyTo HeaderReplyTo2 //`xml:"a:ReplyTo"`
+	To MustUnderstand //`xml:"a:To"`
+}
+
+type HeaderReplyTo2 struct {
+	Address string //`xml:"a:Address"`
+}
+
+//Payloads
+
+type DiscoverPayload struct {
+    XMLName xml.Name `xml:"Discover"`
+		Xmlns string `xml:"xmlns,attr"`
+		Request request `xml:"request"`
+}
+
+type request struct {
+	I string `xml:"xmlns:i,attr"`
+	EmailAddress string
+	OSEdition string
+	RequestVersion string
+	DeviceType string
+	ApplicationVersion string
+	AuthPolicies      []string `xml:"AuthPolicies>AuthPolicy"`
+	/*AuthPolicies []struct{
+		AuthPolicy []string `xml:"AuthPolicy"`
+	}*/
+
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 type Envelope struct {
     XMLName       xml.Name       `xml:"Envelope"`
 
@@ -25,15 +85,15 @@ type EnvelopeHeader struct {
 }*/
 type EnvelopeHeader struct {
 	XMLName      xml.Name `xml:"s:Header"`
-	Action interface{} `xml:"a:Action"`
+	Action MustUnderstand `xml:"a:Action"`
 	MessageID string `xml:"a:MessageID"`
 	ReplyTo HeaderReplyTo `xml:"a:ReplyTo"`
-	To interface{} `xml:"a:To"`
+	To MustUnderstand `xml:"a:To"`
 }
 
 type MustUnderstand struct {
 	MustUnderstand  int      `xml:"s:mustUnderstand,attr"`
-	Payload  interface{}        `xml:",chardata"`
+	Payload  string        `xml:",chardata"`
 }
 
 type HeaderReplyTo struct {
@@ -45,31 +105,64 @@ type EnvelopeBody struct {
     Payload interface{} // the empty interface lets us assign any other type
 }
 
-//Payloads
 
-type DiscoverPayload struct {
-    XMLName xml.Name `xml:"Discover"`
-		Xmlns string `xml:"xmlns,attr"`
-		Request request `xml:"request"`
+
+
+
+/*
+<s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+ xmlns:a="http://www.w3.org/2005/08/addressing">
+<s:Header>
+	<a:Action s:mustUnderstand="1">
+		http://schemas.microsoft.com/windows/management/2012/01/enrollment/IDiscoveryService/DiscoverResponse
+	</a:Action>
+	<ActivityId>
+		d9eb2fdd-e38a-46ee-bd93-aea9dc86a3b8
+	</ActivityId>
+	<a:RelatesTo>urn:uuid: 748132ec-a575-4329-b01b-6171a9cf8478</a:RelatesTo>
+</s:Header>
+<s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	 xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+	<DiscoverResponse
+		 xmlns="http://schemas.microsoft.com/windows/management/2012/01/enrollment">
+		<DiscoverResult>
+			<AuthPolicy>OnPremise</AuthPolicy>
+			<EnrollmentVersion>3.0</EnrollmentVersion>
+			<EnrollmentPolicyServiceUrl>
+				https://enrolltest.contoso.com/ENROLLMENTSERVER/DEVICEENROLLMENTWEBSERVICE.SVC
+			</EnrollmentPolicyServiceUrl>
+			<EnrollmentServiceUrl>
+				https://enrolltest.contoso.com/ENROLLMENTSERVER/DEVICEENROLLMENTWEBSERVICE.SVC
+			</EnrollmentServiceUrl>
+		</DiscoverResult>
+	</DiscoverResponse>
+</s:Body>
+</s:Envelope>
+*/
+
+
+func init() {
+	envelope := Envelope2{
+		S: "http://www.w3.org/2003/05/soap-envelope",
+		A: "http://www.w3.org/2005/08/addressing",
+		Header: Header2{
+			Action: MustUnderstand{
+				MustUnderstand: 1,
+				Payload: "http://schemas.microsoft.com/windows/management/2012/01/enrollment/IDiscoveryService/DiscoverResponse",
+			},
+
+
+		},
+	}
+
+
+	out, _ := xml.MarshalIndent(envelope, "", "   ") //TEMP Pretty Print
+	log.Println(string(out))
 }
 
-type request struct {
-	I string `xml:"xmlns:i,attr"`
-	EmailAddress string
-	OSEdition string
-	RequestVersion string
-	DeviceType string
-	ApplicationVersion string
-	/*AuthPolicies []struct{
-		AuthPolicy []string `xml:"AuthPolicy"`
-	}*/
-
-}
 
 
-
-
-
+/*
 func CreatePayload(Action string, MessageID string, ReplyTo string, To string) *Envelope {
     // Build the envelope (this could be farmed out to another func)
     env := &Envelope{
@@ -123,7 +216,7 @@ func init() {
 	log.Println(string(out))
 	//log.Println(buffer)
 }
-
+*/
 
 
 
