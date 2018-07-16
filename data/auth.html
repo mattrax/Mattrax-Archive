@@ -1,0 +1,20 @@
+<!DOCTYPE>
+<html>
+   <head>
+      <title>Working...</title>
+      <script>
+         function formSubmit() {
+            document.forms[0].submit();
+         }
+           //window.onload=formSubmit;
+      </script>
+   </head>
+   <body>
+     <h1>Mattrax authentication</h1>
+    <!-- appid below in post command must be same as appid in previous client https request. -->
+      <form method="post" action="ms-app://appid">
+         <p><input name="wresult" value="token value"/></p>
+         <input type="submit"/>
+      </form>
+   </body>
+</html>

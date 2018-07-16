@@ -2,31 +2,51 @@ package soap
 
 import (
 	"log"
-	"encoding/xml"
+	//"encoding/xml"
+	"github.com/juju/xml"
 	//"bytes"
 )
 
-type Envelope2 struct {
-    XMLName xml.Name   `xml:"Envelope"` //http://www.w3.org/2003/05/soap-envelope
-		A	string   `xml:"xmlns:a,attr"`
-		S    string   `xml:"xmlns:s,attr"`
 
-		Header        Header2 //`xml:"s:Header"` //Header2
-		/*Body  struct {
+type Envelope1 struct {
+    XMLName xml.Name   `xml:"s:Envelope"` //http://www.w3.org/2003/05/soap-envelope
+		XmlnsA	string   `xml:"xmlns:a,attr"` //EncodingStyle string         `xml:"http://schemas.xmlsoap.org/soap/envelope/ encodingStyle,attr"`
+		XmlnsS    string   `xml:"xmlns:s,attr"`
+
+		Header        Header2 `xml:"s:Header"` //Header2
+		Body  struct {
 			Payload []byte `xml:",innerxml"`
-		} //`xml:"s:Body"` */
+		} `xml:"s:Body"`
+}
+
+type Envelope2 struct {
+    XMLName xml.Name   `xml:"http://www.w3.org/2003/05/soap-envelope Envelope"` //http://www.w3.org/2003/05/soap-envelope
+		XmlnsA	string   `xml:"xmlns:a,attr"` //EncodingStyle string         `xml:"http://schemas.xmlsoap.org/soap/envelope/ encodingStyle,attr"`
+		XmlnsS    string   `xml:"xmlns:s,attr"`
+
+		Header        Header2 `xml:"http://www.w3.org/2003/05/soap-envelope Header"` //Header2
+		Body  struct {
+			Payload []byte `xml:",innerxml"`
+		} `xml:"http://www.w3.org/2003/05/soap-envelope Body"`
 }
 
 type Header2 struct {
+	//XMLName      xml.Name `xml:"s Header"`
+	Action MustUnderstand `xml:"http://www.w3.org/2005/08/addressing Action"`
+	MessageID string `xml:"http://www.w3.org/2005/08/addressing MessageID"`
+	ReplyTo HeaderReplyTo `xml:"http://www.w3.org/2005/08/addressing ReplyTo"`
+	To MustUnderstand `xml:"http://www.w3.org/2005/08/addressing To"`
+	/*
 	//XMLName      xml.Name `xml:"s:Header"`
 	Action MustUnderstand //`xml:"a:Action"`
 	MessageID string //`xml:"http://www.w3.org/2005/08/addressing MessageID"`
 	ReplyTo HeaderReplyTo2 //`xml:"a:ReplyTo"`
 	To MustUnderstand //`xml:"a:To"`
+	*/
 }
 
 type HeaderReplyTo2 struct {
-	Address string //`xml:"a:Address"`
+	Address string `xml:"http://www.w3.org/2005/08/addressing Address"`
 }
 
 //Payloads
@@ -141,6 +161,7 @@ type EnvelopeBody struct {
 */
 
 
+/*
 func init() {
 	envelope := Envelope2{
 		S: "http://www.w3.org/2003/05/soap-envelope",
@@ -159,7 +180,9 @@ func init() {
 	out, _ := xml.MarshalIndent(envelope, "", "   ") //TEMP Pretty Print
 	log.Println(string(out))
 }
+*/
 
+func init() { log.Println() }
 
 
 /*

@@ -11,7 +11,8 @@ import (
 	"fmt"
 	"net/http"
   "io/ioutil"
-  "encoding/xml"
+  //"encoding/xml"
+  "github.com/juju/xml"
   //"regexp"
 
 
@@ -24,7 +25,7 @@ import (
 	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
 	mdb "github.com/mattrax/Mattrax/internal/database" //Mattrax Database
 	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
-  auth "github.com/mattrax/Mattrax/internal/authentication"
+  //auth "github.com/mattrax/Mattrax/internal/authentication"
 
 	// Internal Modules
 	//restAPI "github.com/mattrax/Mattrax/windowsMDM/api" //The Windows MDM REST API
@@ -51,6 +52,9 @@ func Mount(r *mux.Router, ee *mux.Router) {
   //Main MDM Domain
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Windows Mobile Device Management Server!") }).Methods("GET")
   r.HandleFunc("/enroll", func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, "ms-device-enrollment:?mode=mdm", 301) }).Methods("GET") //ms-device-enrollment:?mode=mdm ms-device-enrollment:?mode=mdm&username=oscar@otbeaumont.me&servername=https://mdm.otbeaumont.me", 301)
+  r.HandleFunc("/auth", authHandler).Methods("GET")
+  r.Handle("/enrollmentService", errors.Handler(enrollmentService)).Methods("POST")
+
 
 
 
@@ -68,19 +72,200 @@ func Mount(r *mux.Router, ee *mux.Router) {
 
 
 
+
+
+
+
+func enrollmentService(w http.ResponseWriter, r *http.Request) (int, error) {
+  bodyBytes, _ := ioutil.ReadAll(r.Body)
+  log.Info(string(bodyBytes))
+
+  envelope := soap.Envelope{
+    //XmlnsA: "http://www.w3.org/2005/08/addressing",
+    //XmlnsS: "http://www.w3.org/2003/05/soap-envelope",
+  }
+
+  if err := xml.Unmarshal([]byte(string(bodyBytes)), &envelope); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
+
+
+
+
+
+
+
+
+  testing123 := &soap.GEnvelope{
+    XmlnsA: "http://www.w3.org/2005/08/addressing",
+    XmlnsS: "http://www.w3.org/2003/05/soap-envelope",
+    Header: soap.GHeader{
+      Action: soap.GMustUnderstand{
+        MustUnderstand: 1,
+        Payload: "http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy/IPolicy/GetPoliciesResponse",
+      },
+      RelatesTo: envelope.Header.MessageID,
+    },
+  }
+
+  testing123.Body.Xsi = "http://www.w3.org/2001/XMLSchema-instance"
+  testing123.Body.Xsd = "http://www.w3.org/2001/XMLSchema"
+  testing123.Body.Payload = []byte(`<GetPoliciesResponse
+             xmlns="http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy">
+            <response>
+            <policyID />
+              <policyFriendlyName xsi:nil="true"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+              <nextUpdateHours xsi:nil="true"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+              <policiesNotChanged xsi:nil="true"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+              <policies>
+                <policy>
+                  <policyOIDReference>0</policyOIDReference>
+                  <cAs xsi:nil="true" />
+                  <attributes>
+                    <commonName>CEPUnitTest</commonName>
+                    <policySchema>3</policySchema>
+                    <certificateValidity>
+                      <validityPeriodSeconds>1209600</validityPeriodSeconds>
+                      <renewalPeriodSeconds>172800</renewalPeriodSeconds>
+                    </certificateValidity>
+                    <permission>
+                      <enroll>true</enroll>
+                      <autoEnroll>false</autoEnroll>
+                    </permission>
+                    <privateKeyAttributes>
+                      <minimalKeyLength>2048</minimalKeyLength>
+                      <keySpec xsi:nil="true" />
+                      <keyUsageProperty xsi:nil="true" />
+                      <permissions xsi:nil="true" />
+                      <algorithmOIDReference xsi:nil="true" />
+                      <cryptoProviders xsi:nil="true" />
+                    </privateKeyAttributes>
+                    <revision>
+                      <majorRevision>101</majorRevision>
+                      <minorRevision>0</minorRevision>
+                    </revision>
+                    <supersededPolicies xsi:nil="true" />
+                    <privateKeyFlags xsi:nil="true" />
+                    <subjectNameFlags xsi:nil="true" />
+                    <enrollmentFlags xsi:nil="true" />
+                    <generalFlags xsi:nil="true" />
+                    <hashAlgorithmOIDReference>0</hashAlgorithmOIDReference>
+                    <rARequirements xsi:nil="true" />
+                    <keyArchivalAttributes xsi:nil="true" />
+                    <extensions xsi:nil="true" />
+                  </attributes>
+                </policy>
+              </policies>
+            </response>
+            <cAs xsi:nil="true" />
+            <oIDs>
+              <oID>
+                <value>1.3.14.3.2.29</value>
+                <group>1</group>
+                <oIDReferenceID>0</oIDReferenceID>
+                <defaultName>szOID_OIWSEC_sha1RSASign</defaultName>
+              </oID>
+            </oIDs>
+          </GetPoliciesResponse>`)
+
+  //testing123.Body =
+
+  out, _ := xml.MarshalIndent(testing123, "", "   ") //TEMP Pretty Print
+	log.Info(string(out))
+  //fmt.Fprintf(w, string(out))
+
+  fmt.Fprintf(w, `<s:Envelope
+   xmlns:a="http://www.w3.org/2005/08/addressing"
+   xmlns:s="http://www.w3.org/2003/05/soap-envelope">
+   <s:Header>
+     <a:Action s:mustUnderstand="1">
+ http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy/IPolicy/GetPoliciesResponse
+     </a:Action>
+   </s:Header>
+   <s:Body
+     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+     <GetPoliciesResponse   xmlns="http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy">
+       <response>
+         <policies>
+           <policy>
+             <attributes>
+               <policySchema>3</policySchema>
+               <privateKeyAttributes>
+                 <minimalKeyLength>2048</minimalKeyLength>
+                 <algorithmOIDReferencexsi:nil="true"/>
+               </privateKeyAttributes>
+               <hashAlgorithmOIDReference xsi:nil="true"></hashAlgorithmOIDReference>
+             </attributes>
+           </policy>
+         </policies>
+       </response>
+       <oIDs>
+         <oID>
+           <value>1.3.6.1.4.1.311.20.2</value>
+           <group>1</group>
+           <oIDReferenceID>5</oIDReferenceID>
+           <defaultName>Certificate Template Name</defaultName>
+         </oID>
+       </oIDs>
+     </GetPoliciesResponse>
+   </s:Body>
+ </s:Envelope>`)
+
+  return 200, nil
+}
+
+
+
+
+
+
+
+
+
+
+
+
+func authHandler(w http.ResponseWriter, r *http.Request) {
+  w.Header().Set("Content-Type", "text/html")
+  fmt.Fprintf(w, `<!DOCTYPE>
+  <html>
+     <head>
+        <title>Working...</title>
+        <script>
+           function formSubmit() {
+              document.forms[0].submit();
+           }
+           window.onload=formSubmit;
+        </script>
+     </head>
+     <body>
+       <h1>Mattrax authentication</h1>
+      <!-- appid below in post command must be same as appid in previous client https request. -->
+        <form method="post" action="` + r.URL.Query().Get("appru") + `">
+           <p><input name="wresult" value="` + r.URL.Query().Get("appru") + `"/></p>
+           <input type="submit"/>
+        </form>
+     </body>
+  </html>
+`)
+}
+
+
 //TODO: Redo Error Returns
 // TODO: Doc
 func enrollmentDiscover(w http.ResponseWriter, r *http.Request) (int, error) {
   bodyBytes, _ := ioutil.ReadAll(r.Body)
-  log.Info(string(bodyBytes))
+  //log.Info(string(bodyBytes))
 
   /*bodyBytes, _ := ioutil.ReadAll(r.Body)
   log.Info(string(bodyBytes))
   return 200, nil*/
 
-  envelope := soap.Envelope2{
-    A: "http://www.w3.org/2005/08/addressing",
-    S: "http://www.w3.org/2003/05/soap-envelope",
+  envelope := soap.Envelope{
+    //XmlnsA: "http://www.w3.org/2005/08/addressing",
+    //XmlnsS: "http://www.w3.org/2003/05/soap-envelope",
   }
 
   if err := xml.Unmarshal([]byte(string(bodyBytes)), &envelope); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
@@ -92,10 +277,10 @@ func enrollmentDiscover(w http.ResponseWriter, r *http.Request) (int, error) {
 
   //log.Info(env)
 
-  log.Warning(envelope.Header.Action.Payload)
+  //log.Warning(envelope.Header.Action.Payload)
   log.Warning(envelope.Header.MessageID)
-  log.Warning(envelope.Header.ReplyTo.Address)
-  log.Warning(envelope.Header.To.Payload)
+  //log.Warning(envelope.Header.ReplyTo.Address)
+  //log.Warning(envelope.Header.To.Payload)
   //log.Warning(cmd.Request.EmailAddress)
 
 
@@ -113,7 +298,95 @@ func enrollmentDiscover(w http.ResponseWriter, r *http.Request) (int, error) {
   //log.Warning(cmd.Request.EmailAddress) //Could Not be Email But Domain\Username
 
 
+  /*
+  <s:Envelope xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+   xmlns:a="http://www.w3.org/2005/08/addressing">
+  <s:Header>
+    <a:Action s:mustUnderstand="1">
+      http://schemas.microsoft.com/windows/management/2012/01/enrollment/IDiscoveryService/DiscoverResponse
+    </a:Action>
+    <ActivityId>
+      d9eb2fdd-e38a-46ee-bd93-aea9dc86a3b8
+    </ActivityId>
+    <a:RelatesTo>urn:uuid: 748132ec-a575-4329-b01b-6171a9cf8478</a:RelatesTo>
+  </s:Header>
+  <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+    <DiscoverResponse
+       xmlns="http://schemas.microsoft.com/windows/management/2012/01/enrollment">
+      <DiscoverResult>
+        <AuthPolicy>Federated</AuthPolicy>
+        <EnrollmentVersion>3.0</EnrollmentVersion>
+        <EnrollmentPolicyServiceUrl>
+          https://enrolltest.contoso.com/ENROLLMENTSERVER/DEVICEENROLLMENTWEBSERVICE.SVC
+        </EnrollmentPolicyServiceUrl>
+        <EnrollmentServiceUrl>
+          https://enrolltest.contoso.com/ENROLLMENTSERVER/DEVICEENROLLMENTWEBSERVICE.SVC
+        </EnrollmentServiceUrl>
+        <AuthenticationServiceUrl>
+          https://portal.manage.contoso.com/LoginRedirect.aspx
+        </AuthenticationServiceUrl>
+      </DiscoverResult>
+    </DiscoverResponse>
+  </s:Body>
+</s:Envelope>
+*/
 
+  testing123 := &soap.GEnvelope{
+    XmlnsA: "http://www.w3.org/2005/08/addressing",
+    XmlnsS: "http://www.w3.org/2003/05/soap-envelope",
+    Header: soap.GHeader{
+      Action: soap.GMustUnderstand{
+        MustUnderstand: 1,
+        Payload: "http://schemas.microsoft.com/windows/management/2012/01/enrollment/IDiscoveryService/DiscoverResponse",
+      },
+      ActivityId: "d9eb2fdd-e38a-46ee-bd93-aea9dc86a3b8",
+      RelatesTo: envelope.Header.MessageID,
+    },
+    /*Body: &soap.GTesting{
+Payload: `<DiscoverResponse
+   xmlns="http://schemas.microsoft.com/windows/management/2012/01/enrollment">
+  <DiscoverResult>
+    <AuthPolicy>Federated</AuthPolicy>
+    <EnrollmentVersion>3.0</EnrollmentVersion>
+    <EnrollmentPolicyServiceUrl>
+      https://enrolltest.contoso.com/ENROLLMENTSERVER/DEVICEENROLLMENTWEBSERVICE.SVC
+    </EnrollmentPolicyServiceUrl>
+    <EnrollmentServiceUrl>
+      https://enrolltest.contoso.com/ENROLLMENTSERVER/DEVICEENROLLMENTWEBSERVICE.SVC
+    </EnrollmentServiceUrl>
+    <AuthenticationServiceUrl>
+      https://portal.manage.contoso.com/LoginRedirect.aspx
+    </AuthenticationServiceUrl>
+  </DiscoverResult>
+  </DiscoverResponse>`, },*/
+  }
+
+  testing123.Body.Xsi = "http://www.w3.org/2001/XMLSchema-instance"
+  testing123.Body.Xsd = "http://www.w3.org/2001/XMLSchema"
+  testing123.Body.Payload = []byte(`<DiscoverResponse
+           xmlns="http://schemas.microsoft.com/windows/management/2012/01/enrollment">
+          <DiscoverResult>
+            <AuthPolicy>Federated</AuthPolicy>
+            <EnrollmentVersion>3.0</EnrollmentVersion>
+            <EnrollmentPolicyServiceUrl>
+              https://mdm.otbeaumont.me/windows/enrollmentService?policies
+            </EnrollmentPolicyServiceUrl>
+            <EnrollmentServiceUrl>
+              https://mdm.otbeaumont.me/windows/enrollmentService
+            </EnrollmentServiceUrl>
+            <AuthenticationServiceUrl>
+              https://` + config.Domain + `/windows/auth
+            </AuthenticationServiceUrl>
+          </DiscoverResult>
+        </DiscoverResponse>`)
+
+  //testing123.Body =
+
+  out, _ := xml.MarshalIndent(testing123, "", "   ") //TEMP Pretty Print
+	log.Info(string(out))
+  fmt.Fprintf(w, string(out))
+  //Send
 
 
 
@@ -133,221 +406,34 @@ func enrollmentDiscover(w http.ResponseWriter, r *http.Request) (int, error) {
   return 200, nil
 }
 
-func djldk(w http.ResponseWriter, r *http.Request) (int, error) {
-  auth.IsUser("oscar")
 
 
 
 
-  bodyBytes, _ := ioutil.ReadAll(r.Body)
-  log.Info(string(bodyBytes))
 
-  //cmd := &soap.Envelope{ Body: soap.EnvelopeBody{ Payload: soap.DiscoverPayload{} } }
-  //cmd.Body =
 
-  env := &soap.Envelope2{}
-  //Body
 
 
-  if err := xml.Unmarshal([]byte(string(bodyBytes)), env); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
 
 
-  /*cmd := &soap.DiscoverPayload{}
-  if err := xml.Unmarshal(env.Body.Payload, cmd); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
 
-  log.Info(env)
 
-  log.Warning(env.Header.Action.Payload)
-  log.Warning(env.Header.MessageID)
-  log.Warning(env.Header.ReplyTo.Address)
-  log.Warning(env.Header.To.Payload)
-  //log.Warning(string(env.Body.Payload))
-  log.Warning(cmd.Request.EmailAddress)*/
 
 
 
 
 
 
-  return 200, nil
 
 
 
-  //Parse The Request
-  //cmd := &structs.Envelope{}
-  //cmd := &soap.ResponseEnvelope{}
-  //if err := xml.Unmarshal([]byte(string(bodyBytes)), cmd); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
 
-  /*if cmd.Header.Action != "http://schemas.microsoft.com/windows/management/2012/01/enrollment/IDiscoveryService/Discover" {
-    return 403, errors.New("The Device Is Not Discovering ???")
-  }
 
-  if !regexp.MustCompile("^[A-Za-z0-9._%+-]+@otbeaumont.me$").MatchString(cmd.Body.Discover.Request.EmailAddress) { // TODO: Replace With Check Users In The Database/Active Directory
-    return 403, errors.New("The Device's Email Is Invalid/Not Of The Correct Domain")
-  }*/
 
-  /*soapResponse, _ := soap.SoapFomMTOM(bodyBytes)
-  cmd := soap.ResponseEnvelope{}
-	_ = xml.Unmarshal(soapResponse, &cmd)
-  */
 
 
-  data := `<?xml version="1.0"?>
-<s:Envelope xmlns:a="http://www.w3.org/2005/08/addressing" xmlns:s="http://www.w3.org/2003/05/soap-envelope">
-<s:Header>
-    <a:Action s:mustUnderstand="1">http://schemas.microsoft.com/windows/management/2012/01/enrollment/IDiscoveryService/Discover</a:Action>
-    <a:MessageID>urn:uuid:748132ec-a575-4329-b01b-6171a9cf8478</a:MessageID>
-    <a:ReplyTo>
-        <a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address>
-    </a:ReplyTo>
-    <a:To s:mustUnderstand="1">https://EnterpriseEnrollment.otbeaumont.me:443/EnrollmentServer/Discovery.svc</a:To>
-</s:Header>
 
 
-<s:Body>
-    <Discover xmlns="http://schemas.microsoft.com/windows/management/2012/01/enrollment">
-    <request xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-    <EmailAddress>oscar@otbeaumont.me</EmailAddress>
-    <RequestVersion>4.0</RequestVersion>
-    <DeviceType>CIMClient_Windows</DeviceType>
-    <ApplicationVersion>10.0.17134.0</ApplicationVersion>
-    <OSEdition>48</OSEdition>
-    <AuthPolicies>
-        <AuthPolicy>OnPremise</AuthPolicy>
-        <AuthPolicy>Federated</AuthPolicy>
-    </AuthPolicies>
-</request>
-</Discover>
-</s:Body>
-</s:Envelope>`
-
-
-  //log.Info(soap.CheckFault([]byte(data)))
-
-  s := &soap.ResponseEnvelope{}
-  if err := xml.Unmarshal([]byte(data), s); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
-
-
-
-
-  log.Info("Done")
-  log.Info(s)
-  log.Printf("%+v\n", s)
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-  //MessageID := "urn:uuid: 748132ec-a575-4329-b01b-6171a9cf8478"//Get From The Input
-
-  /*body := &soap.Discover{
-    Xmlns: "http://schemas.microsoft.com/windows/management/2012/01/enrollment/",
-    Request: soap.DiscoverRequest {
-      Address: "Hello World",
-    },
-  }*/
-
-
-  /*env := &soap.Envelope{
-    XmlnsA: "http://www.w3.org/2005/08/addressing",
-    XmlnsS: "http://www.w3.org/2003/05/soap-envelope",
-    Header: &soap.Header{
-      Action: soap.MustUnderstand{
-        MustUnderstand: 1,
-        Value: "http://schemas.microsoft.com/windows/management/2012/01/enrollment/IDiscoveryService/Discover",
-      },
-      MessageID: MessageID,
-      ReplyTo: soap.ReplyTo{
-        Address: "http://www.w3.org/2005/08/addressing/anonymous",
-      },
-      To: soap.MustUnderstand{
-        MustUnderstand: 1,
-        Value: "https://mdm.otbeaumont.me/EnrollmentServer/Discovery.svc",
-      }, //TODO: This Or The Old Domain ????
-    },
-    Body: &soap.Body{
-      Payload: &soap.Discover{
-        Xmlns: "http://schemas.microsoft.com/windows/management/2012/01/enrollment/",
-        MessageID: "bo",
-        //Request: soap.DiscoverRequest {
-        //  Address: "Hello World",
-        //
-        //},
-      },
-    },
-	}
-
-
-
-	//env.Header.WsseSecurity.UsernameToken.Username.Value = "username"
-	//env.Header.WsseSecurity.UsernameToken.Password.Value = "pass"
-	//env.Body = &soap.Body{} // interface
-
-	output, err := xml.MarshalIndent(env, "", "   ")
-	if err != nil {
-		fmt.Printf("error: %v\n", err)
-	}
-
-	fmt.Println(string(output))*/
-
-
-
-
-
-
-  /*
-  fmt.Fprintf(w, ` <?xml version="1.0"?>
-    <s:Envelope xmlns:a="http://www.w3.org/2005/08/addressing"
-       xmlns:s="http://www.w3.org/2003/05/soap-envelope">
-      <s:Header>
-        <a:Action s:mustUnderstand="1">
-          http://schemas.microsoft.com/windows/management/2012/01/enrollment/IDiscoveryService/Discover
-        </a:Action>
-        <a:MessageID>urn:uuid: 748132ec-a575-4329-b01b-6171a9cf8478</a:MessageID>
-        <a:ReplyTo>
-          <a:Address>http://www.w3.org/2005/08/addressing/anonymous</a:Address>
-        </a:ReplyTo>
-        <a:To s:mustUnderstand="1">
-          https://mdm.otbeaumont.me/EnrollmentServer/Discovery.svc
-        </a:To>
-      </s:Header>
-      <s:Body>
-        <Discover xmlns="http://schemas.microsoft.com/windows/management/2012/01/enrollment/">
-          <request xmlns:i="http://www.w3.org/2001/XMLSchema-instance">
-            <EmailAddress>user@contoso.com</EmailAddress>
-            <OSEdition>3</OSEdition> <!--New -->
-            <RequestVersion>3.0</RequestVersion> <!-- Updated -->
-            <DeviceType>WindowsPhone</DeviceType> <!--Updated -->
-            <ApplicationVersion>10.0.0.0</ApplicationVersion>
-            <AuthPolicies>
-               <AuthPolicy>OnPremise</AuthPolicy>
-            </AuthPolicies>
-          </request>
-        </Discover>
-      </s:Body>
-    </s:Envelope>`)
-    */
-
-
-  return 200, nil
-}
 
 
 //TODO:
