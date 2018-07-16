@@ -9,6 +9,8 @@
 
 package structs
 
+//TODO: On All Structs Files Reodo notnull and omit if empty on everything. Remove All json serialising (For Now Redo For API)
+
 type Device struct {
 	TableName      struct{}       `sql:"devices"`
 	UDID           string         `sql:"uuid,pk"`
@@ -35,9 +37,9 @@ type DeviceTokens struct {
 }
 
 type DevicePolicies struct {
-	Installed []string `sql:"Installed,notnull"`
+	Installed map[string]DevicePolicy `sql:"Installed,notnull"`
 	LastUpdate int64 `sql:"LastUpdate,notnull"`
-	Queued    []string `sql:"Queued,notnull"`
+	Queued    map[string]DevicePolicy `sql:"Queued,notnull"`
 	Inventory DevicePoliciesInventory `sql:"Inventory,notnull"`
 }
 
@@ -76,15 +78,20 @@ type DeviceCurrentAction struct {
 
 
 
+//TODO Doc
+type DevicePolicy struct {
+	Status int
+	//Result 
+	//Policy Policy
+}
 
-
-
+//TODO Doc
 type Policy struct {
 	TableName struct{}      `sql:"policies"`
 	UDID      string        `sql:"uuid,pk"`
 
 	Config PolicyConfig  `sql:"config,notnull"`
-	Options PolicyOptions `sql:"options,notnull"`
+	Command Command `sql:"command,notnull"` // PolicyOptions `sql:"options,notnull"`
   Content   string        `sql:"content"` //////////////////////////////////////////////// Does This Break if Parsed Null
 
 

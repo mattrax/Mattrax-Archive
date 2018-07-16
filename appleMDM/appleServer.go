@@ -8,6 +8,7 @@
 package appleMDM
 
 import (
+  //"encoding/json"
   "encoding/hex" // TODO Elminate This By Storing In Structs And DB As It
 	"fmt"
 	"net/http"
@@ -25,10 +26,11 @@ import (
 )
 
 
-var temp_done = false
 
 
+var temp_done = false //TEMP
 
+//TODO: Redo All Exit HTTP Codes
 //TODO: Redo Exit Resaving DB Handler (Maybe Add it To The errors Router Controller)
 //TODO: Func Description -> Make Sure It Doesn't DOS Itself By Returning 403 Lots
 func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
@@ -41,6 +43,36 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	//Handle The Request
 	if device.DeviceState != 3 { return 200, errors.New("A Device That is Not Known To The MDM Tried To /server") } //TODO: Redo Message
   if !apns.IsDeviceTokenValid(hex.EncodeToString(device.DeviceTokens.Token)) { return 200, errors.New("The APNS Token Is Invalid For Device: " + device.UDID )} //TODO: Report To Admin (Maybe Add New DeviceState Of Lost (When It Stops COmmunicating))
+  //Handle Feedback From The Device
+  if cmd.Status != "Acknowledged" {
+    //Save Output And It Worked
+  } else if cmd.Status != "Error" {
+    //Save Output And It Failed
+  } else if cmd.Status != "CommandFormatError" {
+    log.Error("The Command Sent To The Device Was Malformed")
+
+    /*log.WithFields(logrus.Fields{ //TODO: Fill With Lots Of Debugging Details
+	    "animal": "walrus",
+	    "size":   10,
+	  }).Error("The Command Sent To The Device Was Malformed")*/
+
+
+  } else if cmd.Status != "NotNow" {
+    log.Fatal("This Isn't Working Yet") //TODO: Make This Mechanic
+  } else if cmd.Status != "Idle" {
+    log.Debug("The Device Is Idle")
+  } else {
+    //Handle Invalud Status From The Device
+  }
+
+
+
+
+
+
+
+
+
 
 
 
@@ -82,6 +114,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
   }
 
 
+  //TODO: Handle Policy Updates Before Inventory
 
 
 
@@ -93,93 +126,206 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 
 
-	/*if (time.Now().Unix()-device.DevicePolicies.LastUpdate > 30) { //TODO: Redo Timer Mechanic And Set A Sane Default. Allow Changing Through config.json (Bigger Deployments Will Need it)
+
+  //Policys
+  for uuid, devicePolicy := range device.DevicePolicies.Queued {
+    if devicePolicy.Status == 0 {
+      //Get The Policy From The Database
+      var policy structs.Policy
+    	if err := pgdb.Model(&policy).Where("uuid = ?", uuid).Select(); err != nil && errors.PgError(err) { return 403, err }
+      //Generate And Push The Policy
+      log.Info("Pushing Policy '" + policy.Config.Name + "' To Device '" + device.UDID + "'")
+
+      var command = policy.Command
+      command.RequestType = policy.Config.PolicyType
+      if payload, err := structs.NewPayload(&command); err != nil {
+        return 200, err
+      } else {
+        if err := returnPlist(w, payload); err != nil {
+          return 200, err
+        } else {
+          log.Warning("Deployed")
+
+          devicePolicy.Status = 1
+          device.DevicePolicies.Queued[uuid] = devicePolicy
+          if err := pgdb.Update(&device); err != nil && errors.PgError(err) { return 403, err } //TODO: Do I NEed erros.PgError For This Type Of Request
+          return 200, nil
+
+
+          //device.DevicePolicies.Queued[i].Status = 1
+
+
+          //devicePolicy.Status = 1
+          //if err := pgdb.Update(&devicePolicy); err != nil && errors.PgError(err) { return 403, err }
+
+        }
+        //return 200, returnPlist(w, payload)
+      }
+
+
+
+
+
+
+
+      break
+    }
+  }
+
+
+
+  //Move To Installed Once Feedback is Recieved
+  //delete(device.DevicePolicies.Queued, devicePolicy.UUID)
+  //device.DevicePolicies.Queued[devicePolicy.UUID]
+  //Status = 0
+
+  //if err := pgdb.Update(&device); err != nil && errors.PgError(err) { return 403, err } //TODO: Do I NEed erros.PgError For This Type Of Request
+
+  return 200, nil
+
+
+
+
+
+
+
+
+
+  /*
+  queuedPolicies := len(device.DevicePolicies.Queued)
+  if queuedPolicies > 0 {
+    for i, devicePolicy := range queuedPolicies {
+
+
+
+
+
+    }
+
+
+  } else { //TEMP Else And Content
+    log.Warning("No Policies To Push To Device")
+  }
+  */
+
+
+
+
+
+  /*
+  for i, devicePolicy := range device.DevicePolicies.Queued { // TODO: Don't Use This It Would Push Multiple Policys In One Request
+    if devicePolicy.Status == 0 {
+      var policy structs.Policy
+    	if err := pgdb.Model(&policy).Where("uuid = ?", devicePolicy.UUID).Select(); err != nil && errors.PgError(err) { return 403, err }
+
+      //TODO: Check Device And Target Match to Be Safe
+      //TODO: Handle No Device Being Returned -> Use The Custom If Erro handling Thingo
+
+      log.Info("Pushing Policy '" + policy.Config.Name + "' To Device '" + device.UDID + "'")
+
+      var command = policy.Command
+      command.RequestType = policy.Config.PolicyType
+      if payload, err := structs.NewPayload(&command); err != nil {
+        return 200, err
+      } else {
+        if err := returnPlist(w, payload); err != nil {
+          return 200, err
+        } else {
+
+          //device.DevicePolicies.Queued[i].Status = 1
+
+
+          //devicePolicy.Status = 1
+          //if err := pgdb.Update(&devicePolicy); err != nil && errors.PgError(err) { return 403, err }
+
+        }
+        //return 200, returnPlist(w, payload)
+      }
+
+
+
+
+      //Save devicePolicy
+
+    } else {
+      log.Warning("Already Sent To Device") //TEMP
+    }
+
+    return 200, nil
+    //Up
+
+
+    log.Info(devicePolicy.UUID)
+    log.Info(devicePolicy.Status)
+
+    //Get Policies Status
+
+
+
+
+    //
+
+
+
+  }*/
+
+  /*if (time.Now().Unix()-device.DevicePolicies.LastUpdate > 30) { //TODO: Redo Timer Mechanic And Set A Sane Default. Allow Changing Through config.json (Bigger Deployments Will Need it)
 		return doInventory(w, r, cmd, device)
 	} else {
 		if err := pgdb.Update(&device); err != nil { return 403, err }
 	  return 200, nil
 	}*/
 
-  //Policys
-  for _, policy_name := range device.DevicePolicies.Queued {
-    log.Info("Pushing Policy '" + policy_name + "' To Device '" + device.UDID + "'")
 
+
+
+
+
+
+
+    /*
     var policy structs.Policy
     if err := pgdb.Model(&policy).Where("uuid = ?", policy_name).Select(); err != nil { return 403, err }
-    //Check PolicY.PolicyConfig.Target Is Valid With Device
-
-    if !temp_done {
-      temp_done = true
-      log.Warning("Doing")
-
-      fmt.Fprintf(w, `<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-	<dict>
-		<key>RequestType</key>
-		<string>InstallApplication</string>
-		<key>iTunesStoreID</key>
-		<integer>640199958</integer>
-	</dict>
-</plist>`)
-
-      return 200, nil
+    //TODO: Check PolicY.PolicyConfig.Target Is Valid With Device
 
 
 
 
 
-
-      command := structs.Command{
-        RequestType: "InstallApplication",
-        InstallApplication: structs.InstallApplication{
-          ITunesStoreID: 640199958,
-    			Identifier: "developer.apple.wwdc-Release",
-        },
-      }
-
-      if payload, err := structs.NewPayload(&command); err != nil {
-        return 403, err
-      } else {
-        log.Info(payload.Command.InstallApplication.ITunesStoreID)
-        //if err := returnPlist(w, payload); err != nil { return 403, err}
-        return 200, returnPlist(w, payload)
-      }
-
-    }
-
-
-    /*command := &structs.Command{
-      RequestType: "InstallApplication",
-      //ITunesStoreID: 640199958,
-      InstallApplication: structs.InstallApplication{
-        ITunesStoreID: 640199958,
-      },
-     }*/
-     /*command := structs.InstallApplication{
-       RequestType: "InstallApplication",
-       ITunesStoreID: 640199958,
-     }
-    //command.InstallApplication.ITunesStoreID = 640199958
-
-    log.Println(command)
-
-    if payload, err := structs.NewPayload(command); err != nil {
+    var command = policy.Command
+    command.RequestType = "InstallApplication"
+    if payload, err := structs.NewPayload(&command); err != nil {
       return 403, err
     } else {
       log.Info(payload.Command.InstallApplication.ITunesStoreID)
-      //if err := returnPlist(w, payload); err != nil { return 403, err}
       return 200, returnPlist(w, payload)
-    }*/
-
-    //log.Info("Hey")
+    }
 
 
-    //log.Info(policy)
-    //parsePolicy(policy)
 
 
-  }
+
+
+    //Track Status Of Policy Deployment 0 Not Sent, 1 Sent, 2 Got Reply
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    return 200, nil
+
+
+    */
 
 	//Check For Update Policies To Update
 
@@ -196,7 +342,11 @@ func returnPlist(w http.ResponseWriter, payload *structs.Payload) error {
 	return nil
 }
 
-
+func deleteSlice(a []string, i int) []string {
+  copy(a[i:], a[i+1:])
+  a[len(a)-1] = ""
+  return a[:len(a)-1]
+}
 
 
 

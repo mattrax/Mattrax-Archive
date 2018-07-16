@@ -12,25 +12,29 @@ package structs
 
 
 
-
+/*
 import (
   "log"
   "github.com/groob/plist" //Plist Parsing
 )
 
 func init() {
-  payload := Command{
+  command := Command{
     RequestType: "InstallApplication",
     InstallApplication: InstallApplication{
       ITunesStoreID: 640199958,
-			ChangeManagementState: "Managed",
+			//ChangeManagementState: "Managed",
     },
   }
 
-  plistCmd, err := plist.MarshalIndent(payload, "\t")
-	if err != nil { log.Println(err); return }
-  log.Println(string(plistCmd))
-}
+	if payload, err := NewPayload(&command); err != nil {
+		log.Println(err)
+	} else {
+		plistCmd, err := plist.MarshalIndent(payload, "\t")
+		if err != nil { log.Println(err); return }
+	  log.Println(string(plistCmd))
+	}
+}*/
 
 /*
 type InstallApplication struct {
@@ -60,8 +64,10 @@ type Payload struct {
 }
 
 type Command struct {
-	RequestType string `plist:"RequestType,notnull" json:"request_type"`
-	DeviceInformation
+	RequestType string `plist:"RequestType,notnull"` //json:"request_type"
+	InstallApplication
+
+	/*DeviceInformation
 	InstallApplication
 	AccountConfiguration
 	ScheduleOSUpdateScan
@@ -80,7 +86,7 @@ type Command struct {
 	ApplyRedemptionCode
 	//InstallMedia
 	//RemoveMedia
-	Settings
+	Settings*/
 }
 
 // The following commands are in the order provided by the apple documentation.
@@ -150,13 +156,13 @@ type EnableLostMode struct {
 
 // InstallApplication is an InstallApplication MDM Command
 type InstallApplication struct {
-	ITunesStoreID         int                        `plist:"iTunesStoreID,omitempty" json:"itunes_store_id,omitempty"`
-	Identifier            string                     `plist:"Identifier,omitempty" json:"identifier,omitempty"`
+	ITunesStoreID         int                        `plist:"iTunesStoreID,omitempty"` //json:"itunes_store_id,omitempty"
+	/*Identifier            string                     `plist:"Identifier,omitempty" json:"identifier,omitempty"`
 	ManifestURL           string                     `plist:",omitempty" json:"manifest_url,omitempty"`
 	ManagementFlags       int                        `plist:",omitempty" json:"management_flags,omitempty"`
 	NotManaged            bool                       `plist:",omitempty" json:"not_managed,omitempty"`
 	ChangeManagementState string                     `plist:",omitempty" json:"change_management_state,omitempty"`
-	Options               *InstallApplicationOptions `plist:",omitempty" json:"options,omitempty"`
+	Options               *InstallApplicationOptions `plist:",omitempty" json:"options,omitempty"`*/ //TODO Renenable
 	// TODO: add remaining optional fields
 }
 

@@ -26,8 +26,8 @@ func NewPayload(request *Command) (*Payload, error) {
 
 	switch requestType {
 
-	case "DeviceInformation":
-		payload.Command.DeviceInformation = request.DeviceInformation
+	//case "DeviceInformation":
+	//	payload.Command.DeviceInformation = request.DeviceInformation
 
 	case "InstallApplication":
 		payload.Command.InstallApplication = request.InstallApplication

@@ -28,9 +28,9 @@ func NewDevice(cmd CheckinCommand) Device {
 			UnlockToken: []byte{},
 		},
 		DevicePolicies: DevicePolicies{
-			Installed:    []string{},
+			Installed:    map[string]DevicePolicy{},
 			LastUpdate: 	0,
-			Queued:       []string{},
+			Queued:       map[string]DevicePolicy{},
 			Inventory:		DevicePoliciesInventory{
 				State: 0,
 				CommandUUIDs: map[string]string{},
