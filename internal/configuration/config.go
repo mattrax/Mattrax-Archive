@@ -38,6 +38,7 @@ func newConfig() Config {
 	return Config{
 		Name:     "Acme Inc",
 		Domain:   "mdm.acme.com",
+		EEDomain: "enterpriseenrollment.acme.com",
 		Verbose:  false,
 		LogFile:  "data/log.txt",
 		APNScert: "data/PushCert.p123",
@@ -52,6 +53,7 @@ func newConfig() Config {
 type Config struct {
 	Name     string `json:"name"`
 	Domain   string `json:"domain"`
+	EEDomain string `json:"EEDomain"`
 	Verbose  bool   `json:"verbose"`
 	LogFile  string `json:"logFile"`
 	APNScert string `json:"APNScert"`

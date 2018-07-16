@@ -40,8 +40,8 @@ func Init() { log.Info("Loaded The Apple MDM Module") }
 
 //TODO
 func Mount(r *mux.Router) {
-	r.HandleFunc("/", genericResponse).Methods("GET")
-	r.HandleFunc("/enroll", enrollHandler).Methods("GET")
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Apple Mobile Device Management Server!") }).Methods("GET")
+	r.HandleFunc("/enroll", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "application/x-apple-aspen-config"); http.ServeFile(w, r, "data/enroll.mobileconfig") }).Methods("GET")
 
 	//REST API
 	restAPI.Mount(r.PathPrefix("/api/").Subrouter())
@@ -51,13 +51,6 @@ func Mount(r *mux.Router) {
 	r.Handle("/server", errors.Handler(serverHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm")
 }
 
-func genericResponse(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintf(w, "Apple Mobile Device Management Server!")
-}
-func enrollHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/x-apple-aspen-config")
-	http.ServeFile(w, r, "data/enroll.mobileconfig")
-}
 
 //TODO: handle Error Even If Status Code Is 200 For errors subpackage
 //TODO: Come Up With a Better name For The /server route and the /checkin route and set it up

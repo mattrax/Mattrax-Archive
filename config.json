@@ -1,6 +1,7 @@
 {
   "name": "Oscar's MDM",
   "domain": "mdm.otbeaumont.me",
+  "EEDomain": "enterpriseenrollment.otbeaumont.me",
   "verbose": true,
   "logFile": "data/log.txt",
   "APNS": {
