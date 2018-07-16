@@ -45,7 +45,7 @@ type DevicePolicies struct {
 
 type DevicePoliciesInventory struct {
 	State int `sql:"State,notnull"`
-	CommandUUIDs map[string]string `sql:"CommandUUIDs,notnull"` // [2]bool `sql:"CommandUUIDs,notnull"`
+	Commands map[string]string `sql:"CommandUUIDs,notnull"` // [2]bool `sql:"CommandUUIDs,notnull"`
 	LastUpdate int64 `sql:"LastUpdate,notnull"`
 }
 
@@ -81,7 +81,7 @@ type DeviceCurrentAction struct {
 //TODO Doc
 type DevicePolicy struct {
 	Status int
-	//Result 
+	//Result
 	//Policy Policy
 }
 

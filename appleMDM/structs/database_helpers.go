@@ -33,7 +33,7 @@ func NewDevice(cmd CheckinCommand) Device {
 			Queued:       map[string]DevicePolicy{},
 			Inventory:		DevicePoliciesInventory{
 				State: 0,
-				CommandUUIDs: map[string]string{},
+				Commands: map[string]string{},
 				LastUpdate: 0,
 			},
 		},

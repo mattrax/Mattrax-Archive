@@ -66,6 +66,7 @@ type Payload struct {
 type Command struct {
 	RequestType string `plist:"RequestType,notnull"` //json:"request_type"
 	InstallApplication
+	InstallProfile
 
 	/*DeviceInformation
 	InstallApplication

@@ -77,8 +77,8 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 
 	if cmd.Status == "Acknowledged" {
-		if device.DevicePolicies.Inventory.CommandUUIDs[cmd.CommandUUID] != "" { //TODO: Cehck false isn't Returned By Blank
-			requestType := device.DevicePolicies.Inventory.CommandUUIDs[cmd.CommandUUID] //TODO: Rename This var
+		if device.DevicePolicies.Inventory.Commands[cmd.CommandUUID] != "" { //TODO: Cehck false isn't Returned By Blank
+			requestType := device.DevicePolicies.Inventory.Commands[cmd.CommandUUID] //TODO: Rename This var
 
 			log.Warning("Inventory Req: ", cmd.CommandUUID)
 
@@ -95,7 +95,7 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 
 
-			delete(device.DevicePolicies.Inventory.CommandUUIDs, cmd.CommandUUID)
+			delete(device.DevicePolicies.Inventory.Commands, cmd.CommandUUID)
 		} else {
 			log.Warning("Authentication For Non Inventory Thingo")
 
@@ -372,8 +372,8 @@ func doInventory(w http.ResponseWriter, r *http.Request, cmd structs.Response, d
     if payload, err := structs.NewPayload(&structs.Command{ RequestType: "ProfileList" }); err != nil {
       return 403, err
     } else {
-      device.DevicePolicies.Inventory.CommandUUIDs[payload.CommandUUID] = "ProfileList"
-      //device.DevicePolicies.Inventory.CommandUUIDs[0] = payload.CommandUUID //TODO: Will This Cause Issues ????
+      device.DevicePolicies.Inventory.Commands[payload.CommandUUID] = "ProfileList"
+      //device.DevicePolicies.Inventory.Commands[0] = payload.CommandUUID //TODO: Will This Cause Issues ????
       if err := returnPlist(w, payload); err != nil { return 403, err}
     }
 
@@ -383,8 +383,8 @@ func doInventory(w http.ResponseWriter, r *http.Request, cmd structs.Response, d
     if payload, err := structs.NewPayload(&structs.Command{ RequestType: "ProvisioningProfileList" }); err != nil {
       return 403, err
     } else {
-      device.DevicePolicies.Inventory.CommandUUIDs[payload.CommandUUID] = "ProvisioningProfileList"
-      //device.DevicePolicies.Inventory.CommandUUIDs[1] = payload.CommandUUID //TODO: Will This Cause Issues ????
+      device.DevicePolicies.Inventory.Commands[payload.CommandUUID] = "ProvisioningProfileList"
+      //device.DevicePolicies.Inventory.Commands[1] = payload.CommandUUID //TODO: Will This Cause Issues ????
       if err := returnPlist(w, payload); err != nil { return 403, err}
     }
 
