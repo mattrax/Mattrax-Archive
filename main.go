@@ -46,12 +46,26 @@ func main() {
 	r := router.Host(config.Domain).Subrouter()
 
 	//Webroutes -> Management Interface
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Mattrax MDM Server!") }).Methods("GET")
+	//r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Mattrax MDM Server!") }).Methods("GET")
 	r.HandleFunc("/enroll", enrollmentHandler).Methods("GET")
 
 	//Webroutes -> Modules
 	appleMDM.Mount(r.PathPrefix("/apple/").Subrouter())
 	windowsMDM.Mount(r.PathPrefix("/windows/").Subrouter(), router.Host(config.EEDomain).Subrouter())
+
+
+
+
+
+	//React Interface
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("../MattraxUI/build"))))
+
+	r.HandleFunc("/api/testing", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{ data: 'Hello World' }") }).Methods("GET")
+
+
+
+
+
 
 	//Start The Webserver (In The Background)
 	go func() { startWebserver(router) }()

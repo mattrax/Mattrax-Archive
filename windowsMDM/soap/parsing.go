@@ -23,7 +23,14 @@ type Header struct {
 	MessageID string `xml:"http://www.w3.org/2005/08/addressing MessageID"`
 	ReplyTo HeaderReplyTo `xml:"http://www.w3.org/2005/08/addressing ReplyTo"`
 	To MustUnderstand `xml:"http://www.w3.org/2005/08/addressing To"`
+	Security HeaderSecurity `xml:"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd Security"`
+
 }
+
+type HeaderSecurity struct {
+	BinarySecurityToken string `"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd BinarySecurityToken"`
+}
+
 
 type HeaderReplyTo struct {
 	Address string `xml:"http://www.w3.org/2005/08/addressing Address"`
@@ -32,9 +39,9 @@ type HeaderReplyTo struct {
 //Payloads
 
 type DiscoverPayload struct {
-    XMLName xml.Name `xml:"Discover"`
-		Xmlns string `xml:"xmlns,attr"`
-		Request request `xml:"request"`
+  XMLName xml.Name `xml:"Discover"`
+	Xmlns string `xml:"xmlns,attr"`
+	Request request `xml:"request"`
 }
 
 type request struct {
@@ -52,3 +59,20 @@ type MustUnderstand struct {
 	MustUnderstand  int      `xml:"http://www.w3.org/2003/05/soap-envelope mustUnderstand,attr"`
 	Payload  string        `xml:",chardata"`
 }
+
+
+
+
+
+type SecurityBody struct {
+	RequestSecurityToken Security2Body `xml:"http://docs.oasis-open.org/ws-sx/ws-trust/200512 wst:RequestSecurityToken"`
+}
+
+type Security2Body struct {
+	BinarySecurityToken string `xml:"http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd wsse:BinarySecurityToken"`
+}
+
+
+//RequestSecurityToken
+
+// wsse:BinarySecurityToken

@@ -15,7 +15,10 @@ import (
   "github.com/juju/xml"
   //"regexp"
 
-
+	//"strings"
+	//"crypto/x509"
+	//"encoding/base64"
+	//"encoding/hex"
 
 	//External Deps
 	"github.com/gorilla/mux" //HTTP Router
@@ -53,8 +56,8 @@ func Mount(r *mux.Router, ee *mux.Router) {
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Windows Mobile Device Management Server!") }).Methods("GET")
   r.HandleFunc("/enroll", func(w http.ResponseWriter, r *http.Request) { http.Redirect(w, r, "ms-device-enrollment:?mode=mdm", 301) }).Methods("GET") //ms-device-enrollment:?mode=mdm ms-device-enrollment:?mode=mdm&username=oscar@otbeaumont.me&servername=https://mdm.otbeaumont.me", 301)
   r.HandleFunc("/auth", authHandler).Methods("GET")
-  r.Handle("/enrollmentService", errors.Handler(enrollmentService)).Methods("POST")
-
+  r.Handle("/enrollmentPolicyService", errors.Handler(enrollmentPolicyService)).Methods("POST")
+	r.Handle("/enrollmentService", errors.Handler(enrollmentService)).Methods("POST")
 
 
 
@@ -70,13 +73,87 @@ func Mount(r *mux.Router, ee *mux.Router) {
 
 
 
-
-
-
-
-
-
 func enrollmentService(w http.ResponseWriter, r *http.Request) (int, error) {
+	log.Info("")
+	log.Info("")
+	log.Info("")
+	log.Info("")
+
+	bodyBytes, _ := ioutil.ReadAll(r.Body)
+  log.Info(string(bodyBytes))
+
+	envelope := soap.Envelope{}
+  if err := xml.Unmarshal([]byte(string(bodyBytes)), &envelope); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
+
+	body := soap.SecurityBody{}
+  if err := xml.Unmarshal(envelope.Body.Payload, &body); err != nil { return 403, err } //TODO Replace The Input With The Direct Stream For Preformance
+
+
+	//log.Warning(envelope.Header.Security.BinarySecurityToken) //.Security.BinarySecurityToken
+
+	// wsse:BinarySecurityToken
+	log.Warning(body.RequestSecurityToken.BinarySecurityToken)
+
+
+
+	//fmt.Printf("%+v\n", envelope.Body)
+
+	//Security.BinarySecurityToken
+
+	//out := strings.TrimLeft(strings.TrimRight(string(bodyBytes), ),"</wsse:BinarySecurityToken>")
+
+	//test := strings.NewReplacer("http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-secext-1.0.xsd#base64binary\">", "", "</wsse:BinarySecurityToken>", "")
+	//log.Warning(test.Replace(string(bodyBytes)))
+
+	//log.Warning(out)
+
+	//Check The Certificate Form The Client
+
+	/*in := bodyBytes
+  in2, _ := base64.StdEncoding.DecodeString(string(bodyBytes)) //Better Decoder Without Needing To Convert //TODO:E rror handling
+	in3, _ := hex.DecodeString(string(bodyBytes))
+
+	log.Warning(string(in))
+
+	log.Info("")
+
+	log.Warning(in2)
+
+	log.Info("")
+
+	log.Warning(in3)
+
+	log.Info("")
+
+	log.Warning(x509.ParseDERCRL(in))
+	*/
+
+	return 200, nil;
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+func enrollmentPolicyService(w http.ResponseWriter, r *http.Request) (int, error) {
   bodyBytes, _ := ioutil.ReadAll(r.Body)
   log.Info(string(bodyBytes))
 
@@ -90,9 +167,46 @@ func enrollmentService(w http.ResponseWriter, r *http.Request) (int, error) {
 
 
 
+	fmt.Fprintf(w, `<s:Envelope
+         xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+         xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+         xmlns:a="http://www.w3.org/2005/08/addressing">
+        <s:Header>
+          <a:Action s:mustUnderstand="1">
+            http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy/IPolicy/GetPoliciesResponse
+          </a:Action>
+          <a:RelatesTo>` + envelope.Header.MessageID + `</a:RelatesTo>
+        </s:Header>
+        <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          <GetPoliciesResponse
+             xmlns="http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy">
+            <response>
+
+            </response>
+            <cAs xsi:nil="true" />
+            <oIDs>
+              <oID>
+                <value>1.3.14.3.2.29</value>
+                <group>1</group>
+                <oIDReferenceID>0</oIDReferenceID>
+                <defaultName>szOID_OIWSEC_sha1RSASign</defaultName>
+              </oID>
+            </oIDs>
+          </GetPoliciesResponse>
+        </s:Body>
+      </s:Envelope>`)
+		return 200, nil
+}
 
 
 
+
+
+
+
+/*
+func oldenrollmentService(w http.ResponseWriter, r *http.Request, envelope soap.Envelope) (int, error) {
 
   testing123 := &soap.GEnvelope{
     XmlnsA: "http://www.w3.org/2005/08/addressing",
@@ -175,47 +289,86 @@ func enrollmentService(w http.ResponseWriter, r *http.Request) (int, error) {
 	log.Info(string(out))
   //fmt.Fprintf(w, string(out))
 
+
+  // log.Warning(envelope.Header.MessageID)
   fmt.Fprintf(w, `<s:Envelope
-   xmlns:a="http://www.w3.org/2005/08/addressing"
-   xmlns:s="http://www.w3.org/2003/05/soap-envelope">
-   <s:Header>
-     <a:Action s:mustUnderstand="1">
- http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy/IPolicy/GetPoliciesResponse
-     </a:Action>
-   </s:Header>
-   <s:Body
-     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-     <GetPoliciesResponse   xmlns="http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy">
-       <response>
-         <policies>
-           <policy>
-             <attributes>
-               <policySchema>3</policySchema>
-               <privateKeyAttributes>
-                 <minimalKeyLength>2048</minimalKeyLength>
-                 <algorithmOIDReferencexsi:nil="true"/>
-               </privateKeyAttributes>
-               <hashAlgorithmOIDReference xsi:nil="true"></hashAlgorithmOIDReference>
-             </attributes>
-           </policy>
-         </policies>
-       </response>
-       <oIDs>
-         <oID>
-           <value>1.3.6.1.4.1.311.20.2</value>
-           <group>1</group>
-           <oIDReferenceID>5</oIDReferenceID>
-           <defaultName>Certificate Template Name</defaultName>
-         </oID>
-       </oIDs>
-     </GetPoliciesResponse>
-   </s:Body>
- </s:Envelope>`)
+         xmlns:u="http://docs.oasis-open.org/wss/2004/01/oasis-200401-wss-wssecurity-utility-1.0.xsd"
+         xmlns:s="http://www.w3.org/2003/05/soap-envelope"
+         xmlns:a="http://www.w3.org/2005/08/addressing">
+        <s:Header>
+          <a:Action s:mustUnderstand="1">
+            http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy/IPolicy/GetPoliciesResponse
+          </a:Action>
+          <a:RelatesTo>` + envelope.Header.MessageID + `</a:RelatesTo>
+        </s:Header>
+        <s:Body xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+           xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+          <GetPoliciesResponse
+             xmlns="http://schemas.microsoft.com/windows/pki/2009/01/enrollmentpolicy">
+            <response>
+            <policyID />
+              <policyFriendlyName xsi:nil="true"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+              <nextUpdateHours xsi:nil="true"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+              <policiesNotChanged xsi:nil="true"
+                 xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>
+              <policies>
+							<policy>
+								<policyOIDReference>0</policyOIDReference>
+								<cAs xsi:nil="true" />
+								<attributes>
+									<commonName>CEPUnitTest</commonName>
+									<policySchema>3</policySchema>
+									<certificateValidity>
+										<validityPeriodSeconds>1209600</validityPeriodSeconds>
+										<renewalPeriodSeconds>172800</renewalPeriodSeconds>
+									</certificateValidity>
+									<permission>
+										<enroll>true</enroll>
+										<autoEnroll>false</autoEnroll>
+									</permission>
+									<privateKeyAttributes>
+										<minimalKeyLength>2048</minimalKeyLength>
+										<keySpec xsi:nil="true" />
+										<keyUsageProperty xsi:nil="true" />
+										<permissions xsi:nil="true" />
+										<algorithmOIDReference xsi:nil="true" />
+										<cryptoProviders xsi:nil="true" />
+									</privateKeyAttributes>
+									<revision>
+										<majorRevision>101</majorRevision>
+										<minorRevision>0</minorRevision>
+									</revision>
+									<supersededPolicies xsi:nil="true" />
+									<privateKeyFlags xsi:nil="true" />
+									<subjectNameFlags xsi:nil="true" />
+									<enrollmentFlags xsi:nil="true" />
+									<generalFlags xsi:nil="true" />
+									<hashAlgorithmOIDReference>0</hashAlgorithmOIDReference>
+									<rARequirements xsi:nil="true" />
+									<keyArchivalAttributes xsi:nil="true" />
+									<extensions xsi:nil="true" />
+								</attributes>
+							</policy>
+              </policies>
+            </response>
+            <cAs xsi:nil="true" />
+            <oIDs>
+              <oID>
+                <value>1.3.14.3.2.29</value>
+                <group>1</group>
+                <oIDReferenceID>0</oIDReferenceID>
+                <defaultName>szOID_OIWSEC_sha1RSASign</defaultName>
+              </oID>
+            </oIDs>
+          </GetPoliciesResponse>
+        </s:Body>
+      </s:Envelope>`)
 
   return 200, nil
 }
-
+*/
 
 
 
@@ -370,7 +523,7 @@ Payload: `<DiscoverResponse
             <AuthPolicy>Federated</AuthPolicy>
             <EnrollmentVersion>3.0</EnrollmentVersion>
             <EnrollmentPolicyServiceUrl>
-              https://mdm.otbeaumont.me/windows/enrollmentService?policies
+              https://mdm.otbeaumont.me/windows/enrollmentPolicyService
             </EnrollmentPolicyServiceUrl>
             <EnrollmentServiceUrl>
               https://mdm.otbeaumont.me/windows/enrollmentService

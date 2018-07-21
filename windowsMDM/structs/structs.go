@@ -44,7 +44,19 @@ type ReplyToStruct struct {
 
 type BodyStruct struct {
 	Discover DiscoverStruct `xml:"Discover"`
+	//Security SecurityStruct `xml:"wsse:Security"`
 }
+
+
+/*
+type SecurityStruct struct {
+	BinarySecurityToken string `xml:"wsse:BinarySecurityToken"`
+}
+*/
+
+
+
+
 
 type DiscoverStruct struct {
 	Request RequestStruct `xml:"request"`
