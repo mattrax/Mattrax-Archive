@@ -1,5 +1,6 @@
 {
   "name": "Oscars MDM",
+  "domain": "mdm.otbeaumont.me",
   "verbose": true,
   "logFile": "",
   "database": "postgres://oscar.beaumont:@localhost/mattrax?sslmode=disable"

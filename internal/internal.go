@@ -31,6 +31,9 @@ func LoadConfig() gonfig.Gonfig {
   if _, err = config.GetString("name", nil); err != nil {
     log.Fatal("Missing The Required Config Parameter 'name'")
   }
+  if _, err = config.GetString("domain", nil); err != nil {
+    log.Fatal("Missing The Required Config Parameter 'domain'")
+  }
 
   return config
 }

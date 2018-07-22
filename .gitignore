@@ -25,3 +25,6 @@ config.json
 *.crt
 *.key
 *.p12
+
+#DEP Go Package Manager
+vendor/
