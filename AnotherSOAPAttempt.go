@@ -9,8 +9,12 @@ import (
 
 type Envelope struct {
 	XMLName   xml.Name `xml:"s:Envelope"`
-  XmlNSa    string    `xml:"xmlns:a,attr"`
-  XmlNSs    string    `xml:"xmlns:s,attr"`
+  Attrs   []xml.Attr `xml:"-"`
+
+
+
+  //XmlNSa    string    `xml:"xmlns:a,attr"` //Try Putting Attributes In Dynamic Map
+  //XmlNSs    string    `xml:"xmlns:s,attr"`
 
   Header  *Header  `xml:",omitempty"`
   Body
@@ -23,6 +27,7 @@ type Body struct {
   XMLName xml.Name    `xml:"s:Body"`
 	Testing string `xml:"s:Testing"`
 }
+
 
 
 // Header header
@@ -46,9 +51,27 @@ type TestingBody struct {
 }
 
 func main() {
+  atrributes := make([]xml.Attr, 1)
+  atrributes[0] = xml.Attr{
+    Name: xml.Name{
+      //Space
+      Local: "test",
+    },
+    Value: "What is up",
+  }
+
 	v := &Envelope{
-    XmlNSa: "http://www.w3.org/2005/08/addressing",
-    XmlNSs: "http://www.w3.org/2003/05/soap-envelope",
+    Attrs: atrributes, /*[]xml.Attr{
+        xml.Attr{
+          Name: "test",
+          Value: "What is up",
+        },
+      },*/
+
+
+
+    //XmlNSa: "http://www.w3.org/2005/08/addressing",
+    //XmlNSs: "http://www.w3.org/2003/05/soap-envelope",
 
     /*Body: "Hey", Body{
       Content: TestingBody{
