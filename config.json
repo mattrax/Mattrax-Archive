@@ -1,15 +1,6 @@
 {
-  "name": "Oscar's MDM",
-  "domain": "mdm.otbeaumont.me",
-  "EEDomain": "enterpriseenrollment.otbeaumont.me",
+  "name": "Oscars MDM",
   "verbose": true,
-  "logFile": "data/log.txt",
-  "APNS": {
-    "Make This Work": "It Is Cool"
-  },
-  "APNScert": "data/PushCert.p12",
-  "APNSProduction": true,
-  "APNSpass": "password",
-  "port": 8000,
+  "logFile": "",
   "database": "postgres://oscar.beaumont:@localhost/mattrax?sslmode=disable"
 }
