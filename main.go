@@ -21,11 +21,24 @@ var (
 )
 
 func main() {
+  out := config.Get2("domain", "")
+  fmt.Println(out)
+
+
+
+
+
+
+
+
+
   //Load The Modules
 	//appleMDM.Init()
 	//windowsMDM.Init()
 
 	//Webserver Routes
+
+
 
   var listenDomain string
   var err error //Cleanup This
@@ -43,9 +56,7 @@ func main() {
 	router := mux.NewRouter()
 	r := router.Host(listenDomain).Subrouter()
 
-  log.Info("Mounted At: " + listenDomain)
-
-
+  //TODO: Add The Domain To The Startup Webserver Message
 
 
 
@@ -170,6 +181,8 @@ func verboseRequestLogger(handler http.Handler) http.Handler {
 
 
 
+// TODO: Comit The Chnages To The Config Library To Github
+// TODO Capitalise The Organisations Name
 // TODO Go Doc On Functions
 
 //TODO: /apple doesn;t work only /apple/ in browser
