@@ -24,8 +24,9 @@ import (
 	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
 
 	// Internal Modules
-	"github.com/mattrax/Mattrax/appleMDM" // The Apple MDM Module
-	"github.com/mattrax/Mattrax/windowsMDM" // The Windows MDM Module
+	"github.com/mattrax/Mattrax/modules/appleMDM" // The Apple MDM Module
+	//"github.com/mattrax/Mattrax/modules/windowsMDM" // The Windows MDM Module
+	//"github.com/mattrax/Mattrax/modules/api"
 )
 
 var ( // Get The Internal State
@@ -39,7 +40,7 @@ var ( // Get The Internal State
 func main() {
 	//Load The Modules
 	appleMDM.Init()
-	windowsMDM.Init()
+	//windowsMDM.Init()
 
 	//Webserver Routes
 	router := mux.NewRouter()
@@ -51,7 +52,7 @@ func main() {
 
 	//Webroutes -> Modules
 	appleMDM.Mount(r.PathPrefix("/apple/").Subrouter())
-	windowsMDM.Mount(r.PathPrefix("/windows/").Subrouter(), router.Host(config.EEDomain).Subrouter())
+	//windowsMDM.Mount(r.PathPrefix("/windows/").Subrouter(), router.Host(config.EEDomain).Subrouter())
 
 
 
@@ -154,3 +155,5 @@ func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 //TODO: /apple doesn;t work only /apple/ in browser
+
+//TODO: Setup Go Lang Package Management Using DEP

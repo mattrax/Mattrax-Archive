@@ -23,7 +23,7 @@ import (
 	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
 
 	// Internal Modules
-	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	structs "github.com/mattrax/Mattrax/modules/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
 var pgdb = mdb.GetDatabase()

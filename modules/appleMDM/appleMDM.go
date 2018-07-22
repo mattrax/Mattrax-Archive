@@ -21,7 +21,7 @@ import (
 	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
 
 	// Internal Modules
-	restAPI "github.com/mattrax/Mattrax/appleMDM/api" //The Apple MDM REST API
+	restAPI "github.com/mattrax/Mattrax/modules/appleMDM/api" //The Apple MDM REST API
 )
 
 var ( // Get The Internal State

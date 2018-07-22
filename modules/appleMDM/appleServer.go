@@ -22,7 +22,7 @@ import (
 	errors "github.com/mattrax/Mattrax/internal/errors"     // Mattrax Error Handling
 
 	// Internal Modules
-	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	structs "github.com/mattrax/Mattrax/modules/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
 

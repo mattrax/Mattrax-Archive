@@ -14,7 +14,6 @@ import (
 
 	// External Deps
 	"github.com/gorilla/mux"                   // HTTP Router
-	"github.com/mattrax/Mattrax/appleMDM/apns" // Apple Push Notification Service
 
 	// Internal Functions
 	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
@@ -22,7 +21,8 @@ import (
 	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
 
 	// Internal Modules
-	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	structs "github.com/mattrax/Mattrax/modules/appleMDM/structs" // Apple MDM Structs/Functions
+	"github.com/mattrax/Mattrax/modules/appleMDM/apns" // Apple Push Notification Service
 )
 
 var ( // Get The Internal State

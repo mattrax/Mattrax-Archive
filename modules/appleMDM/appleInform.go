@@ -19,7 +19,7 @@ import (
 	errors "github.com/mattrax/Mattrax/internal/errors"     // Mattrax Error Handling
 
 	// Internal Modules
-	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
+	structs "github.com/mattrax/Mattrax/modules/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
 // The "/inform" route is used to check if the device can join the mdm and update its push token to the server (In The Apple Docs This Is Refered To As The Check-In Route)
