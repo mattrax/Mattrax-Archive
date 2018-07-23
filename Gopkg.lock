@@ -42,7 +42,7 @@
   branch = "master"
   name = "github.com/oscartbeaumont/gonfig"
   packages = ["."]
-  revision = "d2906814ede4e2cd64b1e06a030e9fb8acd303a0"
+  revision = "900c7c2d9065fa1e19cfae2aac41048be10ae258"
 
 [[projects]]
   name = "github.com/rifflock/lfshook"
@@ -80,6 +80,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "7c35433efdbd833e26eef56b58ff792ff94fbba9f270f5329b32b2a91f8c8b87"
+  inputs-digest = "27b89c5089ade90a6b2186155b4ff34c07d3856d0ce4c1f7e952fcfbdae0370b"
   solver-name = "gps-cdcl"
   solver-version = 1

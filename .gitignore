@@ -19,6 +19,7 @@ log.txt
 
 #Configuration
 config.json
+data/
 
 #Certificates
 *.pem
