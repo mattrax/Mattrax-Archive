@@ -1,66 +1,64 @@
-/**
- * Mattrax: An Open Source Device Management System
- * File Description: This is The Core. It Loads The Database, Logging and The Webserver Components.
- * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
- */
-
 package main
 
 import (
-	"context"
+  "context"
 	"fmt"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
+  "github.com/gorilla/mux"
+  "github.com/gorilla/handlers"
+  "github.com/mattrax/Mattrax/internal"
 
-	// External Deps
-	"github.com/gorilla/handlers" // HTTP Handlers
-	"github.com/gorilla/mux"      // HTTP Router
-
-	// Internal Functions
-	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
-	mdb "github.com/mattrax/Mattrax/internal/database"      //Mattrax Database
-	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
-
-	// Internal Modules
-	"github.com/mattrax/Mattrax/appleMDM" // The Apple MDM Module
-	"github.com/mattrax/Mattrax/windowsMDM" // The Windows MDM Module
+  //Modules
+  "github.com/mattrax/Mattrax/appleMDM"
 )
 
-var ( // Get The Internal State
-	pgdb = mdb.GetDatabase()
-	log = mlg.GetLogger()
-	config = mcf.GetConfig()
-	srv *http.Server // The Webserver
+var (
+  config, log, pgdb = internal.GetInternalState()
+  srv *http.Server
 )
 
-// This Function Handles The Webserver And Cleanup When Exitting The Application
 func main() {
-	//Load The Modules
-	appleMDM.Init()
-	windowsMDM.Init()
-
 	//Webserver Routes
 	router := mux.NewRouter()
-	r := router.Host(config.Domain).Subrouter()
+	r := router.Host(config.JustGetString("domain", "")).Subrouter()
 
 	//Webroutes -> Management Interface
-	//r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Mattrax MDM Server!") }).Methods("GET")
-	r.HandleFunc("/enroll", enrollmentHandler).Methods("GET")
+
+	//r.HandleFunc("/enroll", enrollmentHandler).Methods("GET")
+
+  r.HandleFunc("/enroll", func (w http.ResponseWriter, r *http.Request) {
+  	//TODO: This Will Show Interface To Guide User Through Enrollment
+  	http.Redirect(w, r, "/apple/enroll", 301)
+  }).Methods("GET")
+
 
 	//Webroutes -> Modules
 	appleMDM.Mount(r.PathPrefix("/apple/").Subrouter())
-	windowsMDM.Mount(r.PathPrefix("/windows/").Subrouter(), router.Host(config.EEDomain).Subrouter())
+	//windowsMDM.Mount(r.PathPrefix("/windows/").Subrouter(), router.Host(config.EEDomain).Subrouter())
 
 
 
-
+  //TODO: User Authentcation
+  //TODO: Show Mattrax Admin Interface + API/Login If IP Range Is Good
 
 	//React Interface
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(http.Dir("../MattraxUI/build"))))
+  /*MattraxUI := http.Dir("../MattraxUI/build")
+	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(MattraxUI)))
+  r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(MattraxUI))))
+  r.PathPrefix("/img/").Handler(http.StripPrefix("/img/", http.FileServer(http.Dir(MattraxUI))))
+  */
+  r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprintf(w, "Mattrax MDM Server!")
+  }).Methods("GET")
 
-	r.HandleFunc("/api/testing", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{ data: 'Hello World' }") }).Methods("GET")
+
+
+
+
+  //r.HandleFunc("/api/testing", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{ data: 'Hello World' }") }).Methods("GET")
 
 
 
@@ -68,8 +66,8 @@ func main() {
 
 
 	//Start The Webserver (In The Background)
-	go func() { startWebserver(router) }()
-	log.Info("The Mattrax Webserver Is Listening At " + fmt.Sprintf("%v:%v", "0.0.0.0", config.Port))
+	go func() { startWebserver(router, config.JustGetString("listen", "0.0.0.0:8000")) }()
+	log.Info("Listening For: '", config.JustGetString("domain", ""), "' At '", config.JustGetString("listen", "0.0.0.0:8000"), "'")
 
 	//Wait Until Shutting Down
 	c := make(chan os.Signal, 1)
@@ -78,39 +76,48 @@ func main() {
 
 	//Cleanup
 	log.Info("Mattrax is Shutting Down...")
-	mdb.Cleanup() //Shutdown The Database
+
+
+
+
+  internal.CleanInternalState()
+	//mdb.Cleanup() //Shutdown The Database
+
+
+
+
+
+
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 	srv.Shutdown(ctx) // Shutdown The Webserver
 	os.Exit(0)        //Exit Successfuly
+
+
+  //internal.CleanInternalState() //Run On Exit
 }
 
-/* Database Initialisation */ //FIXME: Make This Entire Section Work
+
+
+
 //TODO Docs
-func correctSchema() bool {
-	if _, err := pgdb.Exec("SELECT * FROM devices"); err != nil {
-		//Find Out If Error Was Database Table If Not Log Fatal
-		return false
-	}
-	return true
-}
-
-func initDatabaseSchema() {
-	panic("This will create the database schema")
-}
-
-/* The Webserver */
-//TODO Docs
-func startWebserver(router *mux.Router) {
+func startWebserver(router *mux.Router, addr string) {
 	var handler http.Handler
-	if config.Verbose {
+
+
+
+	/*if config.Verbose { //FIXME
 		handler = verboseRequestLogger(handlers.CORS()(router))
 	} else {
 		handler = handlers.CORS()(router)
-	}
+	}*/
+  handler = verboseRequestLogger(handlers.CORS()(router))
+
+
+
 
 	srv = &http.Server{
-		Addr:         fmt.Sprintf("%v:%v", "0.0.0.0", config.Port), //FIXME Configurable Listen IP (Optional)
+		Addr:         addr, //FIXME Configurable Listen IP (Optional)
 		WriteTimeout: time.Second * 15,
 		ReadTimeout:  time.Second * 15,
 		IdleTimeout:  time.Second * 60,
@@ -122,35 +129,21 @@ func startWebserver(router *mux.Router) {
 	}
 }
 
+
+
 //TODO Docs
 func verboseRequestLogger(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		log.Debug("Request: " + r.RemoteAddr + " " + r.Method + " " + r.URL.String())
-
-
-		var keys []string
-    for k := range r.Header {
-        keys = append(keys, k)
-    }
-		//log.Info(keys)
-
-
 		handler.ServeHTTP(w, r)
 	})
 }
 
 
-
-
-
-
-
-
-
-//TODO Docs
-func enrollmentHandler(w http.ResponseWriter, r *http.Request) {
-	//TODO: This Will Show Interface To Guide User Through Enrollment
-	http.Redirect(w, r, "/apple/enroll", 301)
-}
+// TODO: Go Doc Every Function & File
+// TODO: Check log.Fatal Does Cleanup Funcs (Safly Kills DB And Webserver)
+// TODO: Comit The Chnages To The Config Library To Github
+// TODO Capitalise The Organisations Name
+// TODO Go Doc On Functions
 
 //TODO: /apple doesn;t work only /apple/ in browser

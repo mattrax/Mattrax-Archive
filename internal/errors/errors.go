@@ -1,4 +1,4 @@
-package errorHandling
+package errors
 
 import (
 	"net/http"
@@ -8,20 +8,12 @@ import (
 	//"bytes" //TEMP
 	//"io/ioutil"
 
-	// External Deps
 	"github.com/go-pg/pg" // Database (Postgres)
 
-	// Internal Functions
-	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
-	mdb "github.com/mattrax/Mattrax/internal/database"      //Mattrax Database
-	mlg "github.com/mattrax/Mattrax/internal/logging"       //Mattrax Logging
+	"github.com/mattrax/Mattrax/internal"
 )
 
-var ( // Get The Internal State
-	pgdb = mdb.GetDatabase()
-	log = mlg.GetLogger()
-	config = mcf.GetConfig()
-)
+var config, log, pgdb = internal.GetInternalState()
 
 //FIXME: Redo This File. It Is A Mess And Uses Sketchy Code
 

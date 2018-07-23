@@ -10,41 +10,39 @@ package appleMDM
 import (
 	"fmt"
 	"net/http"
-
-	//External Deps
-	"github.com/gorilla/mux" //HTTP Router
+	"github.com/gorilla/mux"
 
 	// Internal Functions
-	mlg "github.com/mattrax/Mattrax/internal/logging" //Mattrax Logging
-	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
-	mdb "github.com/mattrax/Mattrax/internal/database" //Mattrax Database
+	//mlg "github.com/mattrax/Mattrax/internal/logging" //Mattrax Logging
+	//mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
+	//mdb "github.com/mattrax/Mattrax/internal/database" //Mattrax Database
 	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
+	"github.com/mattrax/Mattrax/internal"
 
 	// Internal Modules
-	restAPI "github.com/mattrax/Mattrax/appleMDM/api" //The Apple MDM REST API
+	//restAPI "github.com/mattrax/Mattrax/appleMDM/api" //The Apple MDM REST API
 )
 
-var ( // Get The Internal State
-	pgdb = mdb.GetDatabase()
-	log = mlg.GetLogger()
-	config = mcf.GetConfig()
-)
-
-
-
-
-
+var config, log, pgdb = internal.GetInternalState()
 
 //TODO
-func Init() { log.Info("Loaded The Apple MDM Module") }
+func init() {
+	log.Debug("Loaded The Apple MDM Module")
+
+	//Verify The Config Has The Required Values
+	//log.Info(config.JustGetString("domain", ""))
+}
+
+
+
 
 //TODO
 func Mount(r *mux.Router) {
-	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Apple Mobile Device Management Server!") }).Methods("GET")
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Apple Mobile Device Management Server!") }).Methods("GET") //TEMP
 	r.HandleFunc("/enroll", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "application/x-apple-aspen-config"); http.ServeFile(w, r, "data/enroll.mobileconfig") }).Methods("GET")
 
 	//REST API
-	restAPI.Mount(r.PathPrefix("/api/").Subrouter())
+	//restAPI.Mount(r.PathPrefix("/api/").Subrouter())
 
 	// MDM Device Endpoints
 	r.Handle("/inform", errors.Handler(informHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")

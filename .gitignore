@@ -19,9 +19,13 @@ log.txt
 
 #Configuration
 config.json
+data/
 
 #Certificates
 *.pem
 *.crt
 *.key
 *.p12
+
+#DEP Go Package Manager
+vendor/
