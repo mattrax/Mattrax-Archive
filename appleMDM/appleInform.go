@@ -1,7 +1,7 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Description: This Is The Apple MDM Checkin (Inform) URL. it Is accessable From "/apple/inform" And Is Used For Joining Device And Updating Thier APNS Details.
- * Important Notes: In The Apple Docs (And Even Parts of This Code) This ("Inform") is Refered To As Checkin Which Is Its Official Name
+ * File Description: This Is The Apple MDM Checkin (Inform) URL. it Is accessible From "/apple/inform" And Is Used For Joining Device And Updating Their APNS Details.
+ * Important Notes: In The Apple Docs (And Even Parts of This Code) This ("Inform") is Referred To As Checkin Which Is Its Official Name
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
  */
@@ -16,20 +16,24 @@ import (
 	"github.com/groob/plist" //Plist Parsing
 
 	// Internal Functions
-	errors "github.com/mattrax/Mattrax/internal/errors"     // Mattrax Error Handling
+	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
 
 	// Internal Modules
 	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
-// The "/inform" route is used to check if the device can join the mdm and update its push token to the server (In The Apple Docs This Is Refered To As The Check-In Route)
+// The "/inform" route is used to check if the device can join the mdm and update its push token to the server (In The Apple Docs This Is Referred To As The Check-In Route)
 func informHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	//Parse The Request
 	var cmd structs.CheckinCommand
-	if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil { return 403, err }
+	if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
+		return 403, err
+	}
 	//Attempt To Get The Device From the Database
 	var device structs.Device
-	if err := pgdb.Model(&device).Where("uuid = ?", cmd.UDID).Select(); err != nil && errors.PgError(err) { return 403, err }
+	if err := pgdb.Model(&device).Where("uuid = ?", cmd.UDID).Select(); err != nil && errors.PgError(err) {
+		return 403, err
+	}
 	//Handle The Request
 	if cmd.MessageType == "Authenticate" { //New Device Requesting To Enrolling
 		if cmd.Auth.OSVersion == "" && cmd.Auth.BuildVersion == "" && cmd.Auth.ProductName == "" && cmd.Auth.SerialNumber == "" && cmd.Auth.IMEI == "" && cmd.Auth.MEID == "" {
@@ -61,7 +65,9 @@ func informHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 			// TODO: Handle DEP (Currently Bypassed)
 			/* TEMP Bypass */
 			device.DeviceState = 3
-			if err := pgdb.Update(&device); err != nil { return 403, err }
+			if err := pgdb.Update(&device); err != nil {
+				return 403, err
+			}
 			log.Info("A New Device Joined The MDM: " + device.UDID)
 			/* End Bypass */
 

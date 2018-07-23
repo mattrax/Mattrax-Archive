@@ -65,7 +65,6 @@ func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	//buf.ReadFrom(r.Body)
 	log.Info(buf.String())*/
 
-
 	//r.Body.Close()
 	//fmt.Fprintf(w, "")
 	//return

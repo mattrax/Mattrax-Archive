@@ -85,7 +85,7 @@ func NewPayload(request *Command) (*Payload, error) {
 
 	case "Settings":
 		payload.Command.Settings = request.Settings
-		*/
+	*/
 	case "ProfileList",
 		"ProvisioningProfileList",
 		"CertificateList",

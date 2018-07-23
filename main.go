@@ -1,23 +1,23 @@
 package main
 
 import (
-  "context"
+	"context"
 	"fmt"
+	"github.com/gorilla/handlers"
+	"github.com/gorilla/mux"
+	"github.com/mattrax/Mattrax/internal"
 	"net/http"
 	"os"
 	"os/signal"
 	"time"
-  "github.com/gorilla/mux"
-  "github.com/gorilla/handlers"
-  "github.com/mattrax/Mattrax/internal"
 
-  //Modules
-  "github.com/mattrax/Mattrax/appleMDM"
+	//Modules
+	"github.com/mattrax/Mattrax/appleMDM"
 )
 
 var (
-  config, log, pgdb = internal.GetInternalState()
-  srv *http.Server
+	config, log, pgdb = internal.GetInternalState()
+	srv               *http.Server
 )
 
 func main() {
@@ -29,41 +29,29 @@ func main() {
 
 	//r.HandleFunc("/enroll", enrollmentHandler).Methods("GET")
 
-  r.HandleFunc("/enroll", func (w http.ResponseWriter, r *http.Request) {
-  	//TODO: This Will Show Interface To Guide User Through Enrollment
-  	http.Redirect(w, r, "/apple/enroll", 301)
-  }).Methods("GET")
-
+	r.HandleFunc("/enroll", func(w http.ResponseWriter, r *http.Request) {
+		//TODO: This Will Show Interface To Guide User Through Enrollment
+		http.Redirect(w, r, "/apple/enroll", 301)
+	}).Methods("GET")
 
 	//Webroutes -> Modules
 	appleMDM.Mount(r.PathPrefix("/apple/").Subrouter())
 	//windowsMDM.Mount(r.PathPrefix("/windows/").Subrouter(), router.Host(config.EEDomain).Subrouter())
 
-
-
-  //TODO: User Authentcation
-  //TODO: Show Mattrax Admin Interface + API/Login If IP Range Is Good
+	//TODO: User Authentcation
+	//TODO: Show Mattrax Admin Interface + API/Login If IP Range Is Good
 
 	//React Interface
-  /*MattraxUI := http.Dir("../MattraxUI/build")
-	r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(MattraxUI)))
-  r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(MattraxUI))))
-  r.PathPrefix("/img/").Handler(http.StripPrefix("/img/", http.FileServer(http.Dir(MattraxUI))))
-  */
-  r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
-    fmt.Fprintf(w, "Mattrax MDM Server!")
-  }).Methods("GET")
+	/*MattraxUI := http.Dir("../MattraxUI/build")
+		r.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(MattraxUI)))
+	  r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(MattraxUI))))
+	  r.PathPrefix("/img/").Handler(http.StripPrefix("/img/", http.FileServer(http.Dir(MattraxUI))))
+	*/
+	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) {
+		fmt.Fprintf(w, "Mattrax MDM Server!")
+	}).Methods("GET")
 
-
-
-
-
-  //r.HandleFunc("/api/testing", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{ data: 'Hello World' }") }).Methods("GET")
-
-
-
-
-
+	//r.HandleFunc("/api/testing", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "{ data: 'Hello World' }") }).Methods("GET")
 
 	//Start The Webserver (In The Background)
 	go func() { startWebserver(router, config.JustGetString("listen", "0.0.0.0:8000")) }()
@@ -77,44 +65,27 @@ func main() {
 	//Cleanup
 	log.Info("Mattrax is Shutting Down...")
 
-
-
-
-  internal.CleanInternalState()
+	internal.CleanInternalState()
 	//mdb.Cleanup() //Shutdown The Database
-
-
-
-
-
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*15)
 	defer cancel()
 	srv.Shutdown(ctx) // Shutdown The Webserver
-	os.Exit(0)        //Exit Successfuly
+	os.Exit(0)        //Exit Successfully
 
-
-  //internal.CleanInternalState() //Run On Exit
+	//internal.CleanInternalState() //Run On Exit
 }
-
-
-
 
 //TODO Docs
 func startWebserver(router *mux.Router, addr string) {
 	var handler http.Handler
-
-
 
 	/*if config.Verbose { //FIXME
 		handler = verboseRequestLogger(handlers.CORS()(router))
 	} else {
 		handler = handlers.CORS()(router)
 	}*/
-  handler = verboseRequestLogger(handlers.CORS()(router))
-
-
-
+	handler = verboseRequestLogger(handlers.CORS()(router))
 
 	srv = &http.Server{
 		Addr:         addr, //FIXME Configurable Listen IP (Optional)
@@ -129,8 +100,6 @@ func startWebserver(router *mux.Router, addr string) {
 	}
 }
 
-
-
 //TODO Docs
 func verboseRequestLogger(handler http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
@@ -138,7 +107,6 @@ func verboseRequestLogger(handler http.Handler) http.Handler {
 		handler.ServeHTTP(w, r)
 	})
 }
-
 
 // TODO: Go Doc Every Function & File
 // TODO: Check log.Fatal Does Cleanup Funcs (Safly Kills DB And Webserver)

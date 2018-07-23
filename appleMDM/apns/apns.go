@@ -16,7 +16,7 @@ import (
 	"github.com/RobotsAndPencils/buford/payload"     // Apple Push Notification Service -> Payloads
 	"github.com/RobotsAndPencils/buford/push"        // Apple Push Notification Service -> Push
 
-  errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
+	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
 	// Internal Functions
 	mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
 	mdb "github.com/mattrax/Mattrax/internal/database"      //Mattrax Database

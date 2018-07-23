@@ -37,7 +37,7 @@ type AvailableOSUpdatesResponseItem struct {
 	ProductName       string  `json:"product_name"`
 	Version           string  `json:"version"`
 	Build             string  `json:"build"`
-	DownloadSize      int `json:"download_size"`
+	DownloadSize      int     `json:"download_size"`
 	InstallSize       float64 `json:"install_size"`
 
 	// Each entry represents an app identifier that is closed to install this update (macOS only).
@@ -237,11 +237,11 @@ type ErrorChainItem struct {
 
 type ErrorChain []ErrorChainItem
 type PayloadContentItem struct {
-	PayloadDescription       string `json:"payload_description"`
-	PayloadDisplayName       string `json:"payload_display_name"`
-	PayloadIdentifier        string `json:"payload_identifier"`
-	PayloadOrganization      string `json:"payload_organization"`
-	PayloadVersion           int    `json:"payload_version"`
+	PayloadDescription  string `json:"payload_description"`
+	PayloadDisplayName  string `json:"payload_display_name"`
+	PayloadIdentifier   string `json:"payload_identifier"`
+	PayloadOrganization string `json:"payload_organization"`
+	PayloadVersion      int    `json:"payload_version"`
 }
 
 type ProfileListItem struct {

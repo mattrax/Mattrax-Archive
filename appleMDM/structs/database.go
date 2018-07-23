@@ -21,12 +21,12 @@ type Device struct {
 }
 
 type DeviceDetails struct {
-	OSVersion    string `sql:"OSVersion,notnull"`
-	BuildVersion string `sql:"BuildVersion,notnull"`
-	ProductName  string `sql:"ProductName,notnull"`
-	SerialNumber string `sql:"SerialNumber,notnull"`
-	IMEI         string `sql:"IMEI,notnull"`
-	MEID         string `sql:"MEID,notnull"`
+	OSVersion    string            `sql:"OSVersion,notnull"`
+	BuildVersion string            `sql:"BuildVersion,notnull"`
+	ProductName  string            `sql:"ProductName,notnull"`
+	SerialNumber string            `sql:"SerialNumber,notnull"`
+	IMEI         string            `sql:"IMEI,notnull"`
+	MEID         string            `sql:"MEID,notnull"`
 	Profiles     []ProfileListItem `sql:"Profiles,notnull"`
 }
 
@@ -37,16 +37,16 @@ type DeviceTokens struct {
 }
 
 type DevicePolicies struct {
-	Installed map[string]DevicePolicy `sql:"Installed,notnull"`
-	LastUpdate int64 `sql:"LastUpdate,notnull"`
-	Queued    map[string]DevicePolicy `sql:"Queued,notnull"`
-	Inventory DevicePoliciesInventory `sql:"Inventory,notnull"`
+	Installed  map[string]DevicePolicy `sql:"Installed,notnull"`
+	LastUpdate int64                   `sql:"LastUpdate,notnull"`
+	Queued     map[string]DevicePolicy `sql:"Queued,notnull"`
+	Inventory  DevicePoliciesInventory `sql:"Inventory,notnull"`
 }
 
 type DevicePoliciesInventory struct {
-	State int `sql:"State,notnull"`
-	Commands map[string]string `sql:"CommandUUIDs,notnull"` // [2]bool `sql:"CommandUUIDs,notnull"`
-	LastUpdate int64 `sql:"LastUpdate,notnull"`
+	State      int               `sql:"State,notnull"`
+	Commands   map[string]string `sql:"CommandUUIDs,notnull"` // [2]bool `sql:"CommandUUIDs,notnull"`
+	LastUpdate int64             `sql:"LastUpdate,notnull"`
 }
 
 /*
@@ -69,15 +69,6 @@ type DeviceCurrentAction struct {
 }
 */
 
-
-
-
-
-
-
-
-
-
 //TODO Doc
 type DevicePolicy struct {
 	Status int
@@ -87,13 +78,12 @@ type DevicePolicy struct {
 
 //TODO Doc
 type Policy struct {
-	TableName struct{}      `sql:"policies"`
-	UDID      string        `sql:"uuid,pk"`
+	TableName struct{} `sql:"policies"`
+	UDID      string   `sql:"uuid,pk"`
 
-	Config PolicyConfig  `sql:"config,notnull"`
-	Command Command `sql:"command,notnull"` // PolicyOptions `sql:"options,notnull"`
-  Content   string        `sql:"content"` //////////////////////////////////////////////// Does This Break if Parsed Null
-
+	Config  PolicyConfig `sql:"config,notnull"`
+	Command Command      `sql:"command,notnull"` // PolicyOptions `sql:"options,notnull"`
+	Content string       `sql:"content"`         //////////////////////////////////////////////// Does This Break if Parsed Null
 
 	//Config    PolicyConfig  `sql:"config,notnull"`
 	//Options   PolicyOptions `sql:"options,notnull"`

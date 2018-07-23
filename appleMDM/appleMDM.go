@@ -9,16 +9,15 @@ package appleMDM
 
 import (
 	"fmt"
-	"net/http"
 	"github.com/gorilla/mux"
+	"net/http"
 
 	// Internal Functions
 	//mlg "github.com/mattrax/Mattrax/internal/logging" //Mattrax Logging
 	//mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
 	//mdb "github.com/mattrax/Mattrax/internal/database" //Mattrax Database
-	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
 	"github.com/mattrax/Mattrax/internal"
-
+	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
 	// Internal Modules
 	//restAPI "github.com/mattrax/Mattrax/appleMDM/api" //The Apple MDM REST API
 )
@@ -33,13 +32,13 @@ func init() {
 	//log.Info(config.JustGetString("domain", ""))
 }
 
-
-
-
 //TODO
 func Mount(r *mux.Router) {
 	r.HandleFunc("/", func(w http.ResponseWriter, r *http.Request) { fmt.Fprintf(w, "Apple Mobile Device Management Server!") }).Methods("GET") //TEMP
-	r.HandleFunc("/enroll", func(w http.ResponseWriter, r *http.Request) { w.Header().Set("Content-Type", "application/x-apple-aspen-config"); http.ServeFile(w, r, "data/enroll.mobileconfig") }).Methods("GET")
+	r.HandleFunc("/enroll", func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/x-apple-aspen-config")
+		http.ServeFile(w, r, "data/enroll.mobileconfig")
+	}).Methods("GET")
 
 	//REST API
 	//restAPI.Mount(r.PathPrefix("/api/").Subrouter())
@@ -49,10 +48,9 @@ func Mount(r *mux.Router) {
 	r.Handle("/server", errors.Handler(serverHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm")
 }
 
-
 //TODO: handle Error Even If Status Code Is 200 For errors subpackage
 //TODO: Come Up With a Better name For The /server route and the /checkin route and set it up
-//TODO: Reformat Apple MDM Code Files (MDM Routes Both In Independant Files)
+//TODO: Reformat Apple MDM Code Files (MDM Routes Both In Independent Files)
 //TODO: Redo All Log Messages, Error Codes Before v1 Release
 //TODO: Handle Shutting Down In The Middle of An Inventory/Update And The The New Update Being Different
 //TODO: System For Updater To Backup The DB, Install Update Restart And Do Checks And Monitoring For An Hour (Auto Rollback On Certain Errors) Before Returning To Normal
@@ -60,7 +58,7 @@ func Mount(r *mux.Router) {
 //Handle Devices DOSing The Server When it Keeps Failing -> Prevent It Fast And Alert The Admin
 
 //TODO Maybe Do "/connect" Route Like The MDM Spec Wants For Trust Certs
-//Read Full MDM Spec And Make Everything Bar School Manager Intergration Work
+//Read Full MDM Spec And Make Everything Bar School Manager Integration Work
 // VPP Support Through The API (Act As Proxy and Rate Limit, etc)
 // Label All Functions In The appleMDM/structs/database.go File
 //TODO: Is There A Need For A APNS Package?

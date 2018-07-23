@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Description: This File Has All of The Structs For The Checkin Hanlder.
+ * File Description: This File Has All of The Structs For The Checkin Handler.
  * Package Description: These Are The Structs and Helpers For Device Communication, The API and Database Communication.
  * A HUGE Thanks To MicroMDM. This Package Is A Modied Version Of The (github.com/micromdm/mdm) Package. It Is Used Under The MIT Licence and The Original Work Is Copyright Of MicroMDM.
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
@@ -38,7 +38,7 @@ type Update struct {
 	PushMagic             string
 	UnlockToken           []byte
 	AwaitingConfiguration bool
-	userTokenUpdate //TODO: Do I Need These/What Devices Send It and Handle or Remove it
+	userTokenUpdate       //TODO: Do I Need These/What Devices Send It and Handle or Remove it
 }
 
 // TokenUpdate with user keys

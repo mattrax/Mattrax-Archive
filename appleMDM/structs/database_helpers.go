@@ -20,7 +20,7 @@ func NewDevice(cmd CheckinCommand) Device {
 			SerialNumber: cmd.Auth.SerialNumber,
 			IMEI:         cmd.IMEI,
 			MEID:         cmd.MEID,
-			Profiles: []ProfileListItem{},
+			Profiles:     []ProfileListItem{},
 		},
 		DeviceTokens: DeviceTokens{
 			Token:       []byte{},
@@ -28,12 +28,12 @@ func NewDevice(cmd CheckinCommand) Device {
 			UnlockToken: []byte{},
 		},
 		DevicePolicies: DevicePolicies{
-			Installed:    map[string]DevicePolicy{},
-			LastUpdate: 	0,
-			Queued:       map[string]DevicePolicy{},
-			Inventory:		DevicePoliciesInventory{
-				State: 0,
-				Commands: map[string]string{},
+			Installed:  map[string]DevicePolicy{},
+			LastUpdate: 0,
+			Queued:     map[string]DevicePolicy{},
+			Inventory: DevicePoliciesInventory{
+				State:      0,
+				Commands:   map[string]string{},
 				LastUpdate: 0,
 			},
 		},

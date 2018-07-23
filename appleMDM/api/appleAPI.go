@@ -8,9 +8,9 @@
 package appleAPI
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
-	"encoding/json"
 
 	// External Deps
 	"github.com/gorilla/mux"                   // HTTP Router
@@ -26,8 +26,8 @@ import (
 )
 
 var ( // Get The Internal State
-	pgdb = mdb.GetDatabase()
-	log = mlg.GetLogger()
+	pgdb   = mdb.GetDatabase()
+	log    = mlg.GetLogger()
 	config = mcf.GetConfig()
 )
 
@@ -55,24 +55,23 @@ func pingApnsHandler(w http.ResponseWriter, r *http.Request) { // TEMP: This And
 				//fmt.Fprintf(w, "Error Sending APNS Update To The Device: " + device.UDID)
 
 				/*log.WithFields(mlg.Fields{
-			    "udid": device.UDID,
-					"DeviceState": device.DeviceState,
-					"DeviceDetails": device.DeviceDetails,
-			  }).Warning("Error Sending APNS Update")
+				    "udid": device.UDID,
+						"DeviceState": device.DeviceState,
+						"DeviceDetails": device.DeviceDetails,
+				  }).Warning("Error Sending APNS Update")
 
-				log.WithFields(mlg.Fields{
-			    "udid": device.UDID,
-					"DeviceDetails": device.DeviceDetails,
-			  }).Debug("Error Sending APNS Update")*/
-
+					log.WithFields(mlg.Fields{
+				    "udid": device.UDID,
+						"DeviceDetails": device.DeviceDetails,
+				  }).Debug("Error Sending APNS Update")*/
 
 				w.WriteHeader(http.StatusBadRequest)
 				json.NewEncoder(w).Encode(JSONStatus{
 					Success: true,
 					Message: "Error Sending APNS Update To Device",
 					Device: &structs.Device{
-						UDID: device.UDID,
-						DeviceState: device.DeviceState,
+						UDID:          device.UDID,
+						DeviceState:   device.DeviceState,
 						DeviceDetails: device.DeviceDetails,
 					},
 				})
@@ -88,9 +87,8 @@ func pingApnsHandler(w http.ResponseWriter, r *http.Request) { // TEMP: This And
 	})
 }
 
-
 type JSONStatus struct { //TODO: Move To Struts Package
-	Success bool `json:"status"`
-	Message string `json:"message"`
-	Device *structs.Device `json:"device,omitempty"`
+	Success bool            `json:"status"`
+	Message string          `json:"message"`
+	Device  *structs.Device `json:"device,omitempty"`
 }
