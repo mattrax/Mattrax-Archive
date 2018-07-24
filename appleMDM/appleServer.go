@@ -137,8 +137,6 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 				}
 				//return 200, returnPlist(w, payload)
 			}
-
-			break
 		}
 	}
 
@@ -257,28 +255,9 @@ func serverHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 
 	   //Track Status Of Policy Deployment 0 Not Sent, 1 Sent, 2 Got Reply
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-	   return 200, nil
-
-
 	*/
 
 	//Check For Update Policies To Update
-
-	return 200, nil
 }
 
 func returnPlist(w http.ResponseWriter, payload *structs.Payload) error {

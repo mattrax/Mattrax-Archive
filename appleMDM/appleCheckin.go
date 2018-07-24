@@ -1,6 +1,6 @@
 /**
  * Mattrax: An Open Source Device Management System
- * File Description: This Is The Apple MDM Checkin (Inform) URL. it Is accessible From "/apple/inform" And Is Used For Joining Device And Updating Their APNS Details.
+ * File Description: This Is The Apple MDM Checkin URL. it Is accessible From "/apple/checkin" And Is Used For Joining Device And Updating Their APNS Details.
  * Important Notes: In The Apple Docs (And Even Parts of This Code) This ("Inform") is Referred To As Checkin Which Is Its Official Name
  * Protcol Documentation: https://developer.apple.com/library/archive/documentation/Miscellaneous/Reference/MobileDeviceManagementProtocolRef/3-MDM_Protocol/MDM_Protocol.html
  * Copyright (C) 2018-2018 Oscar Beaumont <oscartbeaumont@gmail.com>
@@ -22,8 +22,8 @@ import (
 	structs "github.com/mattrax/Mattrax/appleMDM/structs" // Apple MDM Structs/Functions
 )
 
-// The "/inform" route is used to check if the device can join the mdm and update its push token to the server (In The Apple Docs This Is Referred To As The Check-In Route)
-func informHandler(w http.ResponseWriter, r *http.Request) (int, error) {
+// The "/checkin" route is used to check if the device can join the mdm and update its push token to the server (In The Apple Docs This Is Referred To As The Check-In Route)
+func checkinHandler(w http.ResponseWriter, r *http.Request) (int, error) {
 	//Parse The Request
 	var cmd structs.CheckinCommand
 	if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {

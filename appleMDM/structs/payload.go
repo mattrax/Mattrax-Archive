@@ -17,12 +17,8 @@ import (
 func NewPayload(request *Command) (*Payload, error) {
 	requestType := request.RequestType
 	var payload *Payload
-	if uuid, err := uuid.NewV4(); err != nil {
-		return nil, err
-	} else {
-		payload = &Payload{uuid.String(),
-			&Command{RequestType: requestType}}
-	}
+	payload = &Payload{uuid.NewV4().String(),
+		&Command{RequestType: requestType}}
 
 	switch requestType {
 

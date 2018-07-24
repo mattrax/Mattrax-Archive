@@ -9,17 +9,11 @@ package appleMDM
 
 import (
 	"fmt"
-	"github.com/gorilla/mux"
 	"net/http"
+	"github.com/gorilla/mux"
 
-	// Internal Functions
-	//mlg "github.com/mattrax/Mattrax/internal/logging" //Mattrax Logging
-	//mcf "github.com/mattrax/Mattrax/internal/configuration" //Mattrax Configuration
-	//mdb "github.com/mattrax/Mattrax/internal/database" //Mattrax Database
 	"github.com/mattrax/Mattrax/internal"
-	errors "github.com/mattrax/Mattrax/internal/errors" // Mattrax Error Handling
-	// Internal Modules
-	//restAPI "github.com/mattrax/Mattrax/appleMDM/api" //The Apple MDM REST API
+	errors "github.com/mattrax/Mattrax/internal/errors"
 )
 
 var config, log, pgdb = internal.GetInternalState()
@@ -44,7 +38,7 @@ func Mount(r *mux.Router) {
 	//restAPI.Mount(r.PathPrefix("/api/").Subrouter())
 
 	// MDM Device Endpoints
-	r.Handle("/inform", errors.Handler(informHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")
+	r.Handle("/inform", errors.Handler(checkinHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin")
 	r.Handle("/server", errors.Handler(serverHandler)).Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm")
 }
 

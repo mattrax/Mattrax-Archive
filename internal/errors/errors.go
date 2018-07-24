@@ -58,18 +58,6 @@ func (err ErrorPG) Error() string {
 type Handler func(http.ResponseWriter, *http.Request) (int, error)
 
 func (fn Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
-	/* Body Dump */
-
-	/*body, err := ioutil.ReadAll(r.Body)
-	buf := bytes.NewBuffer(body) //buf := new(bytes.Buffer)
-	//buf.ReadFrom(r.Body)
-	log.Info(buf.String())*/
-
-	//r.Body.Close()
-	//fmt.Fprintf(w, "")
-	//return
-	/* End Body Dump */
-
 	returnStatus, err := fn(w, r) //returnStatus    // TODO HERE Inject: pgdb *pg.DB
 
 	if returnStatus == 200 {

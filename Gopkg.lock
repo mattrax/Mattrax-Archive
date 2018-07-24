@@ -2,6 +2,17 @@
 
 
 [[projects]]
+  name = "github.com/RobotsAndPencils/buford"
+  packages = [
+    "certificate",
+    "payload",
+    "payload/badge",
+    "push"
+  ]
+  revision = "1589c179b764ddceb204a439d9bf366f04c55f9b"
+  version = "v0.12.0"
+
+[[projects]]
   name = "github.com/go-pg/pg"
   packages = [
     ".",
@@ -34,6 +45,12 @@
 
 [[projects]]
   branch = "master"
+  name = "github.com/groob/plist"
+  packages = ["."]
+  revision = "dd56909aee38bb3860460e3e1ca8a4270c04ce15"
+
+[[projects]]
+  branch = "master"
   name = "github.com/jinzhu/inflection"
   packages = ["."]
   revision = "04140366298a54a039076d798123ffa108fff46c"
@@ -42,13 +59,19 @@
   branch = "master"
   name = "github.com/oscartbeaumont/gonfig"
   packages = ["."]
-  revision = "900c7c2d9065fa1e19cfae2aac41048be10ae258"
+  revision = "0c9304a62bd3e59a421684915ace01e64698bc25"
 
 [[projects]]
   name = "github.com/rifflock/lfshook"
   packages = ["."]
   revision = "bf539943797a1f34c1f502d07de419b5238ae6c6"
   version = "v2.3"
+
+[[projects]]
+  name = "github.com/satori/go.uuid"
+  packages = ["."]
+  revision = "f58768cc1a7a7e77a3bd49e98cdd21419399b6a3"
+  version = "v1.2.0"
 
 [[projects]]
   name = "github.com/sirupsen/logrus"
@@ -59,8 +82,23 @@
 [[projects]]
   branch = "master"
   name = "golang.org/x/crypto"
-  packages = ["ssh/terminal"]
-  revision = "a2144134853fc9a27a7b1e3eb4f19f1a76df13c9"
+  packages = [
+    "pkcs12",
+    "pkcs12/internal/rc2",
+    "ssh/terminal"
+  ]
+  revision = "c126467f60eb25f8f27e5a981f32a87e3965053f"
+
+[[projects]]
+  branch = "master"
+  name = "golang.org/x/net"
+  packages = [
+    "http/httpguts",
+    "http2",
+    "http2/hpack",
+    "idna"
+  ]
+  revision = "a680a1efc54dd51c040b3b5ce4939ea3cf2ea0d1"
 
 [[projects]]
   branch = "master"
@@ -72,6 +110,27 @@
   revision = "ac767d655b305d4e9612f5f6e33120b9176c4ad4"
 
 [[projects]]
+  name = "golang.org/x/text"
+  packages = [
+    "collate",
+    "collate/build",
+    "internal/colltab",
+    "internal/gen",
+    "internal/tag",
+    "internal/triegen",
+    "internal/ucd",
+    "language",
+    "secure/bidirule",
+    "transform",
+    "unicode/bidi",
+    "unicode/cldr",
+    "unicode/norm",
+    "unicode/rangetable"
+  ]
+  revision = "f21a4dfb5e38f5895301dc265a8def02365cc3d0"
+  version = "v0.3.0"
+
+[[projects]]
   name = "gopkg.in/yaml.v2"
   packages = ["."]
   revision = "5420a8b6744d3b0345ab293f6fcba19c978f1183"
@@ -80,6 +139,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "27b89c5089ade90a6b2186155b4ff34c07d3856d0ce4c1f7e952fcfbdae0370b"
+  inputs-digest = "bcc8668612cf9297c5fc65c48eafe118f552ad1dd4c216404ae9c4f4de709813"
   solver-name = "gps-cdcl"
   solver-version = 1
