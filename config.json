@@ -1,7 +1,14 @@
 {
   "name": "Oscars MDM",
   "domain": "mdm.otbeaumont.me",
+  "database": "postgres://oscar.beaumont:@localhost/mattrax2?sslmode=disable",
+  "listen": "0.0.0.0:8000",
+
   "verbose": true,
   "logFile": "",
-  "database": "postgres://oscar.beaumont:@localhost/mattrax?sslmode=disable"
+
+  "appleMDM": {
+    "apnsCert": "",
+    "apnsPass": ""
+  }
 }
