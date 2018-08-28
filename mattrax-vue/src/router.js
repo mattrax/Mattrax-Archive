@@ -1,9 +1,11 @@
 import Vue from "vue";
 import Router from "vue-router";
+
+//Views
 import Dashboard from "./views/Dashboard.vue";
+import NotFound from "./views/NotFound.vue";
 
 Vue.use(Router);
-
 export default new Router({
   mode: "history",
   base: process.env.BASE_URL,
@@ -12,6 +14,10 @@ export default new Router({
       path: "/",
       name: "home",
       component: Dashboard
+    },
+    {
+      path: '*',
+      component: NotFound //TODO: Lazy Loading For Preformace
     }
     /*{
       path: "/about",
