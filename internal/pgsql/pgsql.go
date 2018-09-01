@@ -20,7 +20,7 @@ func init() { //TODO: Is It Good This Creates A New Connection For Each File It 
 		log.Fatal("Error Communicating With The Database: ", err)
 	} //logrus.Fatal
 	//if !correctSchema() { initDatabaseSchema() }
-	log.Info("The Database Connected Successfuly")
+	log.Info("The Database Connected Successfully")
 }
 
 func GetDB() *pg.DB {

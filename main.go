@@ -103,12 +103,12 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 //	Verify User Input (ie. Device UDID Can't Be Blank)
 //	Database Constant Online Chekcing And Handle And Alert Admin On Failure and Error 500 Everything
 //	Document How It Works On An Overaching Level On The Website
-//	Make The MDM Modules Dynamiclly Loadable Using The Go "plugin" Interface
+//	Make The MDM Modules Dynamically Loadable Using The Go "plugin" Interface
 //  File Headers and Function/Struct Descriptions
 //	HTTP Error Handling -> Genric DONT TELL THE CLIENT THE ERROR
 //	Cisco SCEP Server Built In
 //	Apple Update Server
 //	Add Health Check (Database Connection Status, Internet Connectin Status) -> e.GET("/health", func(c echo.Context) error { return c.JSON(200, "{ 'hello': 'world' }") })
-//  Compile Assets Into The Binary -> Load Some/All Into RAM For Preformance
+//  Compile Assets Into The Binary -> Load Some/All Into RAM For Performance
 //  https://echo.labstack.com/middleware/secure
 //	Force Go Fmt'ed Code For All Pull Requests (Do TravisCI Test)

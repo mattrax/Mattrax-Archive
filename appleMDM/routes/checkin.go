@@ -49,7 +49,7 @@ func authenticate(device devices.Computer, cmd structs.CheckinCommand, c echo.Co
 	if deviceState, ok := device.DeviceState.(structs.MacOS_DeviceState); ok { //TODO: Not Working Right
 		log.Info(deviceState.EnrollmentState)
 		//&& deviceState.EnrollmentState == 0
-		return c.String(http.StatusUnauthorized, "The Device Is Partly Enrolled")
+		return c.String(http.StatusUnauthorized, "The Device Is Partially Enrolled")
 	}
 
 	// Check That The Device Doesn't Already Exist
