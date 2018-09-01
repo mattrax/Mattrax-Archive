@@ -1,17 +1,10 @@
 package appleMDM
 
 import (
-	"log"
-
-	main "../"
+	devices "../internal/devices"
 )
 
-func init() {
-	computer := main.Computer{
-		name: "My name",
-	}
-
-	log.Println(computer)
-	log.Println(computer.name)
-	log.Println(computer.test())
+type MacOS struct {
+	devices.Computer // Extend The Default Computer
+	PushToken        string
 }
