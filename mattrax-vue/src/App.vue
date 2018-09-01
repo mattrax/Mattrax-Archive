@@ -185,6 +185,12 @@
 </template>
 
 <style lang="scss">
+$breadcrumb-item-padding-vertical: 0.5em;
+
+.breadcrumb:not(:last-child) {
+  margin-bottom: 0 !important;
+}
+
 @import "bulma"; //TODO: Extend The Bulma Theme
 </style>
 
@@ -222,6 +228,10 @@
 
   //@import "../node_modules/bulma/bulma";
 
+  $grey-dark:    hsl(0, 0%, 29%) !default; //TODO: MOve To To If Code Is Kept
+  $navbar-height: 52px;
+
+
   ///////
   // The Login Page
   ///////
@@ -232,11 +242,6 @@
     margin: 0 auto; //Center It
   }
 }*/
-
-  $grey-dark:    hsl(0, 0%, 29%) !default; //TODO: MOve To To If Code Is Kept
-  $navbar-height: 52px;
-
-
 
 
   .body-content {

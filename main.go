@@ -1,8 +1,7 @@
 package main
 
 import (
-	"net/http"
-
+	"./appleMDM" //TODO: Full Path
 	"github.com/labstack/echo"
 	"github.com/labstack/echo/middleware"
 )
@@ -21,7 +20,12 @@ func main() {
 	e.Use(middleware.Recover()) //TODO: Debugging/Development
 
 	// Routes
-	routes(e)
+	routes(e) //TEMP For Development
+	interfaceRoutes(e)
+	apiRoutes(e)
+
+	// MDM Modules Routes
+	appleMDM.Startup(e.Group("/apple"))
 
 	// Start as a web server
 	//TODO: Log To A File In Production
@@ -53,14 +57,10 @@ func main() {
 /*
   Webserver Routes
 */
-func routes(e *echo.Echo) {
-	//e.GET("/", func(c echo.Context) error { return c.File("html/index.html") })
-	e.File("/", "html/index.html")
-	//e.File("/favicon.ico", "images/favicon.ico")
-	//e.Static("/static", "assets")
+func routes(e *echo.Echo) { //TEMP For Development
 
-	e.GET("/hello", func(c echo.Context) error { return c.String(http.StatusOK, "Hello, World!") })
-	e.GET("/json", func(c echo.Context) error { return c.JSON(200, "{ 'hello': 'world' }") })
+	//e.GET("/hello", func(c echo.Context) error { return c.String(http.StatusOK, "Hello, World!") })
+	//e.GET("/json", func(c echo.Context) error { return c.JSON(200, "{ 'hello': 'world' }") })
 }
 
 /*
@@ -70,5 +70,11 @@ func hello(c echo.Context) error {
 */
 
 //TODO:
+//	Make The MDM Modules Dynamiclly Loadable Using The Go "plugin" Interface
 //  File Header
+//	Cisco SCEP Server Built In
+//	Apple Update Server
+//	Add Health Check -> e.GET("/health", func(c echo.Context) error { return c.JSON(200, "{ 'hello': 'world' }") })
 //  Compile Assets Into The Binary -> Load Some/All Into RAM For Preformance
+//  https://echo.labstack.com/middleware/secure
+//	Force Go Fmt'ed Code For All Pull Requests (Do TravisCI Test)
