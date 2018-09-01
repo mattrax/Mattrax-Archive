@@ -50,7 +50,7 @@ func main() {
 	//e.Server.Addr = ":1323" //TODO: Load From A Config
 
 	//Connect To The Database
-	pgsql.Connect("postgres://oscar.beaumont:@localhost/mattrax_new?sslmode=disable")
+	//pgsql.Connect("postgres://oscar.beaumont:@localhost/mattrax_new?sslmode=disable")
 
 	// Start the web server
 	go func() {
@@ -83,6 +83,8 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	if he, ok := err.(*echo.HTTPError); ok {
 		code = he.Code
 	}
+	//TODO: If It Is A Plist Error Return A Client Error 40x
+	//TODO: Pgsql Error Handling On The Response -> Detect Broken Connetion And Return To Client
 	c.Logger().Error(err)
 
 	if code == 500 {
@@ -93,10 +95,12 @@ func customHTTPErrorHandler(err error, c echo.Context) {
 	//TODO: Collect Alerts And Send Them Upstream To Me For Debugging/Fixing
 }
 
-//e.GET("/hello", func(c echo.Context) error { return c.String(http.StatusOK, "Hello, World!") })
-//e.GET("/json", func(c echo.Context) error { return c.JSON(200, "{ 'hello': 'world' }") })
-
 //TODO:
+//	On Interval Purge DB For Semi-Enrolled Devices
+//	Make All Import Paths To The Repo Not Based On The Folder
+//	Check Joining Fails For Old Devices
+//	Prevent Forging Of The Enrollment Profile
+//	Verify User Input (ie. Device UDID Can't Be Blank)
 //	Database Constant Online Chekcing And Handle And Alert Admin On Failure and Error 500 Everything
 //	Document How It Works On An Overaching Level On The Website
 //	Make The MDM Modules Dynamiclly Loadable Using The Go "plugin" Interface

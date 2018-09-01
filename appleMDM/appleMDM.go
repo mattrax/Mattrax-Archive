@@ -3,12 +3,9 @@ package appleMDM
 import (
 	"log" //Maybe TEMP
 
-	"../internal/pgsql" //TODO: Full Path
-	"./routes"          //TODO: Make This Full Path
+	"./routes" //TODO: Make This Full Path
 	"github.com/labstack/echo"
 )
-
-var db = pgsql.DB
 
 func Startup(e *echo.Group) {
 	log.Println("Loaded The AppleMDM")
