@@ -2,4 +2,3 @@
 Mattrax Is An Open Source Device Management System
 
 ### [Project Feature Tracker/Roadmap](https://github.com/mattrax/Mattrax/projects/1)
-### [The User Interface's Repository](https://github.com/mattrax/MattraxUI)
