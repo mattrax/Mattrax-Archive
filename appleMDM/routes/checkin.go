@@ -96,10 +96,52 @@ func authenticate(device devices.Computer, cmd structs.CheckinCommand, c echo.Co
 }
 
 func tokenUpdate(device devices.Computer, cmd structs.CheckinCommand, c echo.Context) error {
+	/*
+		if cmd.Update.Token == nil && cmd.Update.PushMagic == "" && cmd.Update.UnlockToken == nil && (cmd.Update.AwaitingConfiguration == true || cmd.Update.AwaitingConfiguration == false) {
+			return 403, errors.New("The Request To 'TokenUpdate' From The Device Is Malformed Or Their Device Is Pre IOS 9 or Is Missing The Device Information Permission In The Profile")
+		} else if device.DeviceState == 0 {
+			return 403, errors.New("A Device Tried To Do A TokenUpdate Without Having Enrolled Via A 'Authenticate' Request")
+		} else if device.DeviceState == 1 {
+			// TODO: Handle DEP (Currently Bypassed)
+			// TEMP Bypass
+			device.DeviceState = 3
+			if err := pgdb.Update(&device); err != nil { return 403, err }
+			log.Info("A New Device Joined The MDM: " + device.UDID)
+			// TEMP: End Bypass
+
+		} else if device.DeviceState == 2 {
+			device.DeviceState = 3
+			if err := pgdb.Update(&device); err != nil {
+				return 403, err
+			}
+			log.Info("A New Device Joined The MDM: " + device.UDID)
+		} else if device.DeviceState == 4 {
+			return 403, errors.New("A Not Enrolled Device Tried To Do A 'TokenUpdate'")
+		} else if cmd.Update.AwaitingConfiguration { //Device Enrollment Program
+			// TODO: Do DEP Prestage Enrollment By Pushing The Profiles Now Then Run The Fully Setup Thing Then Push The Finished Command
+			return 403, errors.New("DEP Is Currently Not Supported But Is Coming Soon")
+		}
+
+		device.DeviceTokens.Token = cmd.Update.Token
+		device.DeviceTokens.PushMagic = cmd.Update.PushMagic
+		if cmd.Update.UnlockToken != nil {
+			device.DeviceTokens.UnlockToken = cmd.Update.UnlockToken
+		}
+
+		if err := pgdb.Update(&device); err != nil {
+			return 403, err
+		}
+	*/
 	return c.String(200, "")
 }
 
 func checkOut(device devices.Computer, cmd structs.CheckinCommand, c echo.Context) error {
+	/*
+		device.DeviceState = 4
+		if err := pgdb.Update(&device); err != nil {
+			return 403, err
+		}
+	*/
 	log.Info(cmd.SerialNumber + "  - Removed From The MDM!")
 	return c.String(200, "")
 }
