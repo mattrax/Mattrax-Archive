@@ -15,7 +15,7 @@ func EnrollHandler() http.HandlerFunc {
 		//err               error
 	)
 	return func(w http.ResponseWriter, r *http.Request) {
-		type AppleMDMEnrollmentPayload struct {
+		type AppleMDMProfile struct {
 			PayloadContent      []interface{} `plist:"PlayloadContent"`
 			PayloadDescription  string        `plist:"PayloadDescription"`
 			PayloadDisplayName  string        `plist:"PayloadDisplayName"`
@@ -26,14 +26,23 @@ func EnrollHandler() http.HandlerFunc {
 			PayloadVersion      uint32        `plist:"PayloadVersion"`
 		}
 
+		type AppleMDMEnrollmentCertificateProfile struct {
+			Password                   string `plist:"Password"`
+			PayloadCertificateFileName string `plist:"PayloadCertificateFileName"`
+			PayloadContent             []byte `plist:"PayloadContent"`
+		}
+
+		type AppleMDMEnrollmentProfile struct {
+		}
+
 		init.Do(func() {
-			enrollmentProfile := AppleMDMEnrollmentPayload{ //TODO: Load Values From Config Or Generate Them
+			enrollmentProfile := AppleMDMProfile{ //TODO: Load Values From Config Or Generate Them
 				PayloadContent: []interface{}{
-					"a",
-					"b",
-					"c",
-					4,
-					true,
+					AppleMDMEnrollmentCertificateProfile{
+						Password:                   "password",
+						PayloadCertificateFileName: "PushCert.p12",
+					},
+					AppleMDMEnrollmentProfile{},
 				},
 				PayloadDescription:  "Allows remote management of your device by your administrator.",
 				PayloadDisplayName:  "Mattrax MDM Server",

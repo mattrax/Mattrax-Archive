@@ -1,25 +1,25 @@
 package main
 
-import (  //TODO: Full Paths
-  "../../pkg/vue"
-  "../../pkg/enroll"
+import ( //TODO: Full Paths
+	"../../pkg/authentication"
+	"../../pkg/enroll"
+	"../../pkg/vue"
 )
 
 func (s *Server) routes() { //TODO: Parsing Server To All These Endpoints
-  // Vue Routes
-  s.router.HandleFunc("/", vue.IndexHandler())
+	// Vue Interface
+	s.router.HandleFunc("/", vue.IndexHandler()).Methods("GET")
 
-  // User Endpoints
-  s.router.HandleFunc("/enroll", enroll.EnrollHandler())
+	// Special Interfaces
+	s.router.HandleFunc("/enroll", enroll.EnrollHandler()).Methods("GET")
 
-  // MDM Endpoints
+	// API Endpoints
+	s.router.HandleFunc("/api/login", authentication.LoginHandler()).Methods("GET")
 
+	// MDM Endpoints
 
-
-
-
-	//s.router.HandleFunc("/", s.handleIndex())
-	//s.router.HandleFunc("/admin", s.adminOnly(s.handleIndex()))
+	//s.router.Methods("GET").HandleFunc("/", s.handleIndex())
+	//s.router.Methods("GET").HandleFunc("/admin", s.adminOnly(s.handleIndex()))
 }
 
 // TEMP //
