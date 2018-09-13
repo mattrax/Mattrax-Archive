@@ -12,3 +12,5 @@ func IndexHandler() http.HandlerFunc {
 		io.WriteString(w, msg)
 	}
 }
+
+// func VueHandler //TODO: Returns The Path Based On What Was Requested

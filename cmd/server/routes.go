@@ -1,8 +1,11 @@
 package main
 
 import ( //TODO: Full Paths
-	"../../pkg/authentication"
-	"../../pkg/enroll"
+	"log"
+	"net/http"
+
+	"../../pkg/apple/authentication"
+	"../../pkg/apple/enroll"
 	"../../pkg/vue"
 )
 
@@ -17,9 +20,20 @@ func (s *Server) routes() { //TODO: Parsing Server To All These Endpoints
 	s.router.HandleFunc("/api/login", authentication.LoginHandler()).Methods("GET")
 
 	// MDM Endpoints
+	//  /MDMServiceConfig
+	//  /apple/checkin
+	//  /apple/server
 
+	// TEMP
 	//s.router.Methods("GET").HandleFunc("/", s.handleIndex())
 	//s.router.Methods("GET").HandleFunc("/admin", s.adminOnly(s.handleIndex()))
+}
+
+func logRequest(handler http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		log.Printf("%s %s %s\n", r.RemoteAddr, r.Method, r.URL)
+		handler.ServeHTTP(w, r)
+	})
 }
 
 // TEMP //
