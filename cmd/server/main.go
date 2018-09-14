@@ -59,3 +59,6 @@ func main() {
 //		MacOS Update Caching
 //		Support For Using Something Like Github Pages As A Cache Of Assets and Maybe Even Files/Software
 //		Remote Terminal And Screen Viewer/Controller (ie. SSH & VNC) Using Extra Binary
+//		GZIP Compression On All HTTP Requests
+//		HTTPS Cert Lock to The Domain
+//		Auto Renewing HTTP and Etc Certs

@@ -1,22 +1,32 @@
 package checkin
 
 import (
-	"io"
 	"log"
 	"net/http"
+
+	"github.com/groob/plist"
 )
 
 func Handler(s interface{}) http.HandlerFunc {
-	//Defines Structs/Static Stuff Here
-	msg := "Checkin handler"
-
 	return func(w http.ResponseWriter, r *http.Request) {
-		var cmd structs.CheckinCommand
+		var cmd CheckinCommand
 		if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
-			return 403, err
+			log.Println(err) //Return HTTP Error 403
 		}
 
-		log.Println("Checkin")
-		io.WriteString(w, msg)
+    switch e.Command.MessageType {
+	   case "Authenticate":
+       
+     case "TokenUpdate":
+
+     case "Checkout" //TODO: Check This
+
+     default:
+       //TODO: Return Error
+   }
+
+		log.Println(cmd)
+		w.WriteHeader(200)
+		w.Write([]byte(""))
 	}
 }
