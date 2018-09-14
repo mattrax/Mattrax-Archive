@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+	<key>PayloadContent</key>
+	<array>
+		<dict>
+			<key>PayloadCertificateFileName</key>
+			<string>Mattrax Trust Cert.cer</string>
+			<key>PayloadContent</key>
+			<data>
+			MIID2zCCAsOgAwIBAgIBATANBgkqhkiG9w0BAQsFADCBmjEbMBkG
+			A1UEAwwSTWF0dHJheCBUcnVzdCBDZXJ0MRwwGgYDVQQKDBNNYXR0
+			cmF4IERldmVsb3BtZW50MQwwCgYDVQQLDANJQ1QxCzAJBgNVBAgM
+			AldBMQswCQYDVQQGEwJBVTEQMA4GA1UEBwwHQnVuYnVyeTEjMCEG
+			CSqGSIb3DQEJARYUaGVscGRlc2tAbWF0dHJheC5jb20wHhcNMTgw
+			OTEzMTA0NDE4WhcNMTkwOTEzMTA0NDE4WjCBmjEbMBkGA1UEAwwS
+			TWF0dHJheCBUcnVzdCBDZXJ0MRwwGgYDVQQKDBNNYXR0cmF4IERl
+			dmVsb3BtZW50MQwwCgYDVQQLDANJQ1QxCzAJBgNVBAgMAldBMQsw
+			CQYDVQQGEwJBVTEQMA4GA1UEBwwHQnVuYnVyeTEjMCEGCSqGSIb3
+			DQEJARYUaGVscGRlc2tAbWF0dHJheC5jb20wggEiMA0GCSqGSIb3
+			DQEBAQUAA4IBDwAwggEKAoIBAQC96A7fQ7CqbeJFtvUW4ws2xfWh
+			pHVm/SR9QZwiH7avYoJX6Ut2NV0tzxQIjX72B5WEsRTaRFhLkYDN
+			WVbDFMsd7Djt+PH+0gd70DAfPBdTkm99Sv2KkLOIiA9/jqF51RPq
+			U4MbTZ74eFgE+kT/iBUdybCzBjQYqtUhqSCXXTUTFDEDabr3EDXm
+			j4r8gaEVzoGsq5iDZSVNeFme2M/yDtM//YZaO3Rnaff4QnoQFblG
+			bi5OhLsy1HdjSjTgeR63MUbkc22QJWbn+8dvyoFKEAmKDSaTst7k
+			IdRgjBB4oEhux7V+DX2eZIUR+AqsC1U/cOa97Zy5yTb7D6gCFveF
+			/TU7AgMBAAGjKjAoMA4GA1UdDwEB/wQEAwIHgDAWBgNVHSUBAf8E
+			DDAKBggrBgEFBQcDAzANBgkqhkiG9w0BAQsFAAOCAQEAJDAwnu7I
+			K8EzkADb1rUFzCW/2Rnfw3VREu0OgnBRSnNBiSdA8HLP9FvQ8UEr
+			N3w6rV8HFJGuQFV0z+9N5vbRIPhF/LVKHlS8eeBY2gDvGffdR6UH
+			kSCN2/j1WoocSgT12lwcEvJiU2rGoLN9zr8Yhs8qRhJy0q7Puxlm
+			2YRwHzD2Yw/eTPSIFi9KLYD5QsOUMH4MP/s4rxgUedjZ2Dk2GB+H
+			/EjB6/GmzvlY/0Hdk0DdF14j2fLYoQZ+RsOK8FQTiC+VEJLBtSBk
+			cpR7m0Nr5ZOdF4gW4OR+1yjHmdLYMp0AlYy8US91kqtu9dDh3e17
+			eGuHxQUAgC+j0fLoTMmpxQ==
+			</data>
+			<key>PayloadDescription</key>
+			<string>Adds a CA root certificate</string>
+			<key>PayloadDisplayName</key>
+			<string>TEMP Generic Enrollment Cert</string>
+			<key>PayloadIdentifier</key>
+			<string>com.apple.security.root.606BA2A0-2516-49F8-88A2-AD6853468956</string>
+			<key>PayloadType</key>
+			<string>com.apple.security.root</string>
+			<key>PayloadUUID</key>
+			<string>606BA2A0-2516-49F8-88A2-AD6853468956</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+		</dict>
+		<dict>
+			<key>AccessRights</key>
+			<integer>8191</integer>
+			<key>CheckInURL</key>
+			<string>https://mdm.otbeaumont.me/apple/checkin</string>
+			<key>CheckOutWhenRemoved</key>
+			<true/>
+			<key>IdentityCertificateUUID</key>
+			<string>606BA2A0-2516-49F8-88A2-AD6853468956</string>
+			<key>PayloadDescription</key>
+			<string>Configures Mobile Device Management</string>
+			<key>PayloadDisplayName</key>
+			<string>Device Management</string>
+			<key>PayloadIdentifier</key>
+			<string>com.apple.mdm.17F35439-6F17-4658-AD31-28306E29CBFE</string>
+			<key>PayloadOrganization</key>
+			<string>Mattrax Academy</string>
+			<key>PayloadType</key>
+			<string>com.apple.mdm</string>
+			<key>PayloadUUID</key>
+			<string>17F35439-6F17-4658-AD31-28306E29CBFE</string>
+			<key>PayloadVersion</key>
+			<integer>1</integer>
+			<key>ServerCapabilities</key>
+			<array>
+				<string>com.apple.mdm.per-user-connections</string>
+			</array>
+			<key>ServerURL</key>
+			<string>https://mdm.otbeaumont.me/apple/server</string>
+			<key>SignMessage</key>
+			<false/>
+			<key>Topic</key>
+			<string>com.apple.mgmt.XServer.232a74b5-7a81-4d6c-82fa-00f351e2c4f9</string>
+			<key>UseDevelopmentAPNS</key>
+			<false/>
+		</dict>
+	</array>
+	<key>PayloadDescription</key>
+	<string>Allows remote management of your device by your administrator.</string>
+	<key>PayloadDisplayName</key>
+	<string>Mattrax MDM Server</string>
+	<key>PayloadIdentifier</key>
+	<string>com.apple.config.Admins-Mac.local.mdm</string>
+	<key>PayloadOrganization</key>
+	<string>Mattrax Academy</string>
+	<key>PayloadType</key>
+	<string>Configuration</string>
+	<key>PayloadUUID</key>
+	<string>C593980C-A0AF-4A8E-B39F-E76C3EC8BB64</string>
+	<key>PayloadVersion</key>
+	<integer>1</integer>
+</dict>
+</plist>

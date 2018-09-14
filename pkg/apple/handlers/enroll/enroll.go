@@ -8,7 +8,7 @@ import (
 	"github.com/groob/plist"
 )
 
-func EnrollHandler() http.HandlerFunc {
+func Handler() http.HandlerFunc {
 	var (
 		init                 sync.Once
 		rawEnrollmentProfile []byte

@@ -4,12 +4,13 @@ import (
 	"log"
 	"net/http"
 
-	_ "../../pkg/apple/management_payloads" //TEMP
+	"github.com/go-pg/pg"
 	"github.com/gorilla/mux"
 )
 
 type Server struct {
 	router *mux.Router
+	db     *pg.DB
 
 	/*
 		  config someConfig
@@ -27,9 +28,19 @@ func main() {
 	if err != nil {  return err }*/
 	//TODO: Create It If Not THere
 
+	databaseURL := "postgres://oscar.beaumont:@localhost/mattrax2?sslmode=disable" //TODO: Get From Config
+
+	options, err := pg.ParseURL(databaseURL)
+	if err != nil {
+		log.Panic("Failed To Parse The Database Connection URL: '", databaseURL, "'\n", err) //TODO: Better Error Handling Without Dumping To Console
+	}
+
 	server := Server{
 		router: mux.NewRouter(),
+		db:     pg.Connect(options),
 	}
+	defer server.db.Close()                          //TODO; Make This Work
+	defer func() { log.Println("Shutting down!") }() // TEMP For Debugging
 
 	server.routes()
 
