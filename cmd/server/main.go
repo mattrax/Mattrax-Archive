@@ -1,64 +1,92 @@
 package main
 
 import (
+	"context"
+	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
-	"github.com/go-pg/pg"
-	"github.com/gorilla/mux"
+	"github.com/julienschmidt/httprouter"
+	"go.uber.org/zap"
 )
 
 type Server struct {
-	router *mux.Router
-	db     *pg.DB
+	router *httprouter.Router
+	log    *zap.Logger
 
-	/*
-		  config someConfig
-			db     *someDatabase
-			email  EmailSender
-			logger *someLogger
-	*/
+	srv http.Server
+	//db     *pg.DB
+	//config Config
+}
+
+func (server *Server) SetupLogger(production bool) {
+	var err error
+	if production {
+		server.log, err = zap.NewProduction()
+		if err != nil {
+			panic(err)
+		}
+	} else {
+		server.log, err = zap.NewDevelopment()
+		if err != nil {
+			panic(err)
+		}
+	}
+}
+
+func (server *Server) ListenHTTP(addr string) {
+	server.srv = http.Server{
+		Addr:    addr,
+		Handler: server.router, // Handler(server.router), // handlers.LoggingHandler(os.Stdout, router), //TODO: Logging Handler (Check Disabled Production Preformance)
+		//ErrorLog:     logger, //TODO: Does This Matter
+		ReadTimeout:  5 * time.Second, //TODO: Config Options To Override
+		WriteTimeout: 10 * time.Second,
+		IdleTimeout:  15 * time.Second,
+	}
+
+	go func() {
+		quit := make(chan os.Signal, 1)
+		signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+		<-quit
+		signal.Stop(quit)
+		fmt.Println("Shutting Down")
+		ctx, _ := context.WithTimeout(context.Background(), 15*time.Second)
+		server.srv.Shutdown(ctx)
+	}()
+
+	server.log.Info("Started Mattrax At " + addr)
+	log.Fatal(server.srv.ListenAndServe()) //TODO: Only Run This If Error
 }
 
 func main() {
-	// Load The Config File
-	/*file, err := os.Open(filename) if err != nil {  return err }
-	decoder := json.NewDecoder(file)
-	err = decoder.Decode(&configuration)
-	if err != nil {  return err }*/
-	//TODO: Create It If Not THere
-
-	databaseURL := "postgres://oscar.beaumont:@localhost/mattrax2?sslmode=disable" //TODO: Get From Config
-
-	options, err := pg.ParseURL(databaseURL)
-	if err != nil {
-		log.Panic("Failed To Parse The Database Connection URL: '", databaseURL, "'\n", err) //TODO: Better Error Handling Without Dumping To Console
-	}
-
 	server := Server{
-		router: mux.NewRouter(),
-		db:     pg.Connect(options),
+		router: httprouter.New(),
 	}
-	defer server.db.Close()                          //TODO; Make This Work
-	defer func() { log.Println("Shutting down!") }() // TEMP For Debugging
-
+	server.SetupLogger(false)
 	server.routes()
-
-	log.Println("Listening Port 8000")
-	log.Fatal(http.ListenAndServe(":8000", logRequest(server.router)))
-
-	//TODO: Better Failure Handline, HTTPS, Etc
-	//TODO Auto HTTPS: https://medium.com/@ScullWM/golang-http-server-for-pro-69034c276355
-	//TODO Subdomains: https://translate.google.com/translate?hl=en&sl=am&tl=en&u=http%3A%2F%2Fcodepodu.com%2Fsubdomains-with-golang%2F&anno=2
-	//TODO: Centeral Error Handling For All The Routes
-	//TODO: CORS, XSS Preventions, Etc
-	//TODO: Try Using Defers To Handle Closing The Resources, And Check It Runs Even If There Are Panics
+	server.ListenHTTP(":8000") //TODO: Cut Down On All The Imports/Code This Uses If Possible
 }
 
-// TODO Features:
-//		MacOS Update Caching
-//		Support For Using Something Like Github Pages As A Cache Of Assets and Maybe Even Files/Software
-//		Remote Terminal And Screen Viewer/Controller (ie. SSH & VNC) Using Extra Binary
-//		GZIP Compression On All HTTP Requests
-//		HTTPS Cert Lock to The Domain
-//		Auto Renewing HTTP and Etc Certs
+//TODO: Document Every Function/Struct
+
+///// TEMP /////
+/*
+type Handler struct {
+	next http.Handler
+}
+
+// Make a constructor for our middleware type since its fields are not exported (in lowercase)
+func NewMiddleware(next http.Handler) *Handler {
+	return &Handler{next: next}
+}
+
+// Our middleware handler
+func (s *Handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+	// We can modify the request here; for simplicity, we will just log a message
+	log.Printf("msg: %s, Method: %s, URI: %s\n", r.Method, r.RequestURI)
+	s.next.ServeHTTP(w, r)
+}*/
