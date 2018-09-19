@@ -11,3 +11,12 @@ This Projects File Structure Is Modelled After [Go Standard Project Layout](http
 
 ## Web Frameworks/Routers
 It Is Unclear To Me Whether It Is Idiomatic To Use A Web Router (Mux). I Eventually Decided On Using [httprouter](https://github.com/julienschmidt/httprouter) Because It Is Fast And Makes Routing Alot Easier Than The Built In `net/http`.
+
+
+
+# Objectives/TODO With The Rebuild
+* Logging
+* HTTP Routing/Handling
+* HTTP Middlewear -> Logging, XSS, CORS, Authentication
+* Database -> Access In HTTP Handlers
+* Postges Triggers
