@@ -3,10 +3,8 @@ package enroll
 import (
 	"bytes"
 	"compress/gzip"
-	"io/ioutil"
 	"log"
 	"net/http"
-	"os"
 	"strings"
 
 	"github.com/groob/plist"
@@ -15,58 +13,36 @@ import (
 var enrollCacheFile = "enrollmentCache.mobileconfig" //TODO: Add To Config/Env Var
 
 // The Web Handler
-func Handler() func(w http.ResponseWriter, r *http.Request) error {
+func Handler(config map[string]string) func(w http.ResponseWriter, r *http.Request) error {
 	var enrollmentProfile []byte
 	var enrollmentProfileGzip []byte
 
-	if _, err := os.Stat(enrollCacheFile); err == nil {
-		log.Println("Loaded The File") //Change To DEBUG Log
-		enrollmentProfile, err = ioutil.ReadFile(enrollCacheFile)
-		if err != nil {
-			// TODO: Handle Error
-		}
-
-		enrollmentProfileGzip, err = gZipData(enrollmentProfile)
-		if err != nil {
-			// TODO: Handle Error
-		}
-	} else if os.IsNotExist(err) {
-		log.Println("Generating The File")
-
-		EnrollmentProfilePayload := AppleMDMProfile{ //TODO: Load Values From Config Or Generate Them
-			PayloadContent: []interface{}{
-				AppleMDMEnrollmentCertificateProfile{
-					Password:                   "password",
-					PayloadCertificateFileName: "PushCert.p12",
-				},
-				AppleMDMEnrollmentProfile{},
+	EnrollmentProfilePayload := AppleMDMProfile{ //TODO: Load Values From Config Or Generate Them
+		PayloadContent: []interface{}{
+			AppleMDMEnrollmentCertificateProfile{
+				Password:                   "password",
+				PayloadCertificateFileName: "PushCert.p12",
 			},
-			PayloadDescription:  "Allows remote management of your device by your administrator.",
-			PayloadDisplayName:  "Mattrax MDM Server",
-			PayloadIdentifier:   "com.apple.config.Admins-Mac.local.mdm",
-			PayloadOrganization: "Mattrax Academy",
-			PayloadType:         "Configuration",
-			PayloadUUID:         "B6F27D01-2D4B-4B08-A927-7A9C6021AB9D",
-			PayloadVersion:      1,
-		}
+			AppleMDMEnrollmentProfile{},
+		},
+		PayloadDescription:  "Allows remote management of your device by your administrator.",
+		PayloadDisplayName:  config["OrganisationName"] + " MDM Server", //TODO: Deal With Extremly Long Org Names
+		PayloadIdentifier:   "com.apple.config.Admins-Mac.local.mdm",
+		PayloadOrganization: "Mattrax Academy",
+		PayloadType:         "Configuration",
+		PayloadUUID:         "B6F27D01-2D4B-4B08-A927-7A9C6021AB9D",
+		PayloadVersion:      1,
+	}
 
-		var err error
-		enrollmentProfile, err = plist.Marshal(EnrollmentProfilePayload)
-		if err != nil {
-			log.Fatal(err) //TODO: Better Handling
-		}
+	var err error
+	enrollmentProfile, err = plist.Marshal(EnrollmentProfilePayload)
+	if err != nil {
+		log.Fatal(err) //TODO: Better Handling
+	}
 
-		err = ioutil.WriteFile(enrollCacheFile, enrollmentProfile, 0644)
-		if err != nil {
-			// TODO: Handle Error
-		}
-
-		enrollmentProfileGzip, err = gZipData(enrollmentProfile)
-		if err != nil {
-			// TODO: Handle Error
-		}
-	} else {
-		// TODO: An Error Occured (Handle It)
+	enrollmentProfileGzip, err = gZipData(enrollmentProfile)
+	if err != nil {
+		log.Fatal(err) //TODO: Better Handling
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) error {

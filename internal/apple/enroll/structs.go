@@ -13,7 +13,7 @@ type AppleMDMProfile struct {
 }
 
 // TODO
-type AppleMDMEnrollmentCertificateProfile struct {
+type AppleMDMEnrollmentSCEPPayload struct {
 	Password                   string `plist:"Password"`
 	PayloadCertificateFileName string `plist:"PayloadCertificateFileName"`
 	PayloadContent             []byte `plist:"PayloadContent"`
