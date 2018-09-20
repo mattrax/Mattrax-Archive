@@ -5,7 +5,6 @@ import "net/http"
 // The Web Handler
 func Handler() func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
-		//w.Write([]byte("Hello World"))
 		/*
 		    var cmd CheckinCommand
 		    if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
