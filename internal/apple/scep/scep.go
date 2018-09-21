@@ -12,7 +12,7 @@ import (
 var svc scepserver.Service
 
 func init() {
-	depot, err := file.NewFileDepot("depoty") //TODO: Get From Config
+	depot, err := file.NewFileDepot("depot") //TODO: Get From Config
 	if err != nil {
 		panic(err)
 	}
@@ -20,7 +20,7 @@ func init() {
 	svcOptions := []scepserver.ServiceOption{ //TODO: ALlow All Of This To Be Configured
 		scepserver.ChallengePassword("secret"), // The SCEP ChallengePassword
 		//scepserver.WithCSRVerifier(csrVerifier), //TODO: Make This Work
-		scepserver.CAKeyPassword([]byte("")), // The CA Key's Password
+		scepserver.CAKeyPassword([]byte("password")), // The CA Key's Password
 		scepserver.ClientValidity(365),
 		scepserver.AllowRenewal(0),
 		//scepserver.WithLogger(logger), //TODO: Try Normal Logger
@@ -45,7 +45,6 @@ func GetHandler() func(w http.ResponseWriter, r *http.Request) error {
 			if err != nil {
 				return err
 			}
-			//h(w, r) //TEMP: What is this
 			w.Write(res)
 		case "GetCACert":
 			res, _, err := svc.GetCACert(context.Background()) //TODO: Handle The Middle Value
@@ -54,7 +53,6 @@ func GetHandler() func(w http.ResponseWriter, r *http.Request) error {
 			}
 			w.Header().Set("Content-Type", "application/x-x509-ca-cert")
 			w.Write(res)
-		/**/
 		case "GetNextCACert":
 			res, err := svc.GetNextCACert(context.Background())
 			if err != nil {

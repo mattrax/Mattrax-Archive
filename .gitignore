@@ -29,3 +29,6 @@ data/
 
 #DEP Go Package Manager
 vendor/
+
+#SCEP Cert Store
+depot/

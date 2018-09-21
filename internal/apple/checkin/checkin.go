@@ -1,10 +1,23 @@
 package checkin
 
-import "net/http"
+import (
+	"log"
+	"net/http"
+
+	"github.com/groob/plist"
+)
 
 // The Web Handler
 func Handler() func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		var cmd CheckinCommand
+		if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
+			log.Println("Error Parsing Checkin Request: ", err)
+			w.WriteHeader(http.StatusBadRequest)
+			return nil // This Does Not Return The Error Due To The MDM Requiring Specific Return Codes With Is Sent Above
+		}
+
+		log.Println(cmd)
 		/*
 		    var cmd CheckinCommand
 		    if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
