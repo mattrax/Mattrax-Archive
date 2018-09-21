@@ -10,7 +10,7 @@ import (
 )
 
 func routes(router *mux.Router, config map[string]string, db sqlbuilder.Database) {
-	r := router.Host("mdm.otbeaumont.me").Subrouter()
+	r := router.Host(config["domain"]).Subrouter()
 	//vue := r.Host("mdm.otbeaumont.me").Methods("GET").Subrouter() //TODO: Load The Domain From The Confi
 
 	//TODO: Caching For These Assets

@@ -21,18 +21,25 @@ func main() {
 
 	// Configuration
 	var configuration struct {
-		OrganisationName  string `db:"OrganisationName"`
-		OrganisationEmail string `db:"OrganisationEmail"`
-		OrganisationPhone string `db:"OrganisationPhone"`
+		AdminDomain           string `db:"AdminDomain"`
+		Domain                string `db:"Domain"`
+		OrganisationName      string `db:"OrganisationName"`
+		OrganisationShortName string `db:"OrganisationShortName"`
+		OrganisationEmail     string `db:"OrganisationEmail"`
+		OrganisationPhone     string `db:"OrganisationPhone"`
 	}
 	if err := db.Collection("configuration").Find("id", "1").One(&configuration); err != nil {
 		log.Fatal(err)
 	}
 
-	config := make(map[string]string)
-	config["OrganisationName"] = configuration.OrganisationName
-	config["OrganisationEmail"] = configuration.OrganisationEmail
-	config["OrganisationPhone"] = configuration.OrganisationPhone
+	config := map[string]string{
+		"AdminDomain":           configuration.AdminDomain,
+		"domain":                configuration.Domain,
+		"OrganisationName":      configuration.OrganisationName,
+		"OrganisationShortName": configuration.OrganisationShortName,
+		"OrganisationEmail":     configuration.OrganisationEmail,
+		"OrganisationPhone":     configuration.OrganisationPhone,
+	}
 
 	// Webserver
 	r := mux.NewRouter()

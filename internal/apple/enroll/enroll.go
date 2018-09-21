@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"github.com/groob/plist"
+	"github.com/iancoleman/strcase"
 )
 
 var enrollCacheFile = "enrollmentCache.mobileconfig" //TODO: Add To Config/Env Var
@@ -19,20 +20,54 @@ func Handler(config map[string]string) func(w http.ResponseWriter, r *http.Reque
 
 	EnrollmentProfilePayload := AppleMDMProfile{ //TODO: Load Values From Config Or Generate Them
 		PayloadContent: []interface{}{
-			AppleMDMEnrollmentCertificateProfile{
-				Password:                   "password",
-				PayloadCertificateFileName: "PushCert.p12",
+			AppleMDMProfilePayload{
+				PayloadContent: AppleMDMEnrollmentSCEPPayload{
+					CAFingerprint: []byte("58L5tHezPdS1z9oiIDiXWYG1KqTQGxT5svzdrvv2kuA"),
+					KeyType:       "RSA",
+					KeyUsage:      0,
+					Keysize:       2048,
+					Name:          "Profile Manager Device Identity CA",
+					//Subject       []interface{} `plist:"Subject"`
+					URL: "https://scep.otbeaumont.me/scep",
+				},
+				PayloadDescription:  "Configures Your Devices Identity To The Mattrax Server.",
+				PayloadDisplayName:  "Device Identity Certificate",
+				PayloadIdentifier:   "com.apple.security.scep.9AD147E7-A9CB-45BD-96FE-672A2F422216", //strcase.ToSnake(config["OrganisationShortName"]) + "." + "TODO UDID HERE", //TEMP Comment    com.apple.config.Admins-Mac.local.mdm
+				PayloadOrganization: "Mattrax MDM Server",
+				PayloadType:         "com.apple.security.scep",
+				PayloadUUID:         "9AD147E7-A9CB-45BD-96FE-672A2F422216", //TODO
+				PayloadVersion:      1,
 			},
-			AppleMDMEnrollmentProfile{},
+			/*
+				AppleMDMProfilePayload{
+					//PayloadContent
+					PayloadDescription:  "Configures Your Devices Identity To The Mattrax Server.",
+					PayloadDisplayName:  "Device Identity Certificate",
+					PayloadIdentifier:   "com.apple.security.scep.9AD147E7-A9CB-45BD-96FE-672A2F422216", //strcase.ToSnake(config["OrganisationShortName"]) + "." + "TODO UDID HERE", //TEMP Comment    com.apple.config.Admins-Mac.local.mdm
+					PayloadOrganization: "Mattrax MDM Server",
+					PayloadType:         "com.apple.security.scep",
+					PayloadUUID:         "9AD147E7-A9CB-45BD-96FE-672A2F422216", //TODO
+					PayloadVersion:      1,
+				},
+			*/
 		},
-		PayloadDescription:  "Allows remote management of your device by your administrator.",
-		PayloadDisplayName:  config["OrganisationName"] + " MDM Server", //TODO: Deal With Extremly Long Org Names
-		PayloadIdentifier:   "com.apple.config.Admins-Mac.local.mdm",
-		PayloadOrganization: "Mattrax Academy",
-		PayloadType:         "Configuration",
-		PayloadUUID:         "B6F27D01-2D4B-4B08-A927-7A9C6021AB9D",
-		PayloadVersion:      1,
+		PayloadRemovalDisallowed: true,
+		PayloadDescription:       "Allow Your Organisation To Maintain and Secure Your Device.",
+		PayloadDisplayName:       config["OrganisationName"] + "'s MDM Server",
+		PayloadIdentifier:        strcase.ToSnake(config["OrganisationShortName"]) + "." + "TODO UDID HERE", //TEMP Comment    com.apple.config.Admins-Mac.local.mdm
+		PayloadOrganization:      config["OrganisationName"],
+		PayloadType:              "Configuration",
+		PayloadUUID:              "B6F27D01-2D4B-4B08-A927-7A9C6021AB9D", //TODO
+		PayloadVersion:           1,
 	}
+
+	/*
+		<key>ConsentText</key>
+		<dict>
+			<key>default</key>
+			<string>Tetsing</string>
+		</dict>
+	*/
 
 	var err error
 	enrollmentProfile, err = plist.Marshal(EnrollmentProfilePayload)
@@ -46,7 +81,7 @@ func Handler(config map[string]string) func(w http.ResponseWriter, r *http.Reque
 	}
 
 	return func(w http.ResponseWriter, r *http.Request) error {
-		//w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
+		w.Header().Set("Content-Type", "application/x-apple-aspen-config")
 		if !strings.Contains(r.Header.Get("Accept-Encoding"), "gzip") {
 			w.Header().Set("Content-Encoding", "gzip")
 			w.Write(enrollmentProfileGzip)
