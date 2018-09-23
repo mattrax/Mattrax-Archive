@@ -4,25 +4,24 @@ import (
 	"net/http"
 
 	"github.com/gorilla/mux"
+	"github.com/jmoiron/sqlx"
 	apple_checkin "github.com/mattrax/Mattrax/internal/apple/checkin"
-	apple_enroll "github.com/mattrax/Mattrax/internal/apple/enroll"
 	apple_scep "github.com/mattrax/Mattrax/internal/apple/scep"
 	apple_server "github.com/mattrax/Mattrax/internal/apple/server"
-	"upper.io/db.v3/lib/sqlbuilder"
 )
 
-func routes(router *mux.Router, config map[string]string, db sqlbuilder.Database) {
-	r := router.Host(config["domain"]).Subrouter()
+func routes(router *mux.Router, db *sqlx.DB) {
+	r := router.Host("mdm.otbeaumont.me").Subrouter() //TODO: Config
 
 	//TODO: Caching For These Assets
 	//vue.Handle("/", httpHandler(IndexHandler))
 	//vue.Handle("/err", httpHandler(ErrorHandler))
 
-	r.PathPrefix("/enroll/apple").Methods("GET").Handler(httpHandler(apple_enroll.Handler(config)))
+	//r.PathPrefix("/enroll/apple").Methods("GET").Handler(httpHandler(apple_enroll.Handler(config)))
 	r.PathPrefix("/apple/scep").Methods("GET").Handler(httpHandler(apple_scep.GetHandler())) //TODO: Require Special Message In the URL Of These For It To Work (Make Proifile Forging Harder) + Check The SCEP Challenge Key
 	r.PathPrefix("/apple/scep").Methods("POST").Handler(httpHandler(apple_scep.PostHandler()))
 
-	r.PathPrefix("/apple/checkin").Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin").Handler(httpHandler(apple_checkin.Handler()))
+	r.PathPrefix("/apple/checkin").Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm-checkin").Handler(httpHandler(apple_checkin.Handler(db)))
 	r.PathPrefix("/apple/server").Methods("PUT").HeadersRegexp("Content-Type", "application/x-apple-aspen-mdm").Handler(httpHandler(apple_server.Handler()))
 
 	//r.Handle("/enroll/apple", httpHandler(apple_enroll.Handler(config))).Methods("GET")

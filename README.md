@@ -20,3 +20,20 @@ It Is Unclear To Me Whether It Is Idiomatic To Use A Web Router (Mux). I Eventua
 * HTTP Middlewear -> Logging, XSS, CORS, Authentication
 * Database -> Access In HTTP Handlers
 * Postges Triggers
+
+# Database Driver Decision
+## Benchmarks
+SQLX:
+  Connected To Database In 11.105445ms
+  Queried Multple In 2.741305ms
+  Queried Single In 1.224454ms
+
+Raw SQL:
+  Connected To Database In 22.672µs
+  Queried Multple In 25.992115ms
+  Queried Single In 1.24597ms
+
+Upper DB:
+  Connected To Database In 20.273257ms
+  Queried Multple In 11.091147ms
+  Queried Single In 1.34252ms

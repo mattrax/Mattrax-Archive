@@ -1,30 +1,55 @@
 package checkin
 
 import (
+	"database/sql"
 	"log"
 	"net/http"
 
-	"github.com/groob/plist"
+	"github.com/jmoiron/sqlx"
+	"github.com/mattrax/Mattrax/models"
 )
 
 // The Web Handler
-func Handler() func(w http.ResponseWriter, r *http.Request) error {
+func Handler(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
+		device := models.Device{} //TODO: Move THis Model Back TO This Package
 
-		log.Println(r.Header.Get("Content-Type"))
-
-		var cmd CheckinCommand
-		if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
+		if err := device.PopulateRequestData(r.Body); err != nil { //TODO: Try And MOve This Error Handling Centeral Based On If The Error Is From Plist/Model Giving Client Errors
 			log.Println("Error Parsing Checkin Request: ", err)
-			w.WriteHeader(http.StatusBadRequest)
-			return nil // This Does Not Return The Error Due To The MDM Requiring Specific Return Codes With Is Sent Above
+			http.Error(w, "Error Parsing The Data From The Device", 500) // TODO: Get Correct 4xx Error Code For This
+			return nil                                                   // This Does Not Return The Error Due To The MDM Requiring Specific Return Codes With Is Sent Above //TODO: Stop Writting This Same Thing And Link To A Github Issue
 		}
 
-		/*switch cmd.MessageType {
+		if err := device.LoadFromDB(db); err != nil && err != sql.ErrNoRows {
+			return err
+		}
 
-		}*/
+		defer func() { //TODO: PROBLEM THE device could be udpated after it is parsed to the defer
+			log.Println("Close Request")
+			/*if loadDBerr == sql.ErrNoRows {
+				res, err := db.NamedExec("UPDATE INTO devices VALUES (:udid, :topic, :os_version, :build_version, :product_name, :serial_number, :imei, :meid, :token, :push_magic, :unlock_token, :awaiting_configuration)", device)
+			} else {*/
+			res, err := db.NamedExec("INSERT INTO devices VALUES (:udid, :topic, :os_version, :build_version, :product_name, :serial_number, :imei, :meid, :token, :push_magic, :unlock_token, :awaiting_configuration) ON CONFLICT (product_name) DO UPDATE SET c = tablename.c + 1;", device)
+			//}
 
-		log.Println(cmd)
+			if err != nil {
+				panic(err)
+			}
+			log.Println(res)
+		}()
+
+		// Send It To The Function Handling Each Checkin Action
+		switch device.DeviceRequest.MessageType { //TODO: Check MessageType Varible Exists
+		case "Authenticate":
+			return checkinAuthenticate(w, r)
+		case "TokenUpdate":
+			return checkinTokenUpdate(w, r)
+		case "CheckOut":
+			return checkout(w, r)
+		default:
+			http.Error(w, "That Operation Is Not Supported By Mattrax", 500) //TODO: Get Correct 4xx Error Code For This
+			return nil                                                       // This Does Not Return The Error Due To The MDM Requiring Specific Return Codes With Is Sent Above
+		}
 
 		/*
 		    var cmd CheckinCommand
@@ -111,3 +136,22 @@ func Handler() func(w http.ResponseWriter, r *http.Request) error {
 		return nil
 	}
 }
+
+// Parse The Plist Data Coming From The Device
+/*var cmd models.CheckinRequest
+if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil { //TODO: Does It Handle A Blank BOdy?
+	log.Println("Error Parsing Checkin Request: ", err)
+	http.Error(w, "Error Parsing The Data From The Device", 500) // TODO: Get Correct 4xx Error Code For This
+	return nil                                                   // This Does Not Return The Error Due To The MDM Requiring Specific Return Codes With Is Sent Above
+}
+
+log.Println(cmd)*/
+
+/*var cmd models.CheckinCommand
+if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil { //TODO: Does It Handle A Blank BOdy?
+	log.Println("Error Parsing Checkin Request: ", err)
+	http.Error(w, "Error Parsing The Data From The Device", 500) // TODO: Get Correct 4xx Error Code For This
+	return nil                                                   // This Does Not Return The Error Due To The MDM Requiring Specific Return Codes With Is Sent Above
+}*/
+
+// Retrieve The Device From The Database (The Output Could Be Nil If One Is Not Found)
