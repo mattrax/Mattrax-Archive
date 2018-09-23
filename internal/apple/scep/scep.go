@@ -5,8 +5,8 @@ import (
 	"io/ioutil"
 	"net/http"
 
-	"github.com/mattrax/scep/depot/file"
-	scepserver "github.com/mattrax/scep/server" //TODO: Try And Move Back To The MicroMDM One
+	scepserver "github.com/mattrax/Mattrax/pkg/scep"
+	"github.com/mattrax/scep/depot/file" // TODO: Get Rid Of This One
 )
 
 var svc scepserver.Service

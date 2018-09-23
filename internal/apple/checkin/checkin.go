@@ -10,6 +10,9 @@ import (
 // The Web Handler
 func Handler() func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
+
+		log.Println(r.Header.Get("Content-Type"))
+
 		var cmd CheckinCommand
 		if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
 			log.Println("Error Parsing Checkin Request: ", err)
@@ -17,7 +20,12 @@ func Handler() func(w http.ResponseWriter, r *http.Request) error {
 			return nil // This Does Not Return The Error Due To The MDM Requiring Specific Return Codes With Is Sent Above
 		}
 
+		/*switch cmd.MessageType {
+
+		}*/
+
 		log.Println(cmd)
+
 		/*
 		    var cmd CheckinCommand
 		    if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
