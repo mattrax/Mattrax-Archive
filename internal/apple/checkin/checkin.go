@@ -14,37 +14,54 @@ func Handler(db *sqlx.DB) func(w http.ResponseWriter, r *http.Request) error {
 	return func(w http.ResponseWriter, r *http.Request) error {
 		device := models.Device{} //TODO: Move THis Model Back TO This Package
 
-		if err := device.PopulateRequestData(r.Body); err != nil { //TODO: Try And MOve This Error Handling Centeral Based On If The Error Is From Plist/Model Giving Client Errors
+		request := models.Device{}
+		if err := request.PopulateRequestData(r.Body); err != nil { //TODO: Try And MOve This Error Handling Centeral Based On If The Error Is From Plist/Model Giving Client Errors
 			log.Println("Error Parsing Checkin Request: ", err)
-			http.Error(w, "Error Parsing The Data From The Device", 500) // TODO: Get Correct 4xx Error Code For This
+			http.Error(w, "Error Parsing The Data From The Device", 404) // TODO: Get Correct 4xx Error Code For This
 			return nil                                                   // This Does Not Return The Error Due To The MDM Requiring Specific Return Codes With Is Sent Above //TODO: Stop Writting This Same Thing And Link To A Github Issue
 		}
 
-		if err := device.LoadFromDB(db); err != nil && err != sql.ErrNoRows {
-			return err
-		}
-
-		defer func() { //TODO: PROBLEM THE device could be udpated after it is parsed to the defer
-			log.Println("Close Request")
-			/*if loadDBerr == sql.ErrNoRows {
-				res, err := db.NamedExec("UPDATE INTO devices VALUES (:udid, :topic, :os_version, :build_version, :product_name, :serial_number, :imei, :meid, :token, :push_magic, :unlock_token, :awaiting_configuration)", device)
-			} else {*/
-			res, err := db.NamedExec("INSERT INTO devices VALUES (:udid, :topic, :os_version, :build_version, :product_name, :serial_number, :imei, :meid, :token, :push_magic, :unlock_token, :awaiting_configuration) ON CONFLICT (product_name) DO UPDATE SET c = tablename.c + 1;", device)
-			//}
-
+		cleanup := func() {
+			_, err := db.NamedExec("INSERT INTO devices VALUES (:udid, :topic, :os_version, :build_version, :product_name, :serial_number, :imei, :meid, :token, :push_magic, :unlock_token, :awaiting_configuration) ON CONFLICT (udid) DO UPDATE SET push_magic = EXCLUDED.push_magic, unlock_token = EXCLUDED.unlock_token;", device)
 			if err != nil {
-				panic(err)
+				log.Println(err)
+				panic(err) //TODO: Better Error Handling
 			}
-			log.Println(res)
-		}()
+		}
 
 		// Send It To The Function Handling Each Checkin Action
 		switch device.DeviceRequest.MessageType { //TODO: Check MessageType Varible Exists
 		case "Authenticate":
+			if err := device.LoadFromDB(db); err != nil && err != sql.ErrNoRows {
+				return err
+			}
+
+			if true { //Allowed To Enroll
+				device = request
+			}
+
+			log.Println(device)
+
+			defer cleanup()
 			return checkinAuthenticate(w, r)
 		case "TokenUpdate":
+			/*topic := device.Topic
+			udid := device.UDID
+			token := device.Token
+			push_magic := device.PushMagic
+			unlock_token := device.UnlockToken
+			awaiting_configuration := device.AwaitingConfiguration*/
+			if err := device.LoadFromDB(db); err != nil && err != sql.ErrNoRows {
+				return err
+			}
+			device.PushMagic = request.PushMagic
+
+			defer cleanup()
 			return checkinTokenUpdate(w, r)
 		case "CheckOut":
+			if err := device.LoadFromDB(db); err != nil && err != sql.ErrNoRows {
+				return err
+			}
 			return checkout(w, r)
 		default:
 			http.Error(w, "That Operation Is Not Supported By Mattrax", 500) //TODO: Get Correct 4xx Error Code For This

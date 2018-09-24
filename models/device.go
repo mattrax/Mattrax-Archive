@@ -34,11 +34,12 @@ type Device struct {
 //TODO
 type DeviceRequest struct {
 	MessageType string `db:"-"` // Could Be Authenticate or TokenUpdate or CheckOut
-	Topic       string `db:"-"`
-	UDID        string `db:"-"`
+	//Topic       string `db:"-"`
+	//UDID        string `db:"-"`
 }
 
 // TODO REMOVE THIS TEMP  STRUCT
+/*
 type Devicey struct {
 	UDID                  string `db:"udid" plist:"UDID"`
 	Topic                 string `db:"topic" plist:"Topic"`
@@ -54,7 +55,7 @@ type Devicey struct {
 	AwaitingConfiguration bool   `db:"awaiting_configuration" plist:"AwaitingConfiguration"`
 
 	DeviceRequest `db:"-"`
-}
+}*/
 
 //TODO
 func (d *Device) PopulateRequestData(body io.ReadCloser) error {
