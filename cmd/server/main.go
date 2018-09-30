@@ -38,7 +38,7 @@ func main() {
 			tls.TLS_RSA_WITH_AES_256_CBC_SHA,
 		},
 	}
-	srv := &http.Server{
+	srv := &http.Server{ //TODO: Check This Gets An A+ On The SSLLabs Test (Make Sure It Doesn't Go Through Nginx During The Test)
 		Handler: r,
 		Addr:    ":8001",
 		// Good practice: enforce timeouts for servers you create!

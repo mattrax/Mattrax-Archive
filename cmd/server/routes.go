@@ -31,10 +31,10 @@ func routes(router *mux.Router, db *sqlx.DB) {
 	//r.Handle("/apple/checkin", httpHandler(apple_checkin.Handler())).Methods("PUT") //.Headers("Content-Type", "application/x-apple-aspen-mdm-checkin")
 	//r.Handle("/apple/server", httpHandler(apple_server.Handler())).Methods("PUT")   //.Headers("Content-Type", "application/x-apple-aspen-mdm")
 
+	// Catch All Route & 404 Handler
 	r.PathPrefix("/").Handler(httpHandler(NotFound()))
 
 	// TODO: Certficiate/Header Checking Middleweare For SCEP Verification On The Server And Checkin Routes
-
 	// TODO: Custom Error 404 Page
 }
 

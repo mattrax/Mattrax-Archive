@@ -1,6 +1,6 @@
 package models
 
-// CheckinRequest represents an MDM checkin command struct.
+// CheckinRequest represents an MDM checkin command struct. /?TODO: Move To The Checkin Handler Package
 type CheckinRequest struct {
 	MessageType string // Could Be Authenticate or TokenUpdate or CheckOut
 	Topic       string
