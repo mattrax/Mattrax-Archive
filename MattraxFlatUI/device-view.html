@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>Mattrax - Dashboard</title>
+
+    <link rel="stylesheet" href="reset.css">
+    <link rel="stylesheet" href="device-view.css">
+    <link href="https://fonts.googleapis.com/css?family=Krub:300,400,500|Montserrat|Open+Sans|Roboto" rel="stylesheet"> <!-- TODO: Only The Used Ones -->
+  </head>
+  <body>
+    <nav class="navigation">
+      <!-- TODO: Customisable LOGO -->
+
+      <!--<a href="/html/">HTML</a>
+      <a href="/css/">CSS</a>
+      <a href="/js/">JavaScript</a>
+      <a href="/jquery/">jQuery</a>-->
+
+      <img class="user-icon" src="img/oscar.png">
+    </nav>
+
+    <div id="body" class="navbar-offset">
+      <ul class="breadcrumb">
+        <li><a href="#">Dashboard</a></li>
+        <li><a href="#">Devices</a></li>
+        <li><a href="#">Oscar's Macbook Air</a></li>
+      </ul>
+
+      <div class="device-topbar">
+        <h1 class="device-name">Oscar's Macbook Air</h1>
+        <div class="actions">
+          <button>Lock Device</button>
+          <button>Blank Push</button>
+          <button>Enable Lockdown</button>
+          <button>{Something Else}</button>
+        </div>
+      </div>
+
+      <div class="view">
+        <div>
+          <img class="device-img" src="img/devices/macbook-air.png">
+          <div class="device-information">
+            <h2><b>Model:</b> Macbook Air (13-inch, 2017)</h2>
+            <h2><b>Software:</b> macOS Sierra (10.12.6)</h2>
+            <h1><b>Specs</b></h1>
+
+            <h2><b>Processor:</b> 1.8 GHz Intel Core i5</h2>
+            <h2><b>Memory:</b> 8 GB 1600 MHz DDR3</h2>
+            <h2><b>Graphics:</b> Intel HD Graphics 6000 1536 MB</h2>
+            <h2><b>Serial Number:</b> WYUQ2792HGJS739</h2>
+          </div>
+        </div>
+        <div>
+          <h2 class="alert">
+            There was a problem installing the policy "Wifi Configuration"!
+          </h2>
+
+          <div class="tabs">
+            <button onclick="openCity(event, 'London')">Home</button>
+            <button onclick="openCity(event, 'Paris')">Policies</button>
+            <button onclick="openCity(event, 'Tokyo')">User</button>
+            <button onclick="openCity(event, 'Tokyo')">Settings</button>
+          </div>
+
+          <div class="device-information">
+            <h2 class="status warning">
+              Warning - Policy Installation Error
+            </h2>
+
+            <h1><b>General</b></h1>
+            <h2><b>Computer Name:</b> Oscar's Macbook Air</h2>
+            <h2><b>Asset Tag:</b> N/A</h2>
+            <h2><b>Bluetooth Mac Address:</b> 47:F4:21:E5:43:3F</h2>
+            <h2><b>Network Mac Address:</b> 48:1C:E1:A6:A3:62</h2>
+            <h2><b>Public IP Address:</b> 167.543.178.195</h2>
+            <h2><b>Internal IP Address:</b> 192.168.4.56</h2>
+            <h2><b>Location:</b> Cloud Break, Western Australia</h2>
+
+            <h1><b>Events</b></h1>
+            <h2><b>Last Checkin:</b> 5:34pm Today</h2>
+            <h2><b>Last Inventory Update:</b> 2:00am Yesterday</h2>
+            <h2><b>Enrollment Date:</b> 23/10/2018</h2>
+          </div>
+          <!--<div class="device-information">
+
+          </div>-->
+
+
+
+
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
