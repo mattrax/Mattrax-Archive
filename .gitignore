@@ -10,3 +10,9 @@
 
 # Output of the go coverage tool, specifically when used with LiteIDE
 *.out
+
+# MacOS Finder Files
+.DS_Store
+
+# Go DEP
+vendor/
