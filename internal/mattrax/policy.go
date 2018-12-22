@@ -1,11 +1,18 @@
 package mattrax
 
-import "errors"
+import (
+	"database/sql/driver"
+	"errors"
+)
 
 // PolicyID is a unique identifier for the policy.
 type PolicyID string
 
-// Policy is a definition of configuration that can be pushed to a device
+func (i PolicyID) Value() (driver.Value, error) {
+	return "('" + string(i) + "')", nil //fmt.Sprintf("('%s')", string(i)), nil
+}
+
+// Policy is a definition of a configuration that can be pushed to a device
 type Policy struct {
 	ID                 PolicyID
 	Name               string

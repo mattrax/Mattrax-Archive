@@ -16,3 +16,6 @@
 
 # Go DEP
 vendor/
+
+# Configuration File
+config.toml
