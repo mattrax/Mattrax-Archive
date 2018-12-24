@@ -1,87 +1,78 @@
 package main
 
 import (
-	"database/sql"
-	"fmt"
-	"net/http"
+	"flag"
+	"io"
 	"os"
-	"os/signal"
-	"syscall"
+	"time"
 
-	_ "github.com/lib/pq"
-	logging "github.com/op/go-logging"
-
-	"github.com/mattrax/Mattrax/internal/mattrax"
-	"github.com/mattrax/Mattrax/internal/postgres"
-	"github.com/mattrax/Mattrax/internal/server"
-	appleMDM "github.com/mattrax/Mattrax/platform/apple"
-	windowsMDM "github.com/mattrax/Mattrax/platform/windows"
+	"github.com/rs/zerolog"
 )
 
-func Server() {
+func server(args []string) error {
 	// Load The Configuration
+	flagset := flag.NewFlagSet("server", flag.ExitOnError)
+	var (
+	/*flConfigPath    = flagset.String("config-path", "/var/db/mattrax", "path to configuration directory")
+	flServerURL     = flagset.String("server-url", "", "public HTTPS url of your server")
+	flTLSCert       = flagset.String("tls-cert", "", "path to TLS certificate")
+	flTLSKey        = flagset.String("tls-key", "", "path to TLS private key")
+	flAddr          = flagset.String("http-addr", ":8000", "https listen address of mdm server. defaults to :8000")
+	flHomePageRedir = flagset.Bool("homepage-redir", true, "redirect request to the home page to an alternate url")*/
+	//flDebug = flagset.Bool("debug", false, "enables debug mode which log extra data and enabled features designed to aid development")
+	)
+	flagset.Usage = usageFor(flagset, "mattrax server [flags]")
+	if err := flagset.Parse(args); err != nil {
+		return err
+	}
+
+	///// From here down is cleaned
 
 	// Setup The Logging
-	console := logging.NewBackendFormatter(logging.NewLogBackend(os.Stderr, "", 0), logging.MustStringFormatter(`%{color}%{time:15:04:05.000} %{shortfile} [%{level:.4s}] ▶%{color:reset} %{message}`))
-	/*if srv.Config.Debug.LogFile != "disabled" { // TODO: After Handling The Config Work Fix This
-		file, err := os.OpenFile(srv.Config.Debug.LogFile, os.O_RDWR|os.O_APPEND|os.O_CREATE, 0660)
-		if err != nil {
-			return err
-		}
-		logFile := logging.NewBackendFormatter(logging.NewLogBackend(file, "", 0), logging.MustStringFormatter(`time=%{time:2006-01-02 15:04:05.000} file=%{longfile} pid=%{pid} callpath=%{callpath} level=%{level} msg=%{message}`))
-		logging.SetBackend(console, logFile)
-		return nil
+	/*zerolog.TimeFieldFormat = ""
+
+	zerolog.SetGlobalLevel(zerolog.InfoLevel)
+	if *flDebug {
+		zerolog.SetGlobalLevel(zerolog.DebugLevel)
+	}
+
+	log.Logger = log.Output(zerolog.ConsoleWriter{Out: os.Stderr})*/
+
+	//output := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+
+	/*output.FormatLevel = func(i interface{}) string {
+		return strings.ToUpper(fmt.Sprintf("| %-6s|", i))
 	}*/
-	logging.SetBackend(console)
-	log := logging.MustGetLogger("mattrax_cmd")
-
-	log.Info("Starting Mattrax... Created By Oscar Beaumont")
-
-	// Setup repositories
-	var (
-		devices      mattrax.DeviceRepository
-		policies     mattrax.PolicyRepository
-		applications mattrax.ApplicationRepository
-		users        mattrax.UserRepository
-	)
-
-	// TODO: Load from config
-	db, err := sql.Open("postgres", "user=oscar.beaumont dbname=mattrax sslmode=disable")
-	if err != nil {
-		log.Fatal("Error initialising the connection to the database", err)
-		return
+	//output.FormatMessage = func(i interface{}) string {
+	//	return fmt.Sprintf("***%s****", i)
+	//}
+	/*output.FormatFieldName = func(i interface{}) string {
+		return fmt.Sprintf("%s:", i)
 	}
+	output.FormatFieldValue = func(i interface{}) string {
+		return strings.ToUpper(fmt.Sprintf("%s", i))
+	}*/
 
-	if err := db.Ping(); err != nil {
-		log.Fatal("Error establishing a connection with the database", err)
-	}
-	defer db.Close() //TODO: Error Handling
+	console := zerolog.ConsoleWriter{Out: os.Stdout, TimeFormat: time.RFC3339}
+	file := zerolog.New(os.Stderr) //.With().Timestamp().Logger()
 
-	devices = postgres.NewDeviceRepository(db)
-	//policies = postgres.NewPolicyRepository(db) // TODO: Get These Working + Add Tests
-	//applications = postgres.NewApplicationsRepository(db)
-	//users = postgres.NewUserRepository(db)
+	logger := zerolog.New(io.MultiWriter(file, console)).With().Timestamp().Caller().Logger()
 
-	var as appleMDM.Service
-	as = appleMDM.NewService(devices, policies, applications, users)
-	as = appleMDM.NewLoggingService(as)
+	// BREAK
 
-	var ws windowsMDM.Service
-	ws = windowsMDM.NewService(devices, policies, applications, users)
-	ws = appleMDM.NewLoggingService(ws)
+	/*
 
-	srv := server.New(as, ws) // TEMP: logging.MustGetLogger("mattrax_http")
+		sublogger := log.With().
+		                 Str("component", "foo").
+		                 Logger()
+	*/
 
-	errs := make(chan error, 2)
-	go func() {
-		log.Info("transport=http address=" + ":8000" + " msg=listening")
-		errs <- http.ListenAndServe(":8000", srv) //TODO: Gracefull Shutdown
-	}()
-	go func() {
-		c := make(chan os.Signal, 1)
-		signal.Notify(c, syscall.SIGINT)
-		errs <- fmt.Errorf("%s", <-c)
-	}()
+	logger.Info().
+		Str("Scale", "833 cents").
+		Float64("Interval", 833.09).
+		Msg("Fibonacci is everywhere")
 
-	log.Info("terminated", <-errs)
+	// if e := log.Debug(); e.Enabled() {
+
+	return nil
 }

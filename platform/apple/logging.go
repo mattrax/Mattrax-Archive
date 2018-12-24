@@ -2,10 +2,8 @@ package appleMDM
 
 import (
 	"github.com/mattrax/Mattrax/internal/mattrax"
-	logging "github.com/op/go-logging"
+	log "github.com/sirupsen/logrus"
 )
-
-var log = logging.MustGetLogger("mattrax_apple_service")
 
 type loggingService struct {
 	next Service
@@ -16,7 +14,13 @@ func NewLoggingService(s Service) Service {
 }
 
 func (s *loggingService) Enroll(device *mattrax.Device) error {
-	log.Info("") //TODO: I need a structed logger
+	log.WithFields(log.Fields{
+		"id":           device.ID,
+		"platform":     device.Platform,
+		"platformID":   device.PlatformID,
+		"deviceName":   device.DeviceName,
+		"serialnumber": device.SerialNumber,
+	}).Info("An Device Requested Enrollment")
 	return s.next.Enroll(device)
 }
 

@@ -2,10 +2,8 @@ package windowsMDM
 
 import (
 	"github.com/mattrax/Mattrax/internal/mattrax"
-	logging "github.com/op/go-logging"
+	log "github.com/sirupsen/logrus"
 )
-
-var log = logging.MustGetLogger("mattrax_windows_service")
 
 type loggingService struct {
 	next Service
@@ -16,7 +14,9 @@ func NewLoggingService(s Service) Service {
 }
 
 func (s *loggingService) Enroll(device *mattrax.Device) error {
-	log.Info("") //TODO: I need a structed logger
+	log.WithFields(log.Fields{
+		"device": device,
+	}).Info("A Windows Device Requested Enrollment")
 	return s.next.Enroll(device)
 }
 

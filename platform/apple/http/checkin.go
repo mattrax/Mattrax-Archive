@@ -13,7 +13,8 @@ func (h *Endpoints) checkinHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		var cmd CheckinCommand
 		if err := plist.NewXMLDecoder(r.Body).Decode(&cmd); err != nil {
-			log.Info(err)
+			//log.Info(err)
+			w.WriteHeader(http.StatusUnauthorized)
 			return
 		}
 
@@ -45,7 +46,7 @@ func (h *Endpoints) checkinHandler() http.HandlerFunc {
 
 			err := h.S.Enroll(device)
 			if err != nil {
-				log.Error(err) //TODO: Error Handling (Centeral)
+				//log.Error(err) //TODO: Error Handling (Centeral)
 				w.WriteHeader(http.StatusUnauthorized)
 				return
 			}
@@ -62,7 +63,7 @@ func (h *Endpoints) checkinHandler() http.HandlerFunc {
 
 		case "CheckOut":
 		default:
-			log.Error("Invalid MessageType") // TEMP
+			//log.Error("Invalid MessageType") // TEMP
 			w.WriteHeader(http.StatusUnauthorized)
 			return
 
