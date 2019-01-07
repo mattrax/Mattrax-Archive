@@ -1,6 +1,6 @@
 # Mattrax
 ## This Project Is In Early Development See The CHANGELOG.md For The Current Feature Set
-### The Current Plan is For A Functional And Decently Secure Version To Be Finish By The End Of 2018
+### The Current Plan is For A Functional And Decently Secure Version To Be Finish By Mid 2019
 Mattrax Is An Open Source Device Management System. Mattrax Is Design To Make Device Management Easy, It Has A Web Interface And Uses The MDM Protocols Exposed By The Devices Operating Systems For A Native Experience.
 
 # Features
