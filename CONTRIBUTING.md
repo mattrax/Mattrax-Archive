@@ -25,7 +25,16 @@ To run Mattrax from the sources, you will need the latest version of [Go Lang](h
 
 ```
 git clone https://github.com/mattrax/Mattrax.git && cd Mattrax
+go generate ./cmd/mattrax
 go run ./cmd/mattrax
+```
+
+## Building the project
+
+It is not recommended that you deploy your own changes as it could put your system in an insecure or unstable state but to do a production build run the commands:
+```bash
+go generate ./cmd/mattrax
+go build -ldflags "$(bash ./scripts/version)" ./cmd/mattrax
 ```
 
 ## Go Resources

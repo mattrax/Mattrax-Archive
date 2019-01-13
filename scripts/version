@@ -1,0 +1,12 @@
+#!/bin/bash
+
+VERSION=$(cat ./VERSION)
+GIT_COMMIT=$(git rev-parse --short HEAD)
+
+if [[ -n $(git status --porcelain) ]]; then
+  GIT_STATE="dirty";
+else
+  GIT_STATE="clean";
+fi
+
+echo "-X main.version=${VERSION} -X main.gitCommit=${GIT_COMMIT} -X main.gitState=${GIT_STATE} -X 'main.buildTime=$(date -u '+%Y-%m-%d %H:%M:%S')'"

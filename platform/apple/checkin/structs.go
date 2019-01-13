@@ -1,21 +1,19 @@
-// Content in this file is used under the MIT Licence (Copyright (c) 2016 Victor Vrantchan) from MicroMDM (https://github.com/micromdm/micromdm)
-package appleHttp
+package checkin
 
 import "encoding/hex"
 
-// CheckinRequest represents an MDM checkin command struct.
+// CheckinCommand represents an MDM checkin request.
 type CheckinCommand struct {
-	// MessageType can be either Authenticate,
-	// TokenUpdate or CheckOut
-	MessageType string
+	MessageType string // Authenticate, TokenUpdate or CheckOut
 	Topic       string
 	UDID        string
-	auth
-	update
+	authenticate
+	tokenUpdate
+	// TODO: checkout
 }
 
-// Authenticate Message Type
-type auth struct {
+// authenticate represents the specific fields for the 'Authenticate' message type of the MDM checkin request.
+type authenticate struct {
 	OSVersion    string
 	BuildVersion string
 	ProductName  string
@@ -28,26 +26,22 @@ type auth struct {
 	ModelName    string `plist:"ModelName,omitempty"`
 }
 
-// TokenUpdate Mesage Type
-type update struct {
+// tokenUpdate represents the specific fields for the 'TokenUpdate' message type of the MDM checkin request.
+type tokenUpdate struct {
 	Token                 hexData
 	PushMagic             string
 	UnlockToken           hexData
 	AwaitingConfiguration bool
-	userTokenUpdate
-}
 
-// TokenUpdate with user keys
-type userTokenUpdate struct {
+	// User Specific Details
 	UserID        string `plist:",omitempty"`
 	UserLongName  string `plist:",omitempty"`
 	UserShortName string `plist:",omitempty"`
 	NotOnConsole  bool   `plist:",omitempty"`
 }
 
-// data decodes to []byte,
-// we can then attach a string method to the type
-// Tokens are encoded as Hex Strings
+// hexData is a special type for storing hex data that has an attached 'String()' func.
+// Thanks to the MicroMDM code base for this idea.
 type hexData []byte
 
 func (d hexData) String() string {

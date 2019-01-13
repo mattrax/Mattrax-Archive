@@ -1,0 +1,29 @@
+type User {
+  username: String!
+  firstName: String!
+  lastName: String!
+  email: String!
+  password: String!
+  createdAt: Time!
+}
+
+interface Device {
+  uuid: ID!
+  name: String!
+  owner: User
+}
+
+type AppleDevice implements Device {
+  Apple: String!
+}
+
+type WindowsDevice implements Device {
+  Windows: String!
+}
+
+type Query {
+  currentUser: User!
+  getDevice(uuid: ID!): Device
+}
+
+scalar Time
