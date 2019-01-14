@@ -10,6 +10,9 @@ import (
 	uuid "github.com/satori/go.uuid"
 )
 
+/* TODO: Create A Profile Service Which Handles Generating Profile and move this to it */
+/* TODO: Create a service which handles pushing profiles to the device - Just like a queue */
+
 type Profile struct {
 	//TEMP: Identifier string
 	Body []byte

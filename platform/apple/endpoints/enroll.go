@@ -1,7 +1,35 @@
-package enroll
+package endpoints
 
 import (
+	"net/http"
+
 	"github.com/mattrax/Mattrax/platform/apple"
+	"github.com/rs/zerolog/log"
+)
+
+func enrollHandler(svc *Service) http.HandlerFunc {
+	profile, err := svc.SignedEnrollmentProfile()
+	if err != nil {
+		log.Fatal().Err(err).Msg("Error Creating The Enrollment Profile")
+	}
+
+	return func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Content-Type", "application/x-apple-aspen-config")
+		w.Write(profile)
+	}
+}
+
+// TODO: Cache Profile Because The Profile ID will keep changing
+
+/* TODO: BELOW IS TEMP */
+
+const (
+	// EnrollmentProfileID is the 'PayloadIdentifier' (Identifier For The Profile) for the Enrollment profile
+	EnrollmentProfileID string = "com.github.mattrax.Mattrax"
+	// EnrollmentPayloadID is the 'PayloadIdentifier' (Identifier For The Payload) for the MDM Enrollment Payload in the Enrollment profile
+	EnrollmentPayloadID string = "com.github.mattrax.Mattrax.enroll"
+	// IdentityPayloadID is the 'PayloadIdentifier' (Identifier For The Payload) for the SCEP Enrollment Payload in the Enrollment profile
+	IdentityPayloadID string = "com.github.mattrax.Mattrax.identity"
 )
 
 // SCEPPayload is the payload returned in the Enrollment profile to configure SCEP on the device
@@ -62,7 +90,7 @@ func (svc *Service) SignedEnrollmentProfile() ([]byte, error) { // TODO: Cleanup
 				[][]string{
 					[]string{
 						"CN",
-						"BeyondCorp Identity (%ComputerName%)",
+						"Mattrax Identity (%ComputerName%)", /* TODO: This ComputerName is not accepted by IOS Devices */
 					},
 				},
 			},

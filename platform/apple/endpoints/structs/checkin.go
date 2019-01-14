@@ -1,6 +1,4 @@
-package checkin
-
-import "encoding/hex"
+package structs
 
 // CheckinCommand represents an MDM checkin request.
 type CheckinCommand struct {
@@ -28,22 +26,14 @@ type authenticate struct {
 
 // tokenUpdate represents the specific fields for the 'TokenUpdate' message type of the MDM checkin request.
 type tokenUpdate struct {
-	Token                 hexData
+	Token                 []byte
 	PushMagic             string
-	UnlockToken           hexData
-	AwaitingConfiguration bool
+	UnlockToken           []byte
+	AwaitingConfiguration bool // TODO: Handle This
 
 	// User Specific Details
 	UserID        string `plist:",omitempty"`
 	UserLongName  string `plist:",omitempty"`
 	UserShortName string `plist:",omitempty"`
 	NotOnConsole  bool   `plist:",omitempty"`
-}
-
-// hexData is a special type for storing hex data that has an attached 'String()' func.
-// Thanks to the MicroMDM code base for this idea.
-type hexData []byte
-
-func (d hexData) String() string {
-	return hex.EncodeToString(d)
 }

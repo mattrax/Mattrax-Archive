@@ -15,6 +15,7 @@ type Store struct {
 }
 
 func NewStore(certFile string, keyFile string) (Store, error) { // TODO: Cleanup
+
 	// TODO: Load Or Generate The Cert Here
 	cf, err := ioutil.ReadFile(certFile)
 	if err != nil {

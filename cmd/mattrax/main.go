@@ -13,14 +13,14 @@ import (
 	"github.com/mattrax/Mattrax/cmd/mattrax/assets"
 	"github.com/mattrax/Mattrax/internal/certificates"
 	"github.com/mattrax/Mattrax/internal/config"
-	applecheckin "github.com/mattrax/Mattrax/platform/apple/checkin"
-	appleenroll "github.com/mattrax/Mattrax/platform/apple/enroll"
-	applescep "github.com/mattrax/Mattrax/platform/apple/scep"
-	appleserver "github.com/mattrax/Mattrax/platform/apple/server"
+	appleendpoints "github.com/mattrax/Mattrax/platform/apple/endpoints"
+	applepostgres "github.com/mattrax/Mattrax/platform/apple/storage/postgres"
 	"github.com/oscartbeaumont/go-utils/http"
 	"github.com/oscartbeaumont/go-utils/log"
 	"github.com/rs/zerolog/log"
 )
+
+// TODO: Logging System To From The Admin Interface An Admin Can View All Failures For Debugging
 
 var (
 	flgDomain      = flag.String("domain", "", "the domain name of your server. eg. 'example.com'")
@@ -64,22 +64,19 @@ func main() {
 		TenantName: "Acme School Inc",
 	}
 
-	cs, err := certificates.NewStore("./certs/apple.crt", "./certs/apple.key")
+	certificateStore, err := certificates.NewStore("./certs/apple.crt", "./certs/apple.key")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error initialising the certificate store")
 	}
 
-	enrollmentService := appleenroll.New(cs, config)
-	enrollmentService.MountEndpoints(mux)
+	// TODO: is Having two DB Connections One for Apple and one for Microsoft bad?
 
-	scepService := applescep.New()
-	scepService.MountEndpoints(mux)
-
-	checkinService := applecheckin.New()
-	checkinService.MountEndpoints(mux)
-
-	serverService := appleserver.New()
-	serverService.MountEndpoints(mux)
+	appleStorage, err := applepostgres.New("localhost", "oscar.beaumont", "", "mattraxy", "disable") // TODO: Load From Config
+	if err != nil {
+		log.Fatal().Err(err).Msg("Error initialising the certificate store")
+	}
+	appleEndpoints := appleendpoints.New(config, certificateStore, appleStorage) // TODO: Remove config + certificateStore (Replace with appleStorage) from here
+	appleEndpoints.MountEndpoints(mux)
 
 	if err := httputils.ListenAndServe(*flgDomain, *flgPort, *flgLetsencrypt, *flgCertCache, *flgEmail, *flgTLSCert, *flgTLSKey, mux); err != nil {
 		log.Fatal().Err(err).Msg("Error starting/stoppping the web server")

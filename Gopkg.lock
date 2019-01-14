@@ -75,6 +75,17 @@
   version = "v0.5.0"
 
 [[projects]]
+  digest = "1:6c41d4f998a03b6604227ccad36edaed6126c397e5d78709ef4814a1145a6757"
+  name = "github.com/jmoiron/sqlx"
+  packages = [
+    ".",
+    "reflectx",
+  ]
+  pruneopts = "UT"
+  revision = "d161d7a76b5661016ad0b085869f77fd410f3e6a"
+  version = "v1.2.0"
+
+[[projects]]
   digest = "1:2cc38971947989a3579a979a5d794e67c9e5e729517cad20c0012ce1015c3d98"
   name = "github.com/kataras/muxie"
   packages = ["."]
@@ -89,6 +100,17 @@
   packages = ["."]
   pruneopts = "UT"
   revision = "b84e30acd515aadc4b783ad4ff83aff3299bdfe0"
+
+[[projects]]
+  digest = "1:8ef506fc2bb9ced9b151dafa592d4046063d744c646c1bbe801982ce87e4bc24"
+  name = "github.com/lib/pq"
+  packages = [
+    ".",
+    "oid",
+  ]
+  pruneopts = "UT"
+  revision = "4ded0e9383f75c197b3a2aaa6d590ac52df6fd79"
+  version = "v1.0.0"
 
 [[projects]]
   digest = "1:0718a9f0855a7dd747abd0fa17b666cbf8d200447813cd7cfa8c47c886f99ae7"
@@ -268,7 +290,9 @@
     "github.com/99designs/gqlgen/graphql/introspection",
     "github.com/99designs/gqlgen/handler",
     "github.com/groob/plist",
+    "github.com/jmoiron/sqlx",
     "github.com/kataras/muxie",
+    "github.com/lib/pq",
     "github.com/mastahyeti/cms",
     "github.com/micromdm/scep/depot/file",
     "github.com/micromdm/scep/server",

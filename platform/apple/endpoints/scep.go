@@ -1,39 +1,12 @@
-package scep
+package endpoints
 
 import (
 	"context"
 	"io/ioutil"
 	"net/http"
 
-	"github.com/kataras/muxie"
-	"github.com/micromdm/scep/depot/file"
 	"github.com/micromdm/scep/server"
 )
-
-// MountEndpoints mounts the http endpoints for the service
-func (svc *Service) MountEndpoints(mux *muxie.Mux) {
-	depot, err := file.NewFileDepot("./depot") // TODO: Replace This With An Internal CA
-	if err != nil {
-		panic(err) // TEMP
-	}
-
-	svcOptions := []scepserver.ServiceOption{ //TODO: Allow Some Of This To Be Configured
-		scepserver.ChallengePassword("secret"),
-		//scepserver.WithCSRVerifier(csrVerifier), //TODO: Make This Work
-		scepserver.CAKeyPassword([]byte("secret")),
-		scepserver.ClientValidity(365),
-		scepserver.AllowRenewal(0),
-	}
-
-	server, err := scepserver.NewService(depot, svcOptions...)
-	if err != nil {
-		panic(err) // TEMP
-	}
-
-	mux.Handle("/apple/scep", muxie.Methods().
-		HandleFunc(http.MethodGet, scepHandler(server)).
-		HandleFunc(http.MethodPost, scepHandler(server)))
-}
 
 func scepHandler(server scepserver.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
