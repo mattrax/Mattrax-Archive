@@ -4,7 +4,7 @@ import (
 	"crypto/x509"
 
 	"github.com/mastahyeti/cms"
-	"github.com/mattrax/Mattrax/internal/certificates"
+	"github.com/mattrax/Mattrax/internal/certstore"
 
 	"github.com/groob/plist"
 	uuid "github.com/satori/go.uuid"
@@ -33,8 +33,8 @@ func (p *Profile) Validate() error {
 }
 */
 
-func (p *Profile) Sign(certStore certificates.Store) ([]byte, error) {
-	profileSigned, err := cms.Sign(p.Body, []*x509.Certificate{certStore.Cert}, certStore.Key)
+func (p *Profile) Sign(certStore *certstore.CertStore) ([]byte, error) {
+	profileSigned, err := cms.Sign(p.Body, []*x509.Certificate{certStore.SigningCert}, certStore.SigningKey)
 	if err != nil {
 		return []byte{}, err
 	}

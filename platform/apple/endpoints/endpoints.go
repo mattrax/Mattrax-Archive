@@ -4,10 +4,9 @@ import (
 	"net/http"
 
 	"github.com/kataras/muxie"
-	"github.com/mattrax/Mattrax/internal/certificates"
+	"github.com/mattrax/Mattrax/internal/certstore"
 	"github.com/mattrax/Mattrax/internal/config"
 	"github.com/mattrax/Mattrax/platform/apple/storage"
-	"github.com/micromdm/scep/depot/file"
 	"github.com/micromdm/scep/server"
 )
 
@@ -17,8 +16,8 @@ type Service struct { // TODO: maybe Rename To Service
 	Storage     storage.Service
 
 	// TODO: Clean up below - May Not Even be Needed When Enrollment profile Code is removed
-	CertStore          certificates.Store
-	PublicURL          string // Protocol + Domain + Port
+	CertStore          *certstore.CertStore // TEMP: certificates.Store
+	PublicURL          string               // Protocol + Domain + Port
 	TenantName         string
 	ProfileDescription string // Optional
 	SCEPChallenge      string
@@ -41,20 +40,20 @@ func (svc *Service) MountEndpoints(mux *muxie.Mux) {
 		HandleFunc(http.MethodPost, scepHandler(svc.SCEPService)))
 
 	mux.Handle("/apple/checkin", muxie.Methods().
-		HandleFunc(http.MethodPut, svc.checkinHandler()))
+		HandleFunc(http.MethodPut, svc.authenticate(svc.checkinHandler())))
 
-	//mux.Handle("/apple/server", muxie.Methods().
-	//	HandleFunc(http.MethodGet, serverHandler()))
+	mux.Handle("/apple/server", muxie.Methods().
+		HandleFunc(http.MethodPut, serverHandler()))
 }
 
 // New creates and returns a new Endpoints
-func New(config config.Config, certStore certificates.Store, storage storage.Service) Service { // TODO: Verify The SCEP Challenge Password
-	depot, err := file.NewFileDepot("./depot") // TODO: Replace This With An Internal CA
-	if err != nil {
-		panic(err) // TEMP
-	}
+func New(config config.Config, certStore *certstore.CertStore, storage storage.Service) Service { // TODO: Verify The SCEP Challenge Password
+	// depot, err := file.NewFileDepot("./depot") // TODO: Replace This With An Internal CA
+	// if err != nil {
+	// 	panic(err) // TEMP
+	// }
 
-	svcOptions := []scepserver.ServiceOption{ //TODO: Allow Some Of This To Be Configured
+	svcOptions := []scepserver.ServiceOption{ //TODO: Allow Some Of This To Be Configured/Managed Dynamicluy
 		scepserver.ChallengePassword("secret"),
 		//scepserver.WithCSRVerifier(csrVerifier), //TODO: Make This Work
 		scepserver.CAKeyPassword([]byte("secret")),
@@ -62,7 +61,7 @@ func New(config config.Config, certStore certificates.Store, storage storage.Ser
 		scepserver.AllowRenewal(0),
 	}
 
-	server, err := scepserver.NewService(depot, svcOptions...)
+	server, err := scepserver.NewService(certStore, svcOptions...)
 	if err != nil {
 		panic(err) // TEMP
 	}

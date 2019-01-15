@@ -7,6 +7,8 @@ import (
 	"github.com/rs/zerolog/log"
 )
 
+// TODO: Cache Profile Because The Profile ID will keep changing
+
 func enrollHandler(svc *Service) http.HandlerFunc {
 	profile, err := svc.SignedEnrollmentProfile()
 	if err != nil {
@@ -18,8 +20,6 @@ func enrollHandler(svc *Service) http.HandlerFunc {
 		w.Write(profile)
 	}
 }
-
-// TODO: Cache Profile Because The Profile ID will keep changing
 
 /* TODO: BELOW IS TEMP */
 

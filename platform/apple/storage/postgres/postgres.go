@@ -12,7 +12,8 @@ import (
 const schema = `
 CREATE TABLE IF NOT EXISTS apple_devices (
 	uuid text PRIMARY KEY,
-	state int NOT NULL,
+	enrolled bool NOT NULL,
+	awaiting_config bool NOT NULL,
 	topic text,
 	os_version text,
 	build_version text,
@@ -56,19 +57,20 @@ type postgres struct {
 }
 
 func (p *postgres) CreateDevice(device storage.Device) error {
-	_, err := p.db.NamedExec(`INSERT INTO apple_devices(uuid, state, topic, os_version, build_version, product_name, serial_number, imei, meid, device_name, challenge, model, model_name, created_by, created_at) VALUES(:uuid, :state, :topic, :os_version, :build_version, :product_name, :serial_number, :imei, :meid, :device_name, :challenge, :model, :model_name, :created_by, :created_at)`, device)
+	_, err := p.db.NamedExec(`INSERT INTO apple_devices(uuid, enrolled, awaiting_config, topic, os_version, build_version, product_name, serial_number, imei, meid, device_name, challenge, model, model_name, created_by, created_at) VALUES(:uuid, :enrolled, :awaiting_config, :topic, :os_version, :build_version, :product_name, :serial_number, :imei, :meid, :device_name, :challenge, :model, :model_name, :created_by, :created_at)`, device)
 	return err
 }
 
-func (p *postgres) UpdateDevice(uuid string, token []byte, pushMagic string, unlockToken []byte) error {
-	_, err := p.db.Exec(`UPDATE apple_devices SET token=$2, push_magic=$3, unlock_token=$4 WHERE uuid=$1`, uuid, token, pushMagic, unlockToken)
+func (p *postgres) UpdateDevice(device storage.Device) error {
+	_, err := p.db.NamedExec(`UPDATE apple_devices SET enrolled=:enrolled, awaiting_config=:awaiting_config, topic=:topic, os_version=:os_version, build_version=:build_version, device_name=:device_name WHERE uuid=:uuid`, device)
 	return err
 }
 
-func (p *postgres) UpdateTokens(uuid string, token []byte, pushMagic string, unlockToken []byte) error {
-	_, err := p.db.Exec(`UPDATE apple_devices SET token=$2, push_magic=$3, unlock_token=$4 WHERE uuid=$1`, uuid, token, pushMagic, unlockToken)
-	return err
-}
+// TODO: Remove This One
+// func (p *postgres) UpdateTokens(uuid string, token []byte, pushMagic string, unlockToken []byte) error {
+// 	_, err := p.db.Exec(`UPDATE apple_devices SET token=$2, push_magic=$3, unlock_token=$4 WHERE uuid=$1`, uuid, token, pushMagic, unlockToken)
+// 	return err
+// }
 
 // TODO: Touch Minimum Columns in the DB For each transaction
 

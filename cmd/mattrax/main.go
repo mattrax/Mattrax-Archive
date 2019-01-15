@@ -11,7 +11,7 @@ import (
 
 	"github.com/kataras/muxie"
 	"github.com/mattrax/Mattrax/cmd/mattrax/assets"
-	"github.com/mattrax/Mattrax/internal/certificates"
+	"github.com/mattrax/Mattrax/internal/certstore"
 	"github.com/mattrax/Mattrax/internal/config"
 	appleendpoints "github.com/mattrax/Mattrax/platform/apple/endpoints"
 	applepostgres "github.com/mattrax/Mattrax/platform/apple/storage/postgres"
@@ -21,6 +21,7 @@ import (
 )
 
 // TODO: Logging System To From The Admin Interface An Admin Can View All Failures For Debugging
+// TODO: Use Fatal Instead Of Boiling Up Errors So Line Numbers Work - Is This Idiomatic
 
 var (
 	flgDomain      = flag.String("domain", "", "the domain name of your server. eg. 'example.com'")
@@ -64,10 +65,16 @@ func main() {
 		TenantName: "Acme School Inc",
 	}
 
-	certificateStore, err := certificates.NewStore("./certs/apple.crt", "./certs/apple.key")
+	certStore, err := certstore.New("./certs")
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error initialising the certificate store")
 	}
+
+	// TEMP This is the old store
+	// certificateStore, err := certificates.NewStore("./certs/apple.crt", "./certs/apple.key")
+	// if err != nil {
+	// 	log.Fatal().Err(err).Msg("Error initialising the certificate store")
+	// }
 
 	// TODO: is Having two DB Connections One for Apple and one for Microsoft bad?
 
@@ -75,7 +82,7 @@ func main() {
 	if err != nil {
 		log.Fatal().Err(err).Msg("Error initialising the certificate store")
 	}
-	appleEndpoints := appleendpoints.New(config, certificateStore, appleStorage) // TODO: Remove config + certificateStore (Replace with appleStorage) from here
+	appleEndpoints := appleendpoints.New(config, certStore, appleStorage) // TODO: Remove config + certificateStore (Replace with appleStorage) from here
 	appleEndpoints.MountEndpoints(mux)
 
 	if err := httputils.ListenAndServe(*flgDomain, *flgPort, *flgLetsencrypt, *flgCertCache, *flgEmail, *flgTLSCert, *flgTLSKey, mux); err != nil {

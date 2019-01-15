@@ -28,6 +28,14 @@
   version = "v1.0.1"
 
 [[projects]]
+  digest = "1:76dc72490af7174349349838f2fe118996381b31ea83243812a97e5a0fd5ed55"
+  name = "github.com/dgrijalva/jwt-go"
+  packages = ["."]
+  pruneopts = "UT"
+  revision = "06ea1031745cb8b3dab3f6a236daf2b0aa468b7e"
+  version = "v3.2.0"
+
+[[projects]]
   digest = "1:613a6897b04e222f3915eb7a88467ced43aeacd3c5f873b833a9fd3daae76089"
   name = "github.com/go-kit/kit"
   packages = [
@@ -126,11 +134,10 @@
   version = "0.0.5"
 
 [[projects]]
-  digest = "1:27685eb46068b985db99367e864035e1351f13b39f8d4f2368f04da558322065"
+  digest = "1:ec672743ca64f07b47ae5a71ecaeb1f989cc973b3fe621d2bf1f6d1430fedb69"
   name = "github.com/micromdm/scep"
   packages = [
     "depot",
-    "depot/file",
     "scep",
     "scep/internal/pkcs7",
     "server",
@@ -193,6 +200,18 @@
   revision = "6a9ea43bcacdf716a5c1b38efff722c07adf0069"
 
 [[projects]]
+  digest = "1:121accd5e68a3057f141159e89ce4cec49c3ae3b3c9fed6b2c26cc02d9d6568f"
+  name = "github.com/sideshow/apns2"
+  packages = [
+    ".",
+    "certificate",
+    "token",
+  ]
+  pruneopts = "UT"
+  revision = "5c6f7afc0242dbeab1c0b26a1efd761a67228004"
+  version = "v0.15"
+
+[[projects]]
   digest = "1:b24d38b282bacf9791408a080f606370efa3d364e4b5fd9ba0f7b87786d3b679"
   name = "github.com/urfave/cli"
   packages = ["."]
@@ -218,11 +237,25 @@
 
 [[projects]]
   branch = "master"
-  digest = "1:1ece11b8b8cccab7ab13b91a44201a6c16f6e4c5a4d1060075b258d4df08da2b"
+  digest = "1:1d18232beafad93272158a9e9810f417b418c2f967e0506f3e2609c10310fe31"
+  name = "golang.org/x/crypto"
+  packages = [
+    "pkcs12",
+    "pkcs12/internal/rc2",
+  ]
+  pruneopts = "UT"
+  revision = "ff983b9c42bc9fbf91556e191cc8efb585c16908"
+
+[[projects]]
+  branch = "master"
+  digest = "1:37f4a0712bbf9b111cf2951fe0efeea300ce87f7915047d4d1d5806a256ca634"
   name = "golang.org/x/net"
   packages = [
     "context",
+    "context/ctxhttp",
     "http/httpguts",
+    "http2",
+    "http2/hpack",
     "idna",
   ]
   pruneopts = "UT"
@@ -294,13 +327,13 @@
     "github.com/kataras/muxie",
     "github.com/lib/pq",
     "github.com/mastahyeti/cms",
-    "github.com/micromdm/scep/depot/file",
     "github.com/micromdm/scep/server",
-    "github.com/pkg/errors",
     "github.com/rs/zerolog/log",
     "github.com/satori/go.uuid",
     "github.com/shurcooL/httpgzip",
     "github.com/shurcooL/vfsgen",
+    "github.com/sideshow/apns2",
+    "github.com/sideshow/apns2/certificate",
     "github.com/vektah/gqlparser",
     "github.com/vektah/gqlparser/ast",
   ]

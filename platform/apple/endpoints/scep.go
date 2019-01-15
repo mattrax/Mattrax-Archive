@@ -8,6 +8,9 @@ import (
 	"github.com/micromdm/scep/server"
 )
 
+// TODO: Request Sepecific SCEP Challenge
+// TODO: Revoking Certs And Devices
+
 func scepHandler(server scepserver.Service) http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		operation := r.URL.Query().Get("operation")
