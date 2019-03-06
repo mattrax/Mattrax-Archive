@@ -1,59 +1,54 @@
 package main
 
 import (
-	"context"
 	"net/http"
 
-	gqlhandler "github.com/99designs/gqlgen/handler"
-	"github.com/kataras/muxie"
-	"github.com/mattrax/Mattrax/cmd/mattrax/assets"
-	"github.com/mattrax/Mattrax/internal/graphql"
-	"github.com/oscartbeaumont/go-utils/handler"
-	"github.com/oscartbeaumont/go-utils/middleware"
-	"github.com/rs/zerolog/log"
-	"github.com/shurcooL/httpgzip"
+	"github.com/mattrax/Mattrax/internal/middleware"
 )
 
-// TODO: Request Logging Middleware
-// TODO: Do HTTP/2 With The React Asssets
-// TODO: Look. Might have good idea's -> https://github.com/strukturag/httputils
-// TODO: Only Serve the the stuff via GET minus GraphQL
-// TODO: Go Doc Funcs
+const interfaceBuildDir = "./interface/build"
 
-func routes(mux *muxie.Mux) {
-	mux.Use(middleware.Headers("Mattrax"))
-
-	/*		Frontend		*/
-	mux.HandleFunc("/", handler.ServeFile("/index.html"))
-	mux.HandleFunc("/login", handler.ServeFile("/index.html"))
-	mux.HandleFunc("/favicon.ico", handler.ServeFile("/favicon.ico"))
-
-	/*		Frontend Static Files (Js, Css, etc)		*/
-	static := mux.Of("/static")
-	static.Use(middleware.CacheHeader("max-age=31536000")) // Cache for 1 Year
-	static.Handle("/*", httpgzip.FileServer(assets.Assets, httpgzip.FileServerOptions{IndexHTML: true}))
-
-	/*		Custom Handlers		*/
-
-	/*		GraphQL And 404 Handler		*/
-	if *flgDebug {
-		mux.Handle("/playground", gqlhandler.Playground("Mattrax GraphQL playground", "/query"))
+func (m Mattrax) routes() {
+	authConfig := middleware.AuthConfig{
+		LoginEndpoint: "/login",
+		AuthService:   m.AuthService,
 	}
-	mux.Handle("/query", gqlhandler.GraphQL(
-		graphql.NewExecutableSchema(graphql.Config{Resolvers: &graphql.Resolver{}}),
-		gqlhandler.IntrospectionEnabled(*flgDebug),
-		gqlhandler.ComplexityLimit(5),
-		gqlhandler.RecoverFunc(func(ctx context.Context, err interface{}) error {
-			log.Error().Interface("err", err).Msg("GraphQL resolver error")
-			return nil
-		}),
-	))
-	mux.HandleFunc("/*path", notFoundHandler())
+
+	m.r.HandleFunc("/login", serveFile("/index.html")).Methods("GET")
+	m.r.HandleFunc("/api/v1/login", middleware.LoginAPI(authConfig)).Methods("POST")
+
+	// End User Interface
+	endUserInterfaceHandler := serveFile("/index.html")               // TODO: Require Authentication
+	m.r.HandleFunc("/enroll", endUserInterfaceHandler).Methods("GET") // TODO: Require Self Enrollment Enable or Have "admin" Role
+
+	// Admin Interface (authenticated with "admin" role required)
+	adminInterfaceHandler := middleware.AuthRequireRoles(authConfig, []string{"admin"}, serveFile("/index.html"))
+	m.r.HandleFunc("/", adminInterfaceHandler).Methods("GET")
+	m.r.HandleFunc("/devices", adminInterfaceHandler).Methods("GET")
+	m.r.HandleFunc("/settings", adminInterfaceHandler).Methods("GET")
+	m.r.HandleFunc("/enroll", adminInterfaceHandler).Methods("GET")
+
+	// Interface Assets
+	m.r.PathPrefix("/static/").Handler(http.StripPrefix("/static/", http.FileServer(http.Dir(interfaceBuildDir+"/static/")))).Methods("GET") // TODO: Caching
+
+	// Windows MDM
+	m.WindowsMDM.Routes(m.r)
+
+	// Apple MDM
+	// TODO: Apple
+
+	// NotFound and MethodNotAllowed Handlers
+	//m.r.NotFoundHandler =
+	//m.r.MethodNotAllowedHandler =
 }
 
-func notFoundHandler() http.HandlerFunc {
+func serveFile(file string) http.HandlerFunc {
+	url := interfaceBuildDir + file
 	return func(w http.ResponseWriter, r *http.Request) {
-		w.WriteHeader(http.StatusNotFound) // TODO: Gives 'multiple response.WriteHeader calls' Make style one here + in React that look the same
-		handler.ServeFile("/404/index.html")(w, r)
+		http.ServeFile(w, r, url)
 	}
 }
+
+// TODO: Listen Only On The Correct Methods
+// TODO: HTST Middleware
+// TODO: s := r.Host("www.example.com").Subrouter()
